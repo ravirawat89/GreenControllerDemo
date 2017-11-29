@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.netcommlabs.greencontroller">
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/FullScreen">
+
+        <activity
+            android:name=".activities.LoginAct"
+            android:screenOrientation="landscape">
+
+        </activity>
+
+        <activity
+            android:name=".activities.DashboardPebbleHome"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".activities.DontHaveDvc"
+            android:screenOrientation="landscape">
+
+
+        </activity>
+
+        <activity
+            android:name=".activities.AvailableDevices"
+            android:screenOrientation="landscape">
+
+        </activity>
+
+        <activity
+            android:name=".activities.ConnectedQRAct"
+            android:screenOrientation="landscape">
+
+        </activity>
+
+        <activity
+            android:name=".activities.AddAddressActivity"
+            android:screenOrientation="landscape" />
+
+        <activity
+            android:name=".activities.QRScanAct"
+            android:screenOrientation="landscape" />
+
+        <activity
+            android:name=".activities.DeviceActivity"
+            android:screenOrientation="landscape">
+
+
+        </activity>
+
+        <activity
+            android:name=".activities.DeviceDetails"
+            android:screenOrientation="landscape">
+
+        </activity>
+
+        <activity
+            android:name=".activities.AddEditSessionPlan"
+            android:screenOrientation="landscape">
+
+        </activity>
+
+        <!-- Place Autocomplete API KEY -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyB3dtRzIP11f8Jx63YyF89v7xxxvSSZomM" />
+
+        <activity android:name=".BTClientActivity" />
+
+
+        <activity
+            android:name=".activities.DialogActivity"
+            android:screenOrientation="landscape" />
+
+
+        <activity
+            android:name=".activities.PlaceACTandMap"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activities.DeviceMapAct"
+            android:screenOrientation="landscape">
+
+
+        </activity>
+
+
+        <activity android:name=".activities.PeripheralControlActivity" />
+
+
+        <service
+            android:name=".services.BleAdapterService"
+            android:enabled="true" />
+    </application>
+
+</manifest>
