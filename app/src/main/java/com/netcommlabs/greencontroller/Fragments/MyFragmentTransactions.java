@@ -6,6 +6,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.netcommlabs.greencontroller.activities.MainActivity;
+
 /**
  * Created by Android on 12/6/2017.
  */
@@ -29,7 +31,7 @@ public class MyFragmentTransactions {
         ft.commit();
 
 
-        //toolbar_title.setText(tag);
+        ((MainActivity)context).toolbar_title.setText(tag);
 
     }
 

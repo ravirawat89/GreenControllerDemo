@@ -219,13 +219,14 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
                 Toast.makeText(mContext, "Next", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.ll_add_device:
-                Intent intent2 = new Intent(mContext, AvailableDevices.class);
-                startActivity(intent2);
+                Toast.makeText(mContext, "In progress...", Toast.LENGTH_SHORT).show();
+               /* Intent intent2 = new Intent(mContext, AvailableDevices.class);
+                startActivity(intent2);*/
                 break;
             case R.id.llScrnHeader:
-                Intent intent1 = new Intent(mContext, DashboardPebbleHome.class);
+               /* Intent intent1 = new Intent(mContext, DashboardPebbleHome.class);
                 mContext.startActivity(intent1);
-                mContext.finish();
+                mContext.finish();*/
                 break;
 
         }

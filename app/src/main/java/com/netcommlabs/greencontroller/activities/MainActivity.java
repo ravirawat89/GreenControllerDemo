@@ -14,7 +14,9 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,6 +26,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -34,6 +37,8 @@ import com.netcommlabs.greencontroller.Interfaces.LocationDecetor;
 import com.netcommlabs.greencontroller.Interfaces.ResponseListener;
 import com.netcommlabs.greencontroller.R;
 import com.netcommlabs.greencontroller.adapters.NavListAdapter;
+import com.netcommlabs.greencontroller.model.ModalBLEDevice;
+import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
 import com.netcommlabs.greencontroller.utilities.AppAlertDialog;
 import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.Constant;
@@ -64,6 +69,10 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
     private ProgressDialog progressDoalog;
     private Location mLastLocation = null;
     private String usersAddress = null;
+    public TextView toolbar_title;
+    private boolean exit = false;
+    private Fragment myFragment;
+    private String dvcMacAddress;
 
 
     @Override
@@ -77,6 +86,15 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
 
     private void initBase() {
         mContext = this;
+
+        DatabaseHandler databaseHandler = new DatabaseHandler(mContext);
+        List<ModalBLEDevice> listBLEDvcFromDB = databaseHandler.getAllBLEDvcs();
+        if (listBLEDvcFromDB != null && listBLEDvcFromDB.size() > 0) {
+            dvcMacAddress = listBLEDvcFromDB.get(0).getDvcMacAddrs();
+            myFragment = new Fragment();
+            BLEAppLevel.getInstance(mContext, myFragment, dvcMacAddress);
+        }
+
         //Checking Marshmallow
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkPermission();
@@ -94,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
 
         frm_lyt_container_int = R.id.frm_lyt_container;
         llHamburgerIcon = findViewById(R.id.llHamburgerIcon);
+        toolbar_title = findViewById(R.id.toolbar_title);
         nav_drawer_layout = findViewById(R.id.nav_drawer_layout);
         nav_revi_slider = findViewById(R.id.nav_revi_slider);
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
@@ -312,9 +331,36 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
 
     @Override
     protected void onDestroy() {
-        BLEAppLevel.getInstanceOnly().disconnectBLECompletely();
+        BLEAppLevel bleAppLevel = BLEAppLevel.getInstanceOnly();
+        if (bleAppLevel != null) {
+            bleAppLevel.disconnectBLECompletely();
+        }
         super.onDestroy();
-
     }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.nav_drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            if (getSupportFragmentManager().getBackStackEntryCount() >= 2) {
+                super.onBackPressed();
+            } else {
+                if (!exit) {
+                    Toast.makeText(this, "Press back press to exit", Toast.LENGTH_SHORT).show();
+                    exit = true;
+                } else
+                    finish();
+            }
+
+            Fragment currentFragment = getSupportFragmentManager().findFragmentById(frm_lyt_container_int);
+            toolbar_title.setText(currentFragment.getTag());
+
+
+            Log.e("@@current Fragment ", currentFragment.getTag());
+        }
+    }
+
 
 }

@@ -28,14 +28,13 @@ import com.netcommlabs.greencontroller.Constants;
 import com.netcommlabs.greencontroller.InterfaceValveAdapter;
 import com.netcommlabs.greencontroller.R;
 import com.netcommlabs.greencontroller.activities.AddEditSessionPlan;
-import com.netcommlabs.greencontroller.activities.DeviceDetails;
 import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.adapters.ValvesListAdapter;
 import com.netcommlabs.greencontroller.model.DataTransferModel;
-import com.netcommlabs.greencontroller.model.MdlLocationAddress;
 import com.netcommlabs.greencontroller.model.ModalBLEValve;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
+import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.Constant;
 
 import java.util.ArrayList;
@@ -45,8 +44,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
-
-import static android.content.Context.BIND_AUTO_CREATE;
 
 /**
  * Created by Android on 12/6/2017.
@@ -73,11 +70,12 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
     private int dvcValveCount;
     private String valveConctName, clickedValveName = "Valve 1";
     private TextView tvSunFirst, tvSunSecond, tvSunThird, tvSunFourth, tvMonFirst, tvMonSecond, tvMonThird, tvMonFourth, tvTueFirst, tvTueSecond, tvTueThird, tvTueFourth, tvWedFirst, tvWedSecond, tvWedThird, tvWedFourth, tvThuFirst, tvThuSecond, tvThuThird, tvThuFourth, tvFriFirst, tvFriSecond, tvFriThird, tvFriFourth, tvSatFirst, tvSatSecond, tvSatThird, tvSatFourth;
-    private TextView tvDischargePnts, tvDuration, tvQuantity;
+    private TextView tvDischargePnts, tvDuration, tvQuantity, tvPauseText;
     private ArrayList<Integer> listTimePntsSun, listTimePntsMon, listTimePntsTue, listTimePntsWed, listTimePntsThu, listTimePntsFri, listTimePntsSat;
     private BleAdapterService bluetooth_le_adapter;
     private boolean back_requested = false;
-    private int position=0;
+    private int position = 0;
+    private String cmdName = "PAUSE";
 
     @Override
     public void onAttach(Context context) {
@@ -155,7 +153,7 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
         if (listValves != null && listValves.size() > 0) {
             LinearLayoutManager gridLayoutManager = new LinearLayoutManager(mContext);
             reviValvesList.setLayoutManager(gridLayoutManager);
-            reviValvesList.setAdapter(new ValvesListAdapter(mContext, FragDeviceDetails.this, listValves, dvcMacAdd,position));
+            reviValvesList.setAdapter(new ValvesListAdapter(mContext, FragDeviceDetails.this, listValves, dvcMacAdd, position));
         }
 
 
@@ -642,7 +640,7 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
                 //bundle.putString(AddEditSessionPlan.EXTRA_NAME, dvcName);
                 fragAddEditSesnPlan.setArguments(bundle);
 
-                fragAddEditSesnPlan.setTargetFragment(FragDeviceDetails.this,101);
+                fragAddEditSesnPlan.setTargetFragment(FragDeviceDetails.this, 101);
 
                 //Adding Fragment(FragAvailableDevices)
                 MyFragmentTransactions.replaceFragment(mContext, fragAddEditSesnPlan, Constant.ADD_EDIT, mContext.frm_lyt_container_int, true);
@@ -670,7 +668,7 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
                 //bundle.putString(AddEditSessionPlan.EXTRA_NAME, dvcName);
                 fragAddEditSesnPlan.setArguments(bundle);
 
-                fragAddEditSesnPlan.setTargetFragment(FragDeviceDetails.this,101);
+                fragAddEditSesnPlan.setTargetFragment(FragDeviceDetails.this, 101);
 
                 //Adding Fragment(FragAvailableDevices)
                 MyFragmentTransactions.replaceFragment(mContext, fragAddEditSesnPlan, Constant.ADD_EDIT, mContext.frm_lyt_container_int, true);
@@ -699,12 +697,23 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
         llStopValve.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialogConfirmAction();
+                dialogSTOPConfirm();
+            }
+        });
+
+        llPauseValve.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (cmdName.equals("PAUSE")) {
+                    dialogPAUSEConfirm();
+                } else if (cmdName.equals("PLAY")) {
+                    dialogPLAYConfirm();
+                }
             }
         });
     }
 
-    private void dialogConfirmAction() {
+    private void dialogSTOPConfirm() {
         String title, msg;
         title = "Stop Valve";
         msg = "This will delete valve saved data";
@@ -720,16 +729,12 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
                 .setCancelable(false)
                 .setPositiveButton("Stop", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        byte[] valveCommand = {3};
-                        if (bluetooth_le_adapter != null) {
-                            bluetooth_le_adapter.writeCharacteristic(
-                                    BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
-                                    BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
-                            );
+                        BLEAppLevel bleAppLevel = BLEAppLevel.getInstanceOnly();
+                        if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+                            bleAppLevel.cmdButtonMethod(FragDeviceDetails.this, "STOP");
                         } else {
-                            Toast.makeText(mContext, "adapter connection lost", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, "BLE lost connection", Toast.LENGTH_SHORT).show();
                         }
-
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -739,6 +744,99 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
                 })
                 .show();
     }
+
+    private void dialogPAUSEConfirm() {
+        String title, msg;
+        title = "Pause Valve";
+        msg = "This will disable valve effect";
+
+        AlertDialog.Builder builder;
+       /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder = new AlertDialog.Builder(mContext, android.R.style.Theme_Material_Dialog_Alert);
+        } else {*/
+        builder = new AlertDialog.Builder(mContext);
+        //}
+        builder.setTitle(title)
+                .setMessage(msg)
+                .setCancelable(false)
+                .setPositiveButton("Pause", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        BLEAppLevel bleAppLevel = BLEAppLevel.getInstanceOnly();
+                        if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+                            bleAppLevel.cmdButtonMethod(FragDeviceDetails.this, "PAUSE");
+                        } else {
+                            Toast.makeText(mContext, "BLE lost connection", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
+
+    private void dialogPLAYConfirm() {
+        String title, msg;
+        title = "Play Valve";
+        msg = "This will enable valve effect";
+
+        AlertDialog.Builder builder;
+       /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder = new AlertDialog.Builder(mContext, android.R.style.Theme_Material_Dialog_Alert);
+        } else {*/
+        builder = new AlertDialog.Builder(mContext);
+        //}
+        builder.setTitle(title)
+                .setMessage(msg)
+                .setCancelable(false)
+                .setPositiveButton("Play", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        BLEAppLevel bleAppLevel = BLEAppLevel.getInstanceOnly();
+                        if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+                            bleAppLevel.cmdButtonMethod(FragDeviceDetails.this, "PLAY");
+                        } else {
+                            Toast.makeText(mContext, "BLE lost connection", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
+
+    public void cmdButtonACK(String cmdName) {
+        if (cmdName.equals("STOP")) {
+            Toast.makeText(mContext, cmdName, Toast.LENGTH_SHORT).show();
+            //initSTOPbtnEffectes();
+        } else if (cmdName.equals("PAUSE")) {
+            Toast.makeText(mContext, cmdName, Toast.LENGTH_SHORT).show();
+            tvPauseText.setText("Play");
+            llEditValve.setEnabled(false);
+            this.cmdName = "PLAY";
+        } else if (cmdName.equals("PLAY")) {
+            Toast.makeText(mContext, cmdName, Toast.LENGTH_SHORT).show();
+            tvPauseText.setText("Pause");
+            llEditValve.setEnabled(true);
+            this.cmdName = "PAUSE";
+        }
+    }
+
+   /* private void cmdButtonMethod() {
+        byte[] valveCommand = {3};
+        if (bluetooth_le_adapter != null) {
+            bluetooth_le_adapter.writeCharacteristic(
+                    BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                    BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+            );
+        } else {
+            Toast.makeText(mContext, "adapter connection lost", Toast.LENGTH_SHORT).show();
+        }
+    }*/
 
     private void initView(View view) {
         llScrnHeader = view.findViewById(R.id.llScrnHeader);
@@ -752,6 +850,7 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
         tvDeviceName = view.findViewById(R.id.tvDeviceName);
         reviValvesList = view.findViewById(R.id.reviValvesList);
         tvAddNewSesnPlan = view.findViewById(R.id.tvAddNewSesnPlan);
+        tvPauseText = view.findViewById(R.id.tvPauseText);
 
         tvDischargePnts = view.findViewById(R.id.tvDischargePnts);
         tvDuration = view.findViewById(R.id.tvDuration);
@@ -797,7 +896,7 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
     public void clickPassDataToAct(ArrayList<DataTransferModel> listValveDataSingleLocal, String clickedValveName, int position) {
         this.clickedValveName = clickedValveName;
         this.listValveDataSingle = listValveDataSingleLocal;
-        this.position=position;
+        this.position = position;
         checkValveDataUpdtUIFrmDB();
     }
 

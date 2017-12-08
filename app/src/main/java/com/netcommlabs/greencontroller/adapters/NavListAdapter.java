@@ -85,31 +85,31 @@ public class NavListAdapter extends RecyclerView.Adapter<NavListAdapter.MyViewHo
                             break;
                         case "Add New Device":
                             //Replacing Fragment(FragAddAddress)
-                            MyFragmentTransactions.replaceFragment(mContext, new FragAvailableDevices(), Constant.ADD_ADDRESS, mContext.frm_lyt_container_int, false);
+                            MyFragmentTransactions.replaceFragment(mContext, new FragAvailableDevices(), Constant.AVAILABLE_DEVICE, mContext.frm_lyt_container_int, false);
                             break;
                         case "Meter Device":
                             //Replacing Fragment(FragAddAddress)
-                            MyFragmentTransactions.replaceFragment(mContext, new FragMeterDevice(), Constant.ADD_ADDRESS, mContext.frm_lyt_container_int, false);
+                            MyFragmentTransactions.replaceFragment(mContext, new FragMeterDevice(), Constant.METER_DEVICE, mContext.frm_lyt_container_int, false);
                             break;
                         case "Recommendations":
                             //Replacing Fragment(FragAddAddress)
-                            MyFragmentTransactions.replaceFragment(mContext, new FragRecomm(), Constant.ADD_ADDRESS, mContext.frm_lyt_container_int, false);
+                            MyFragmentTransactions.replaceFragment(mContext, new FragRecomm(), Constant.RECOMM, mContext.frm_lyt_container_int, false);
                             break;
                         case "Statistics":
                             //Replacing Fragment(FragAddAddress)
-                            MyFragmentTransactions.replaceFragment(mContext, new FragStatistics(), Constant.ADD_ADDRESS, mContext.frm_lyt_container_int, false);
+                            MyFragmentTransactions.replaceFragment(mContext, new FragStatistics(), Constant.DEVICE_STATS, mContext.frm_lyt_container_int, false);
                             break;
                         case "Saved Address":
                             //Replacing Fragment(FragAddAddress)
-                            MyFragmentTransactions.replaceFragment(mContext, new FragSavedAddress(), Constant.ADD_ADDRESS, mContext.frm_lyt_container_int, false);
+                            MyFragmentTransactions.replaceFragment(mContext, new FragSavedAddress(), Constant.SAVED_ADDRESS, mContext.frm_lyt_container_int, false);
                             break;
                         case "Feedback":
                             //Replacing Fragment(FragAddAddress)
-                            MyFragmentTransactions.replaceFragment(mContext, new FragFeedback(), Constant.ADD_ADDRESS, mContext.frm_lyt_container_int, false);
+                            MyFragmentTransactions.replaceFragment(mContext, new FragFeedback(), Constant.FEEDBACK, mContext.frm_lyt_container_int, false);
                             break;
                         case "FAQ & Help":
                             //Replacing Fragment(FragAddAddress)
-                            MyFragmentTransactions.replaceFragment(mContext, new FragFAQHelp(), Constant.ADD_ADDRESS, mContext.frm_lyt_container_int, false);
+                            MyFragmentTransactions.replaceFragment(mContext, new FragFAQHelp(), Constant.FAQ, mContext.frm_lyt_container_int, false);
                             break;
 
                     }

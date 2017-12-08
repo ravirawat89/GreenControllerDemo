@@ -24,6 +24,7 @@ import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.adapters.NavListAdapter;
 import com.netcommlabs.greencontroller.model.ModalBLEDevice;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
+import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.Constant;
 import com.netcommlabs.greencontroller.utilities.Navigation_Drawer_Data;
 import com.netcommlabs.greencontroller.utilities.RowDataArrays;
@@ -41,6 +42,7 @@ public class FragDashboardPebbleHome extends Fragment {
     private View view;
     private TextView tvPebbleAsset;
     private LinearLayout llMyDevices, llStatistics;
+
 
     @Override
     public void onAttach(Context context) {

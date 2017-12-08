@@ -1,6 +1,5 @@
 package com.netcommlabs.greencontroller.utilities;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothGattService;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -15,6 +14,7 @@ import android.widget.Toast;
 
 import com.netcommlabs.greencontroller.Constants;
 import com.netcommlabs.greencontroller.Fragments.FragAvailableDevices;
+import com.netcommlabs.greencontroller.Fragments.FragDeviceDetails;
 import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
 
@@ -41,6 +41,7 @@ public class BLEAppLevel {
     private Fragment myFragment;
     private boolean isBLEContected = false;
     private int alert_level;
+    private String cmdTypeName;
 
     public static BLEAppLevel getInstance(MainActivity mContext, Fragment myFragment, String macAddress) {
         if (bleAppLevel == null) {
@@ -167,7 +168,9 @@ public class BLEAppLevel {
                         showMsg("Device has expected services");
                         isBLEContected = true;
                         onSetTime();
-                        ((FragAvailableDevices) myFragment).dvcHasExptdServices();
+                        if (myFragment instanceof FragAvailableDevices) {
+                            ((FragAvailableDevices) myFragment).dvcHasExptdServices();
+                        }
 
                         //progressDialog.dismiss();
                         //Adding Fragment(FragConnectedQR)
@@ -206,6 +209,22 @@ public class BLEAppLevel {
 
                 case BleAdapterService.GATT_CHARACTERISTIC_WRITTEN:
                     bundle = msg.getData();
+                    //ACK for STOP valve
+                    if (bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase().equals(BleAdapterService.COMMAND_CHARACTERISTIC_UUID)) {
+                        Log.e("@@@@@@@@@@@@", "ACK for command valve");
+                        if (myFragment instanceof FragDeviceDetails) {
+
+                            if (cmdTypeName.equals("STOP")) {
+                                ((FragDeviceDetails) myFragment).cmdButtonACK("STOP");
+                            } else if (cmdTypeName.equals("PAUSE")) {
+                                ((FragDeviceDetails) myFragment).cmdButtonACK("PAUSE");
+                            } else if (cmdTypeName.equals("PLAY")) {
+                                ((FragDeviceDetails) myFragment).cmdButtonACK("PLAY");
+                            }
+
+                        }
+
+                    }
 
                     if (bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase().equals(BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID)) {
                         Log.e("@@@@@@@@@@@@", "Ack Received For");
@@ -294,7 +313,7 @@ public class BLEAppLevel {
                 BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint);
     }
 
-    public void disconnectBLECompletely(){
+    public void disconnectBLECompletely() {
         if (bluetooth_le_adapter.isConnected()) {
             try {
                 bluetooth_le_adapter.disconnect();
@@ -303,5 +322,35 @@ public class BLEAppLevel {
         }
         mContext.unbindService(service_connection);
         bluetooth_le_adapter = null;
+    }
+
+    public void cmdButtonMethod(FragDeviceDetails fragDeviceDetails, String cmdTypeName) {
+        myFragment = fragDeviceDetails;
+        this.cmdTypeName = cmdTypeName;
+
+        if (cmdTypeName.equals("PLAY")) {
+            byte[] valveCommand = {2};
+            if (bluetooth_le_adapter != null) {
+                bluetooth_le_adapter.writeCharacteristic(
+                        BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                        BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+                );
+            }
+        }
+        if (cmdTypeName.equals("STOP")) {
+            byte[] valveCommand = {3};
+            if (bluetooth_le_adapter != null) {
+                bluetooth_le_adapter.writeCharacteristic(
+                        BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                        BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+                );
+            }
+        } else if (cmdTypeName.equals("PAUSE")) {
+            byte[] valveCommand = {4};
+            bluetooth_le_adapter.writeCharacteristic(
+                    BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                    BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+            );
+        }
     }
 }

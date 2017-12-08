@@ -219,8 +219,8 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
         progressDialog.setMessage("Please Wait...");
         progressDialog.setCancelable(false);
         progressDialog.show();
-        myFragment=FragAvailableDevices.this;
 
+        myFragment=FragAvailableDevices.this;
         BLEAppLevel.getInstance(mContext, myFragment, dvcMacAddress);
     }
 
