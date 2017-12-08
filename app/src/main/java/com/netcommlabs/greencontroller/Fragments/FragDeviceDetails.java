@@ -711,6 +711,13 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
                 }
             }
         });
+
+        llFlushValve.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialogFlushStart();
+            }
+        });
     }
 
     private void dialogSTOPConfirm() {
@@ -809,10 +816,43 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
                 .show();
     }
 
+
+    private void dialogFlushStart() {
+        String title, msg;
+        title = "FLush Valve";
+        msg = "This will start valve Flush";
+        AlertDialog.Builder builder;
+       /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder = new AlertDialog.Builder(mContext, android.R.style.Theme_Material_Dialog_Alert);
+        } else {*/
+        builder = new AlertDialog.Builder(mContext);
+        //}
+        builder.setTitle(title)
+                .setMessage(msg)
+                .setCancelable(false)
+                .setPositiveButton("Flush", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        BLEAppLevel bleAppLevel = BLEAppLevel.getInstanceOnly();
+                        if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+                            bleAppLevel.cmdButtonMethod(FragDeviceDetails.this, "FLUSH");
+                        } else {
+                            Toast.makeText(mContext, "BLE lost connection", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
+
+
     public void cmdButtonACK(String cmdName) {
         if (cmdName.equals("STOP")) {
             Toast.makeText(mContext, cmdName, Toast.LENGTH_SHORT).show();
-            //initSTOPbtnEffectes();
+            initSTOPbtnEffectes();
         } else if (cmdName.equals("PAUSE")) {
             Toast.makeText(mContext, cmdName, Toast.LENGTH_SHORT).show();
             tvPauseText.setText("Play");
@@ -823,6 +863,11 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
             tvPauseText.setText("Pause");
             llEditValve.setEnabled(true);
             this.cmdName = "PAUSE";
+        }else if (cmdName.equals("FLUSH")) {
+            Toast.makeText(mContext, cmdName+" Started", Toast.LENGTH_SHORT).show();
+           /* tvPauseText.setText("Pause");
+            llEditValve.setEnabled(true);
+            this.cmdName = "PAUSE";*/
         }
     }
 

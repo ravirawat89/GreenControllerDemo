@@ -13,11 +13,14 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.netcommlabs.greencontroller.Constants;
+import com.netcommlabs.greencontroller.Fragments.FragAddEditSesnPlan;
 import com.netcommlabs.greencontroller.Fragments.FragAvailableDevices;
 import com.netcommlabs.greencontroller.Fragments.FragDeviceDetails;
 import com.netcommlabs.greencontroller.activities.MainActivity;
+import com.netcommlabs.greencontroller.model.DataTransferModel;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -26,6 +29,8 @@ import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 
 import static android.content.Context.BIND_AUTO_CREATE;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 /**
  * Created by Android on 12/7/2017.
@@ -42,6 +47,13 @@ public class BLEAppLevel {
     private boolean isBLEContected = false;
     private int alert_level;
     private String cmdTypeName;
+    private static int dataSendingIndex = 0;
+    private static boolean oldTimePointsErased = FALSE;
+    private ArrayList<DataTransferModel> listSingleValveData;
+    private int etInputDursnPlanInt = 0;
+    private int etQuantPlanInt = 0;
+    private int etInputDischrgPntsInt = 0;
+
 
     public static BLEAppLevel getInstance(MainActivity mContext, Fragment myFragment, String macAddress) {
         if (bleAppLevel == null) {
@@ -209,7 +221,7 @@ public class BLEAppLevel {
 
                 case BleAdapterService.GATT_CHARACTERISTIC_WRITTEN:
                     bundle = msg.getData();
-                    //ACK for STOP valve
+                    //ACK for command button valve
                     if (bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase().equals(BleAdapterService.COMMAND_CHARACTERISTIC_UUID)) {
                         Log.e("@@@@@@@@@@@@", "ACK for command valve");
                         if (myFragment instanceof FragDeviceDetails) {
@@ -220,14 +232,36 @@ public class BLEAppLevel {
                                 ((FragDeviceDetails) myFragment).cmdButtonACK("PAUSE");
                             } else if (cmdTypeName.equals("PLAY")) {
                                 ((FragDeviceDetails) myFragment).cmdButtonACK("PLAY");
+                            } else if (cmdTypeName.equals("FLUSH")) {
+                                ((FragDeviceDetails) myFragment).cmdButtonACK("FLUSH");
                             }
 
                         }
 
                     }
-
+                    //ACK for writing Time Points
                     if (bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase().equals(BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID)) {
-                        Log.e("@@@@@@@@@@@@", "Ack Received For");
+                        Log.e("@@@@@@@@@@@@", "Ack Received For" + dataSendingIndex);
+                        if (oldTimePointsErased == FALSE) {
+                            oldTimePointsErased = TRUE;
+                            if (dataSendingIndex < listSingleValveData.size()) {
+                                startSendData();
+                            } else {
+
+                                dataSendingIndex = 0;
+                            }
+                        } else {
+                            dataSendingIndex++;
+                            if (dataSendingIndex < listSingleValveData.size()) {
+                                startSendData();
+                            } else {
+                                if (myFragment instanceof FragAddEditSesnPlan) {
+                                    ((FragAddEditSesnPlan) myFragment).doneWrtingAllTP();
+                                    dataSendingIndex = 0;
+                                    oldTimePointsErased = FALSE;
+                                }
+                            }
+                        }
 
                     }
 
@@ -307,7 +341,13 @@ public class BLEAppLevel {
         }
     }
 
-    public void eraseOldTimePoints() {
+    public void eraseOldTimePoints(FragAddEditSesnPlan fragAddEditSesnPlan, int etQuantPlanInt, int etInputDursnPlanInt, int etInputDischrgPntsInt, ArrayList<DataTransferModel> listSingleValveData) {
+        myFragment = fragAddEditSesnPlan;
+        this.etQuantPlanInt = etQuantPlanInt;
+        this.etInputDursnPlanInt = etInputDursnPlanInt;
+        this.etInputDischrgPntsInt = etInputDischrgPntsInt;
+        this.listSingleValveData = listSingleValveData;
+
         byte[] timePoint = {0, 0, 0, 0, 0, 0, 0, 0, 0};
         bluetooth_le_adapter.writeCharacteristic(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
                 BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint);
@@ -351,6 +391,46 @@ public class BLEAppLevel {
                     BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
                     BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
             );
+        } else if (cmdTypeName.equals("FLUSH")) {
+            byte[] valveCommand = {1};
+            bluetooth_le_adapter.writeCharacteristic(
+                    BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                    BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+            );
         }
+    }
+
+
+    void startSendData() {
+        Log.e("@@@@@@@@@@@", "" + dataSendingIndex);
+        //byte index = (byte) (listSingleValveData.get(dataSendingIndex).getIndex() + 1);
+        byte index = (byte) (dataSendingIndex + 1);
+        byte hours = (byte) listSingleValveData.get(dataSendingIndex).getHours();
+        byte dayOfTheWeek = (byte) listSingleValveData.get(dataSendingIndex).getDayOfTheWeek();
+
+        int iDurationMSB = (etInputDursnPlanInt / 256);
+        int iDurationLSB = (etInputDursnPlanInt % 256);
+        byte bDurationMSB = (byte) iDurationMSB;
+        byte bDurationLSB = (byte) iDurationLSB;
+
+        int iVolumeMSB = (etQuantPlanInt / 256);
+        int iVolumeLSB = (etQuantPlanInt % 256);
+        byte bVolumeMSB = (byte) iVolumeMSB;
+        byte bVolumeLSB = (byte) iVolumeLSB;
+        listSingleValveData.get(dataSendingIndex).setIndex(index);
+        listSingleValveData.get(dataSendingIndex).setbDurationLSB(bDurationLSB);
+        listSingleValveData.get(dataSendingIndex).setbDurationMSB(bDurationMSB);
+        listSingleValveData.get(dataSendingIndex).setbVolumeLSB(bVolumeLSB);
+        listSingleValveData.get(dataSendingIndex).setbVolumeMSB(bVolumeMSB);
+        listSingleValveData.get(dataSendingIndex).setMinutes(0);
+        listSingleValveData.get(dataSendingIndex).setSeconds(0);
+        listSingleValveData.get(dataSendingIndex).setQty(etQuantPlanInt);
+        listSingleValveData.get(dataSendingIndex).setDuration(etInputDursnPlanInt);
+        listSingleValveData.get(dataSendingIndex).setDischarge(etInputDischrgPntsInt);
+
+        Log.e("@@", "" + index + "-" + dayOfTheWeek + "-" + hours + "-" + 0 + "-" + 0 + "-" + bDurationMSB + "-" + bDurationLSB + "-" + bVolumeMSB + "-" + bVolumeLSB);
+        byte[] timePoint = {index, dayOfTheWeek, hours, 0, 0, bDurationMSB, bDurationLSB, bVolumeMSB, bVolumeLSB};
+        bluetooth_le_adapter.writeCharacteristic(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
+                BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint);
     }
 }
