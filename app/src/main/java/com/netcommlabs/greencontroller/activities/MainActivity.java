@@ -35,6 +35,7 @@ import com.netcommlabs.greencontroller.Interfaces.ResponseListener;
 import com.netcommlabs.greencontroller.R;
 import com.netcommlabs.greencontroller.adapters.NavListAdapter;
 import com.netcommlabs.greencontroller.utilities.AppAlertDialog;
+import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.Constant;
 import com.netcommlabs.greencontroller.utilities.GeocodingLocation;
 import com.netcommlabs.greencontroller.utilities.LocationUtils;
@@ -106,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
 
             ));
         }
-        nav_revi_slider.setAdapter(new NavListAdapter(mContext,listNavDrawerRowDat, nav_drawer_layout));
+        nav_revi_slider.setAdapter(new NavListAdapter(mContext, listNavDrawerRowDat, nav_drawer_layout));
 
         //Adding first Fragment(FragDashboardPebbleHome)
         MyFragmentTransactions.replaceFragment(mContext, new FragDashboardPebbleHome(), Constant.DASHBOARD_PEBBLE_HOME, frm_lyt_container_int, true);
@@ -127,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
 //        getAddressNow();
     }
 
-    void getLocation() {
+    public void getLocation() {
         if (checkGooglePlayServiceAvailability(this)) {
             //buildProgress();
             LocationUtils.getInstance(this, this);
@@ -307,6 +308,13 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
                 progressDoalog.dismiss();
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        BLEAppLevel.getInstanceOnly().disconnectBLECompletely();
+        super.onDestroy();
+
     }
 
 }

@@ -3,26 +3,27 @@ package com.netcommlabs.greencontroller.utilities;
 import android.app.Activity;
 import android.bluetooth.BluetoothGattService;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.netcommlabs.greencontroller.Constants;
 import com.netcommlabs.greencontroller.Fragments.FragAvailableDevices;
-import com.netcommlabs.greencontroller.Fragments.FragConnectedQR;
-import com.netcommlabs.greencontroller.Fragments.MyFragmentTransactions;
-import com.netcommlabs.greencontroller.Interfaces.LocationDecetor;
 import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.SimpleTimeZone;
+import java.util.TimeZone;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
@@ -37,19 +38,28 @@ public class BLEAppLevel {
     private String macAddress;
     private BleAdapterService bluetooth_le_adapter;
     private boolean back_requested = false;
-    private FragAvailableDevices fragAvlDvs;
+    private Fragment myFragment;
+    private boolean isBLEContected = false;
+    private int alert_level;
 
-    public static BLEAppLevel getInstance(MainActivity mContext, FragAvailableDevices fragAvlDvs, String macAddress) {
+    public static BLEAppLevel getInstance(MainActivity mContext, Fragment myFragment, String macAddress) {
         if (bleAppLevel == null) {
-            bleAppLevel = new BLEAppLevel(mContext, fragAvlDvs, macAddress);
+            bleAppLevel = new BLEAppLevel(mContext, myFragment, macAddress);
         }
         return bleAppLevel;
     }
 
-    private BLEAppLevel(MainActivity mContext, FragAvailableDevices fragAvlDvs, String macAddress) {
+    public static BLEAppLevel getInstanceOnly() {
+        if (bleAppLevel != null) {
+            return bleAppLevel;
+        }
+        return null;
+    }
+
+    private BLEAppLevel(MainActivity mContext, Fragment myFragment, String macAddress) {
         this.mContext = mContext;
         this.macAddress = macAddress;
-        this.fragAvlDvs = fragAvlDvs;
+        this.myFragment = myFragment;
         initBLEDevice();
     }
 
@@ -107,6 +117,7 @@ public class BLEAppLevel {
                 case BleAdapterService.GATT_DISCONNECT:
                     //((Button) findViewById(R.id.connectButton)).setEnabled(true);
                     //we're disconnected
+                    isBLEContected = false;
                     showMsg("DISCONNECTED");
                    /* // hide the rssi distance colored rectangle
                     ((LinearLayout) findViewById(R.id.rectangle)).setVisibility(View.INVISIBLE);
@@ -154,7 +165,9 @@ public class BLEAppLevel {
                     }
                     if (time_point_service_present && current_time_service_present && pots_service_present && battery_service_present) {
                         showMsg("Device has expected services");
-                        fragAvlDvs.dvcHasExptdServices();
+                        isBLEContected = true;
+                        onSetTime();
+                        ((FragAvailableDevices) myFragment).dvcHasExptdServices();
 
                         //progressDialog.dismiss();
                         //Adding Fragment(FragConnectedQR)
@@ -204,6 +217,7 @@ public class BLEAppLevel {
                             && bundle.get(BleAdapterService.PARCEL_SERVICE_UUID).toString().toUpperCase().equals(BleAdapterService.LINK_LOSS_SERVICE_UUID)) {
                         b = bundle.getByteArray(BleAdapterService.PARCEL_VALUE);
                         if (b.length > 0) {
+                            setAlertLevel((int) b[0]);
                             showMsg("Received " + b.toString() + "from Pebble.");
                         }
                     }
@@ -214,7 +228,7 @@ public class BLEAppLevel {
 
     private void showMsg(final String msg) {
         Log.d(Constants.TAG, msg);
-        ((Activity)mContext).runOnUiThread(new Runnable() {
+        mContext.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
@@ -223,6 +237,71 @@ public class BLEAppLevel {
         });
     }
 
+    public boolean getBLEConnectedOrNot() {
+        if (isBLEContected) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
+    public void onSetTime() {
+        String[] ids = TimeZone.getAvailableIDs(+5 * 60 * 60 * 1000);
+        SimpleTimeZone pdt = new SimpleTimeZone(+5 * 60 * 60 * 1000, ids[0]);
 
+        Calendar calendar = new GregorianCalendar(pdt);
+        Date trialTime = new Date();
+        calendar.setTime(trialTime);
+
+        //Set present time as data packet
+        byte hours = (byte) calendar.get(Calendar.HOUR);
+        if (calendar.get(Calendar.AM_PM) == 1) {
+            hours = (byte) (calendar.get(Calendar.HOUR) + 12);
+        }
+        byte minutes = (byte) calendar.get(Calendar.MINUTE);
+        byte seconds = (byte) calendar.get(Calendar.SECOND);
+        byte DATE = (byte) calendar.get(Calendar.DAY_OF_MONTH);
+        byte MONTH = (byte) (calendar.get(Calendar.MONTH) + 1);
+        int iYEARMSB = (calendar.get(Calendar.YEAR) / 256);
+        int iYEARLSB = (calendar.get(Calendar.YEAR) % 256);
+        byte bYEARMSB = (byte) iYEARMSB;
+        byte bYEARLSB = (byte) iYEARLSB;
+        byte[] currentTime = {hours, minutes, seconds, DATE, MONTH, bYEARMSB, bYEARLSB};
+        bluetooth_le_adapter.writeCharacteristic(
+                BleAdapterService.CURRENT_TIME_SERVICE_SERVICE_UUID,
+                BleAdapterService.CURRENT_TIME_CHARACTERISTIC_UUID, currentTime
+        );
+    }
+
+    private void setAlertLevel(int alert_level) {
+        this.alert_level = alert_level;
+        switch (alert_level) {
+            case 0:
+                Toast.makeText(mContext, "Alert level " + alert_level, Toast.LENGTH_SHORT).show();
+                break;
+            case 1:
+                Toast.makeText(mContext, "Alert level " + alert_level, Toast.LENGTH_SHORT).show();
+                break;
+            case 2:
+                Toast.makeText(mContext, "Alert level " + alert_level, Toast.LENGTH_SHORT).show();
+                break;
+        }
+    }
+
+    public void eraseOldTimePoints() {
+        byte[] timePoint = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+        bluetooth_le_adapter.writeCharacteristic(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
+                BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint);
+    }
+
+    public void disconnectBLECompletely(){
+        if (bluetooth_le_adapter.isConnected()) {
+            try {
+                bluetooth_le_adapter.disconnect();
+            } catch (Exception e) {
+            }
+        }
+        mContext.unbindService(service_connection);
+        bluetooth_le_adapter = null;
+    }
 }

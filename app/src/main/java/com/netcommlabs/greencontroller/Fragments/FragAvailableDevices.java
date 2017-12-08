@@ -35,8 +35,10 @@ import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.adapters.AdptrAvailableDVCs;
 import com.netcommlabs.greencontroller.model.DataTransferModel;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
+import com.netcommlabs.greencontroller.utilities.AppAlertDialog;
 import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.Constant;
+import com.netcommlabs.greencontroller.utilities.NetworkUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -66,6 +68,7 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
     private boolean back_requested = false;
     ProgressDialog progressDialog;
     private static final int REQUEST_CODE_ENABLE = 1;
+    Fragment myFragment;
 
 
     @Override
@@ -90,7 +93,14 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
         //llScrnHeader = view.findViewById(R.id.llScrnHeader);
         progrsBarIndetmnt = view.findViewById(R.id.progrsBarIndetmnt);
         reViListAvailDvc = view.findViewById(R.id.reViListAvailDvc);
-        startBTWork();
+        if (NetworkUtils.isConnected(mContext)) {
+            //Location work starts
+            mContext.getLocation();
+            //Bluetooth work starts
+            startBTWork();
+        } else {
+            AppAlertDialog.showDialogFinishWithActivity(mContext, "Internet", "You are not Connected to internet");
+        }
 
         LinearLayoutManager llManagerAailDvcs = new LinearLayoutManager(mContext);
         reViListAvailDvc.setLayoutManager(llManagerAailDvcs);
@@ -196,7 +206,7 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
     }*/
 
     @Override
-    public void clickPassDataToAct(ArrayList<DataTransferModel> listValveDataSingle, String clickedValveName,int pos) {
+    public void clickPassDataToAct(ArrayList<DataTransferModel> listValveDataSingle, String clickedValveName, int pos) {
 
     }
 
@@ -209,8 +219,9 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
         progressDialog.setMessage("Please Wait...");
         progressDialog.setCancelable(false);
         progressDialog.show();
+        myFragment=FragAvailableDevices.this;
 
-        BLEAppLevel.getInstance(mContext, FragAvailableDevices.this, dvcMacAddress);
+        BLEAppLevel.getInstance(mContext, myFragment, dvcMacAddress);
     }
 
     @Override
@@ -267,4 +278,17 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
             }
     }*/
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case REQUEST_CODE_ENABLE:
+                if (resultCode == MainActivity.RESULT_OK) {
+                    startDvcDiscovery();
+                } else {
+                    Toast.makeText(mContext, "Enabling Bluetooth is mandatory", Toast.LENGTH_LONG).show();
+                    mContext.finish();
+                }
+        }
+    }
 }

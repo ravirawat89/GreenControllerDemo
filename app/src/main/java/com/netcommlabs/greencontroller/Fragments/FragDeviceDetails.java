@@ -172,7 +172,7 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
         listValveDataSingle = databaseHandler.getValveDataWithMACValveName(dvcMacAdd, clickedValveName);
         checkValveDataUpdtUIFrmDB();
 
-        initController();
+        //initController();
     }
 
     private void checkValveDataUpdtUIFrmDB() {
@@ -807,12 +807,12 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
     }
 
     //BLE CODE STARTS
-    void initController() {
-       /* device_name = "Pebble";
-        device_address = "98:4F:EE:10:87:66";*/
+    /*void initController() {
+        device_name = "Pebble";
+        device_address = "98:4F:EE:10:87:66";
         Intent gattServiceIntent = new Intent(mContext, BleAdapterService.class);
         mContext.bindService(gattServiceIntent, service_connection, BIND_AUTO_CREATE);
-    }
+    }*/
 
     private final ServiceConnection service_connection = new ServiceConnection() {
         @Override

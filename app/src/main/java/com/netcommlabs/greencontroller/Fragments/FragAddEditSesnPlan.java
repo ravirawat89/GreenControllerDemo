@@ -40,6 +40,7 @@ import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.model.DataTransferModel;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
+import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.Constant;
 
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ import static java.lang.Boolean.TRUE;
  * Created by Android on 12/6/2017.
  */
 
-public class FragAddEditSesnPlan extends Fragment implements View.OnClickListener{
+public class FragAddEditSesnPlan extends Fragment implements View.OnClickListener {
 
     private MainActivity mContext;
     private View view;
@@ -130,7 +131,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         listTimePntsFri = new ArrayList<Integer>();
         listTimePntsSat = new ArrayList<Integer>();
 
-        Bundle bundle=this.getArguments();
+        Bundle bundle = this.getArguments();
         device_name = bundle.getString(EXTRA_NAME);
         device_address = bundle.getString(EXTRA_ID);
         clickedValveName = bundle.getString(EXTRA_VALVE_NAME_DB);
@@ -143,7 +144,6 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
 
         Intent gattServiceIntent = new Intent(mContext, BleAdapterService.class);
         mContext.bindService(gattServiceIntent, service_connection, BIND_AUTO_CREATE);
-
 
        /* //Getting sent intent
         dvcName = getIntent().getExtras().getString(EXTRA_NAME);
@@ -162,13 +162,13 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         tvSunEvent = view.findViewById(R.id.tvSunEvent);
         tvMonEvent = view.findViewById(R.id.tvMonEvent);
         tvTueEvent = view.findViewById(R.id.tvTueEvent);
-        tvWedEvent =view.findViewById(R.id.tvWedEvent);
-        tvThuEvent =view.findViewById(R.id.tvThuEvent);
+        tvWedEvent = view.findViewById(R.id.tvWedEvent);
+        tvThuEvent = view.findViewById(R.id.tvThuEvent);
         tvFriEvent = view.findViewById(R.id.tvFriEvent);
         tvSatEvent = view.findViewById(R.id.tvSatEvent);
         tvClearEditData = view.findViewById(R.id.tvClearEditData);
 
-        tvSunFirst =view.findViewById(R.id.tvSunFirst);
+        tvSunFirst = view.findViewById(R.id.tvSunFirst);
         tvSunSecond = view.findViewById(R.id.tvSunSecond);
         tvSunThird = view.findViewById(R.id.tvSunThird);
         tvSunFourth = view.findViewById(R.id.tvSunFourth);
@@ -181,12 +181,12 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         ivMonAdd = view.findViewById(R.id.ivMonAdd);
 
         tvTueFirst = view.findViewById(R.id.tvTueFirst);
-        tvTueSecond =view.findViewById(R.id.tvTueSecond);
-        tvTueThird = view. findViewById(R.id.tvTueThird);
+        tvTueSecond = view.findViewById(R.id.tvTueSecond);
+        tvTueThird = view.findViewById(R.id.tvTueThird);
         tvTueFourth = view.findViewById(R.id.tvTueFourth);
-        ivTueAdd = view. findViewById(R.id.ivTueAdd);
+        ivTueAdd = view.findViewById(R.id.ivTueAdd);
 
-        tvWedFirst =view. findViewById(R.id.tvWedFirst);
+        tvWedFirst = view.findViewById(R.id.tvWedFirst);
         tvWedSecond = view.findViewById(R.id.tvWedSecond);
         tvWedThird = view.findViewById(R.id.tvWedThird);
         tvWedFourth = view.findViewById(R.id.tvWedFourth);
@@ -205,7 +205,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         ivFriAdd = view.findViewById(R.id.ivFriAdd);
 
         tvSatFirst = view.findViewById(R.id.tvSatFirst);
-        tvSatSecond =view.findViewById(R.id.tvSatSecond);
+        tvSatSecond = view.findViewById(R.id.tvSatSecond);
         tvSatThird = view.findViewById(R.id.tvSatThird);
         tvSatFourth = view.findViewById(R.id.tvSatFourth);
         ivSatAdd = view.findViewById(R.id.ivSatAdd);
@@ -458,7 +458,14 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
 
                 //ArrayList list=listSingleValveData;
 
-                eraseOldTimePoints(); //This is automatically followed by loading new time points
+               /* BLEAppLevel bleAppLevel = BLEAppLevel.getInstanceOnly();
+                if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+                    bleAppLevel.eraseOldTimePoints();//This is automatically followed by loading new time points
+                } else {
+                    Toast.makeText(mContext, "BLE lost connection", Toast.LENGTH_SHORT).show();
+                }*/
+
+                eraseOldTimePoints();
 
 
             }
@@ -1892,6 +1899,12 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
                 .show();
     }
 
+    public void eraseOldTimePoints() {
+        byte[] timePoint = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+        bluetooth_le_adapter.writeCharacteristic(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
+                BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint);
+    }
+
     private final ServiceConnection service_connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
@@ -1988,7 +2001,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
                     }
                     if (time_point_service_present && current_time_service_present && pots_service_present && battery_service_present) {
                         showMsg("Device has expected services");
-                        onSetTime();
+                        //onSetTime();
 
                     } else {
                         showMsg("Device does not have expected GATT services");
@@ -2058,30 +2071,6 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
             }
         });
     }
-
-    /*private void setAlertLevel(int alert_level) {
-        this.alert_level = alert_level;
-        ((Button) this.findViewById(R.id.lowButton)).setTextColor(Color.parseColor("#000000"));
-        ;
-        ((Button) this.findViewById(R.id.midButton)).setTextColor(Color.parseColor("#000000"));
-        ;
-        ((Button) this.findViewById(R.id.highButton)).setTextColor(Color.parseColor("#000000"));
-        ;
-
-        switch (alert_level) {
-            case 0:
-                ((Button) this.findViewById(R.id.lowButton)).setTextColor(Color.parseColor("#FF0000"));
-                ;
-                break;
-            case 1:
-                ((Button) this.findViewById(R.id.midButton)).setTextColor(Color.parseColor("#FF0000"));
-                break;
-            case 2:
-                ((Button) this.findViewById(R.id.highButton)).setTextColor(Color.parseColor("#FF0000"));
-                break;
-        }
-    }
-*/
     /*@Override
     public void onBackPressed() {
         back_requested = true;
@@ -2110,11 +2099,11 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
 
     }*/
 
-    void eraseOldTimePoints() {
+   /* void eraseOldTimePoints() {
         byte[] timePoint = {0, 0, 0, 0, 0, 0, 0, 0, 0};
         bluetooth_le_adapter.writeCharacteristic(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
                 BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint);
-    }
+    }*/
 
     void startSendData() {
         Log.e("@@@@@@@@@@@", "" + dataSendingIndex);
@@ -2156,7 +2145,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         return data;
     }
 
-    public void onSetTime() {
+   /* public void onSetTime() {
         String[] ids = TimeZone.getAvailableIDs(+5 * 60 * 60 * 1000);
         SimpleTimeZone pdt = new SimpleTimeZone(+5 * 60 * 60 * 1000, ids[0]);
 
@@ -2182,7 +2171,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
                 BleAdapterService.CURRENT_TIME_SERVICE_SERVICE_UUID,
                 BleAdapterService.CURRENT_TIME_CHARACTERISTIC_UUID, currentTime
         );
-    }
+    }*/
 
     void saveValveDatatoDB() {
         DatabaseHandler databaseHandler = new DatabaseHandler(mContext);
@@ -2200,7 +2189,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         getTargetFragment().onActivityResult(
                 getTargetRequestCode(),
                 Activity.RESULT_OK,
-                new Intent().putExtra("dataKey","Success")
+                new Intent().putExtra("dataKey", "Success")
         );
         getActivity().onBackPressed();
     }

@@ -2,22 +2,15 @@ package com.netcommlabs.greencontroller.Fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.bluetooth.BluetoothGattService;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,12 +20,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.netcommlabs.greencontroller.Constants;
 import com.netcommlabs.greencontroller.R;
 import com.netcommlabs.greencontroller.activities.AddAddressActivity;
 import com.netcommlabs.greencontroller.activities.AvailableDevices;
 import com.netcommlabs.greencontroller.activities.DashboardPebbleHome;
-import com.netcommlabs.greencontroller.activities.DeviceActivity;
 import com.netcommlabs.greencontroller.activities.DeviceDetails;
 import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.adapters.DeviceAddressAdapter;
@@ -41,17 +32,11 @@ import com.netcommlabs.greencontroller.model.MdlLocationAddress;
 import com.netcommlabs.greencontroller.model.ModalBLEDevice;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
+import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.Constant;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.SimpleTimeZone;
-import java.util.TimeZone;
-
-import static android.content.Context.BIND_AUTO_CREATE;
 
 /**
  * Created by Android on 12/6/2017.
@@ -172,8 +157,15 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
 
         tvDeviceNameDyn.setText(device_name + "\n" + device_address);
         tvValveCount.setText(valvesNum + "");
-        initController();
+        //initController();
 
+
+        BLEAppLevel bleAppLevel = BLEAppLevel.getInstanceOnly();
+        if (bleAppLevel!=null && bleAppLevel.getBLEConnectedOrNot()) {
+            setConnectionIsDone();
+        } else {
+            Toast.makeText(mContext, "BLE lost connection", Toast.LENGTH_SHORT).show();
+        }
         setRecyclerViewAdapter();
     }
 
@@ -277,9 +269,9 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
         dialog.show();
     }
 
-    void initController() {
-       /* device_name = "Pebble";
-        device_address = "98:4F:EE:10:87:66";*/
+  /*  void initController() {
+       *//* device_name = "Pebble";
+        device_address = "98:4F:EE:10:87:66";*//*
         Intent gattServiceIntent = new Intent(mContext, BleAdapterService.class);
         mContext.bindService(gattServiceIntent, service_connection, BIND_AUTO_CREATE);
     }
@@ -323,9 +315,9 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
                     //we're connected
                     showMsg("GATT_CONNECTED");
                     // enable the LOW/MID/HIGH alert level selection buttons
-                   /* ((Button)findViewById(R.id.lowButton)).setEnabled(true);
+                   *//* ((Button)findViewById(R.id.lowButton)).setEnabled(true);
                     ((Button) findViewById(R.id.midButton)).setEnabled(true);
-                    ((Button) findViewById(R.id.highButton)).setEnabled(true);*/
+                    ((Button) findViewById(R.id.highButton)).setEnabled(true);*//*
                     bluetooth_le_adapter.discoverServices();
 
                     break;
@@ -334,12 +326,12 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
                     //((Button) findViewById(R.id.connectButton)).setEnabled(true);
                     //we're disconnected
                     showMsg("GATT_DISCONNECT");
-                   /* // hide the rssi distance colored rectangle
+                   *//* // hide the rssi distance colored rectangle
                     ((LinearLayout) findViewById(R.id.rectangle)).setVisibility(View.INVISIBLE);
                     // disable the LOW/MID/HIGH alert level selection buttons
                     ((Button) findViewById(R.id.lowButton)).setEnabled(false);
                     ((Button) findViewById(R.id.midButton)).setEnabled(false);
-                    ((Button) findViewById(R.id.highButton)).setEnabled(false);*/
+                    ((Button) findViewById(R.id.highButton)).setEnabled(false);*//*
                     if (back_requested) {
                         mContext.finish();
                     }
@@ -421,45 +413,7 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
             }
         }
     };
-
-    private void showMsg(final String msg) {
-        Log.d(Constants.TAG, msg);
-        mContext.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    public void onSetTime() {
-        String[] ids = TimeZone.getAvailableIDs(+5 * 60 * 60 * 1000);
-        SimpleTimeZone pdt = new SimpleTimeZone(+5 * 60 * 60 * 1000, ids[0]);
-
-        Calendar calendar = new GregorianCalendar(pdt);
-        Date trialTime = new Date();
-        calendar.setTime(trialTime);
-
-        //Set present time as data packet
-        byte hours = (byte) calendar.get(Calendar.HOUR);
-        if (calendar.get(Calendar.AM_PM) == 1) {
-            hours = (byte) (calendar.get(Calendar.HOUR) + 12);
-        }
-        byte minutes = (byte) calendar.get(Calendar.MINUTE);
-        byte seconds = (byte) calendar.get(Calendar.SECOND);
-        byte DATE = (byte) calendar.get(Calendar.DAY_OF_MONTH);
-        byte MONTH = (byte) (calendar.get(Calendar.MONTH) + 1);
-        int iYEARMSB = (calendar.get(Calendar.YEAR) / 256);
-        int iYEARLSB = (calendar.get(Calendar.YEAR) % 256);
-        byte bYEARMSB = (byte) iYEARMSB;
-        byte bYEARLSB = (byte) iYEARLSB;
-        byte[] currentTime = {hours, minutes, seconds, DATE, MONTH, bYEARMSB, bYEARLSB};
-        bluetooth_le_adapter.writeCharacteristic(
-                BleAdapterService.CURRENT_TIME_SERVICE_SERVICE_UUID,
-                BleAdapterService.CURRENT_TIME_CHARACTERISTIC_UUID, currentTime
-        );
-    }
-
+    */
 
    /* @Override
     public void onBackPressed() {
