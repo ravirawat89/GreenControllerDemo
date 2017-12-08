@@ -354,7 +354,7 @@ public class BLEAppLevel {
     }
 
     public void disconnectBLECompletely() {
-        if (bluetooth_le_adapter.isConnected()) {
+        if (bluetooth_le_adapter!=null && bluetooth_le_adapter.isConnected()) {
             try {
                 bluetooth_le_adapter.disconnect();
             } catch (Exception e) {
