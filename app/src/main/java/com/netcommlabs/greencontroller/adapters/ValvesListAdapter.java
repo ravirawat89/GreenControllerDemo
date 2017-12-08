@@ -41,7 +41,7 @@ public class ValvesListAdapter extends RecyclerView.Adapter<ValvesListAdapter.My
         this.listValves = listValves;
         this.dvcMacAdd = dvcMacAdd;
         this.fragDeviceDetails = fragDeviceDetails;
-        this.clickedPosition=clickedPosition;
+        this.clickedPosition = clickedPosition;
         listViewsCollection = new ArrayList<>();
         databaseHandler = new DatabaseHandler(mContext);
 
@@ -60,8 +60,6 @@ public class ValvesListAdapter extends RecyclerView.Adapter<ValvesListAdapter.My
             tvValveName = itemView.findViewById(R.id.tvValveName);
 
             listViewsCollection.add(llValveNameColor);
-//---- First Item selected----
-            listViewsCollection.get(0).setBackgroundResource(R.drawable.volve_bg_shadow_select);
 
 
             llValveNameColor.setOnClickListener(new View.OnClickListener() {
@@ -84,7 +82,7 @@ public class ValvesListAdapter extends RecyclerView.Adapter<ValvesListAdapter.My
 
                     //DB work for valve selection
                     listValveDataSingle = databaseHandler.getValveDataWithMACValveName(dvcMacAdd, clickedValveName);
-                    fragDeviceDetails.clickPassDataToAct(listValveDataSingle, clickedValveName,pos);
+                    fragDeviceDetails.clickPassDataToAct(listValveDataSingle, clickedValveName, pos);
                 }
             });
 
@@ -99,8 +97,13 @@ public class ValvesListAdapter extends RecyclerView.Adapter<ValvesListAdapter.My
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-
         holder.tvValveName.setText(listValves.get(position));
+        if (clickedPosition == position) {
+            //---- First Item selected----
+            listViewsCollection.get(clickedPosition).setBackgroundResource(R.drawable.volve_bg_shadow_select);
+        } else {
+            listViewsCollection.get(clickedPosition).setBackgroundResource(R.drawable.volve_bg_shadow);
+        }
     }
 
     @Override
