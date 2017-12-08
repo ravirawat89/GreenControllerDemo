@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkPermission();
         } else {
-            Toast.makeText(mContext, "No need to ask runtime permissions", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(mContext, "No need to ask runtime permissions", Toast.LENGTH_SHORT).show();
             if (NetworkUtils.isConnected(this)) {
                 //Location work starts
                 getLocation();
@@ -240,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
                     boolean cameraPermission = grantResults[1] == PackageManager.PERMISSION_GRANTED;
 
                     if (fineLocation && cameraPermission) {
-                        Toast.makeText(mContext, "Thanks for granting permissions", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(mContext, "Thanks for granting permissions", Toast.LENGTH_SHORT).show();
                         if (NetworkUtils.isConnected(this)) {
                             //Location work starts
                             getLocation();
