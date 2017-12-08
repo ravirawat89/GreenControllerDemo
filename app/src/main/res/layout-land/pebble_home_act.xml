@@ -9,12 +9,14 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        android:weightSum="1"
         android:orientation="horizontal">
 
         <LinearLayout
             android:id="@+id/llHamburgerIcon"
-            android:layout_width="@dimen/_70sdp"
-            android:layout_height="@dimen/_30sdp">
+            android:layout_width="0dp"
+            android:layout_height="@dimen/_30sdp"
+            android:layout_weight="0.10">
 
             <ImageView
                 android:layout_width="@dimen/icon_size"
@@ -27,11 +29,21 @@
 
         <TextView
             android:id="@+id/toolbar_title"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="0.40"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="V 1.2"
+            android:textSize="@dimen/header_title_size"  />
+
+        <TextView
+            android:id="@+id/desc_txt"
+            android:layout_width="0dp"
+            android:layout_weight="0.50"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="V 1.2"
-            android:textStyle="bold" />
+            android:text=""
+            android:textSize="@dimen/header_title_size"  />
 
     </LinearLayout>
 

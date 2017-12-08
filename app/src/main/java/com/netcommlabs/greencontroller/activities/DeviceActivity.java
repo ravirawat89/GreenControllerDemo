@@ -54,7 +54,7 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
     private LinearLayout ll_3st;
     private LinearLayout ll_4st;
     private LinearLayout ll_5st;
-    private LinearLayout ll_add_device, llScrnHeader;
+    private LinearLayout ll_add_device/*, llScrnHeader*/;
 
 
     private RelativeLayout rl_1st;
@@ -73,7 +73,7 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
     private ImageView iv_next;
     private DatabaseHandler databaseHandler;
     private int valvesNum;
-    private TextView tvDeviceNameDyn, tvValveCount, tvShowAddressTop;
+    private TextView tvDeviceNameDyn, tvValveCount/*, tvShowAddressTop*/;
     private MdlLocationAddress mdlLocationAddress;
     private String addressComplete;
     private List<String> listLocAddressType;
@@ -87,7 +87,7 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         ll_add_new = (LinearLayout) findViewById(R.id.ll_add_new);
-        llScrnHeader = findViewById(R.id.llScrnHeader);
+//        llScrnHeader = findViewById(R.id.llScrnHeader);
 
         ll_1st = (LinearLayout) findViewById(R.id.ll_1st);
         ll_2st = (LinearLayout) findViewById(R.id.ll_2st);
@@ -110,9 +110,9 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
 
         tvDeviceNameDyn = findViewById(R.id.tvDeviceNameDyn);
         tvValveCount = findViewById(R.id.tvValveCount);
-        tvShowAddressTop = (TextView) findViewById(R.id.tvShowAddressTop);
+//        tvShowAddressTop = (TextView) findViewById(R.id.tvShowAddressTop);
 
-        llScrnHeader.setOnClickListener(this);
+//        llScrnHeader.setOnClickListener(this);
         ll_add_new.setOnClickListener(this);
 
         ll_2st.setOnClickListener(this);
@@ -137,7 +137,7 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
         device_address = listModalBleDevice.get(0).getDvcMacAddrs();
         mdlLocationAddress = listModalBleDevice.get(0).getMdlLocationAddress();
         addressComplete = mdlLocationAddress.getFlat_num() + ", "+ mdlLocationAddress.getStreetName() + ", " + mdlLocationAddress.getLocality_landmark() + ", "+ mdlLocationAddress.getPincode() + ", " + mdlLocationAddress.getCity() + ", " + mdlLocationAddress.getState();
-        tvShowAddressTop.setText(addressComplete);
+//        tvShowAddressTop.setText(addressComplete);
         listLocAddressType = new ArrayList<>();
         listLocAddressType.add(mdlLocationAddress.getAddress_name());
         valvesNum = listModalBleDevice.get(0).getValvesNum();
@@ -212,11 +212,11 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
                 Intent intent2 = new Intent(this, AvailableDevices.class);
                 startActivity(intent2);
                 break;
-            case R.id.llScrnHeader:
+        /*    case R.id.llScrnHeader:
                 Intent intent1 = new Intent(mContext, DashboardPebbleHome.class);
                 mContext.startActivity(intent1);
                 mContext.finish();
-                break;
+                break;*/
 
         }
 

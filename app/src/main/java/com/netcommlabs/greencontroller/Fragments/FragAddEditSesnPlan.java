@@ -83,7 +83,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
     private int etInputDursnPlanInt = 0;
     private int etQuantPlanInt = 0;
     private int etInputDischrgPntsInt = 0;
-    private TextView tvORText, tvTitleTop, tvClearEditData;
+    private TextView tvORText/*, tvTitleTop, tvClearEditData*/;
 
 
     //Mr. Vijay
@@ -101,6 +101,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
     private static int dataSendingIndex = 0;
     private static boolean oldTimePointsErased = FALSE;
     private int plusVisibleOf;
+    TextView header;
 
     @Override
     public void onAttach(Context context) {
@@ -140,7 +141,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
             listSingleValveData = (ArrayList<DataTransferModel>) bundle.getSerializable(AddEditSessionPlan.EXTRA_VALVE_EDITABLE_DATA);
             setEditableValveDataToUI();
         }
-        tvTitleTop.setText(operationType + " Session Plan" + "(" + clickedValveName + ")");
+//        tvTitleTop.setText(operationType + " Session Plan" + "(" + clickedValveName + ")");
 
         Intent gattServiceIntent = new Intent(mContext, BleAdapterService.class);
         mContext.bindService(gattServiceIntent, service_connection, BIND_AUTO_CREATE);
@@ -166,7 +167,8 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         tvThuEvent = view.findViewById(R.id.tvThuEvent);
         tvFriEvent = view.findViewById(R.id.tvFriEvent);
         tvSatEvent = view.findViewById(R.id.tvSatEvent);
-        tvClearEditData = view.findViewById(R.id.tvClearEditData);
+//        tvClearEditData = view.findViewById(R.id.tvClearEditData);
+       header= mContext.desc_txt;
 
         tvSunFirst = view.findViewById(R.id.tvSunFirst);
         tvSunSecond = view.findViewById(R.id.tvSunSecond);
@@ -211,7 +213,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         ivSatAdd = view.findViewById(R.id.ivSatAdd);
 
         tvLoadSesnPlan = view.findViewById(R.id.tvLoadSesnPlan);
-        tvTitleTop = view.findViewById(R.id.tvTitleTop);
+//        tvTitleTop = view.findViewById(R.id.tvTitleTop);
         tvORText = view.findViewById(R.id.tvORText);
         llQuantOfWater = view.findViewById(R.id.llQuantOfWater);
     }
@@ -473,8 +475,14 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
     }
 
     private void setEditableValveDataToUI() {
-        tvClearEditData.setVisibility(View.VISIBLE);
+ /*       tvClearEditData.setVisibility(View.VISIBLE);
         tvClearEditData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialogConfirmAction();
+            }
+        }); */ header.setVisibility(View.VISIBLE);
+        header.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialogConfirmAction();
@@ -886,7 +894,8 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         etDischargePoints.setText("");
         etDurationPlan.setText("");
         etQuantityPlan.setText("");
-        tvClearEditData.setVisibility(View.GONE);
+//        tvClearEditData.setVisibility(View.GONE);
+        header.setVisibility(View.GONE);
 
         tvSunFirst.setVisibility(View.GONE);
         tvSunSecond.setVisibility(View.GONE);

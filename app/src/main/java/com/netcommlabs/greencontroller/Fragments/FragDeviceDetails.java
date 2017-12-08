@@ -57,9 +57,9 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
     public static final int RESULT_CODE_VALVE_INDB = 202;
     private RecyclerView reviValvesList;
     private ArrayList<String> listValves;
-    private LinearLayout llScrnHeader, llNoSesnPlan, llSesnPlanDetails, llControllerNameEdit, llControllerNameSave;
+    private LinearLayout /*llScrnHeader,*/ llNoSesnPlan, llSesnPlanDetails, llControllerNameEdit, llControllerNameSave;
     private LinearLayout llEditValve, llStopValve, llPauseValve, llFlushValve, llHelpValve;
-    private TextView tvDeviceName, tvAddNewSesnPlan;
+    private TextView tvDeviceName,desc_txt, tvAddNewSesnPlan;
     private DatabaseHandler databaseHandler;
     private ArrayList<DataTransferModel> listValveDataSingle;
     public static final String EXTRA_DVC_NAME = "dvc_name";
@@ -839,7 +839,7 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
     }*/
 
     private void initView(View view) {
-        llScrnHeader = view.findViewById(R.id.llScrnHeader);
+//        llScrnHeader = view.findViewById(R.id.llScrnHeader);
         llNoSesnPlan = view.findViewById(R.id.llNoSesnPlan);
         llSesnPlanDetails = view.findViewById(R.id.llSesnPlanDetails);
         llEditValve = view.findViewById(R.id.llEditValve);
@@ -847,7 +847,10 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
         llPauseValve = view.findViewById(R.id.llPauseValve);
         llFlushValve = view.findViewById(R.id.llFlushValve);
         llHelpValve = view.findViewById(R.id.llHelpValve);
-        tvDeviceName = view.findViewById(R.id.tvDeviceName);
+//        tvDeviceName = view.findViewById(R.id.tvDeviceName);
+        tvDeviceName = mContext.toolbar_title;
+        desc_txt=mContext.desc_txt;
+        desc_txt.setText("Last Connected : 02-11-2017  11:00 am");
         reviValvesList = view.findViewById(R.id.reviValvesList);
         tvAddNewSesnPlan = view.findViewById(R.id.tvAddNewSesnPlan);
         tvPauseText = view.findViewById(R.id.tvPauseText);

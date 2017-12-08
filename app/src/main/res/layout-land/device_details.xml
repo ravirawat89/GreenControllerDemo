@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     tools:context="com.netcommlabs.greencontroller.activities.DeviceDetails">
 
-    <LinearLayout
+   <!-- <LinearLayout
         android:id="@+id/llTopDeviceInfo"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_40sdp"
@@ -59,13 +59,12 @@
 
         </LinearLayout>
 
-    </LinearLayout>
+    </LinearLayout>-->
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/llTopDeviceInfo"
         android:orientation="horizontal">
 
         <LinearLayout

@@ -67,7 +67,7 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
     private int etInputDursnPlanInt = 0;
     private int etQuantPlanInt = 0;
     private int etInputDischrgPntsInt = 0;
-    private TextView tvORText, tvTitleTop, tvClearEditData;
+    private TextView tvORText/*, tvTitleTop, tvClearEditData*/;
 
 
     //Mr. Vijay
@@ -120,7 +120,7 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
             listSingleValveData = (ArrayList<DataTransferModel>) intent.getSerializableExtra(AddEditSessionPlan.EXTRA_VALVE_EDITABLE_DATA);
             setEditableValveDataToUI();
         }
-        tvTitleTop.setText(operationType + " Session Plan" + "(" + clickedValveName + ")");
+//        tvTitleTop.setText(operationType + " Session Plan" + "(" + clickedValveName + ")");
 
         Intent gattServiceIntent = new Intent(getApplicationContext(), BleAdapterService.class);
         bindService(gattServiceIntent, service_connection, BIND_AUTO_CREATE);
@@ -147,7 +147,7 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
         tvThuEvent = (TextView) findViewById(R.id.tvThuEvent);
         tvFriEvent = (TextView) findViewById(R.id.tvFriEvent);
         tvSatEvent = (TextView) findViewById(R.id.tvSatEvent);
-        tvClearEditData = findViewById(R.id.tvClearEditData);
+//        tvClearEditData = findViewById(R.id.tvClearEditData);
 
         tvSunFirst = (TextView) findViewById(R.id.tvSunFirst);
         tvSunSecond = (TextView) findViewById(R.id.tvSunSecond);
@@ -192,7 +192,7 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
         ivSatAdd = (ImageView) findViewById(R.id.ivSatAdd);
 
         tvLoadSesnPlan = findViewById(R.id.tvLoadSesnPlan);
-        tvTitleTop = findViewById(R.id.tvTitleTop);
+//        tvTitleTop = findViewById(R.id.tvTitleTop);
         tvORText = findViewById(R.id.tvORText);
         llQuantOfWater = findViewById(R.id.llQuantOfWater);
     }
@@ -455,13 +455,13 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
     }
 
     private void setEditableValveDataToUI() {
-        tvClearEditData.setVisibility(View.VISIBLE);
+      /*  tvClearEditData.setVisibility(View.VISIBLE);
         tvClearEditData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialogConfirmAction();
             }
-        });
+        });*/
 
         DataTransferModel dataTransferModel;
         listTimePntsSun = new ArrayList<>();
@@ -868,7 +868,7 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
         etDischargePoints.setText("");
         etDurationPlan.setText("");
         etQuantityPlan.setText("");
-        tvClearEditData.setVisibility(View.GONE);
+//        tvClearEditData.setVisibility(View.GONE);
 
         tvSunFirst.setVisibility(View.GONE);
         tvSunSecond.setVisibility(View.GONE);

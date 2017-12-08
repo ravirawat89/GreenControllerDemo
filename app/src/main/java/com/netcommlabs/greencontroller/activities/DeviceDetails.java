@@ -48,7 +48,7 @@ public class DeviceDetails extends AppCompatActivity implements InterfaceValveAd
     private ArrayList<String> listValves;
     private LinearLayout llScrnHeader, llNoSesnPlan, llSesnPlanDetails, llControllerNameEdit, llControllerNameSave;
     private LinearLayout llEditValve, llStopValve, llPauseValve, llFlushValve, llHelpValve;
-    private TextView tvDeviceName, tvAddNewSesnPlan;
+    private TextView /*tvDeviceName,*/ tvAddNewSesnPlan;
     private DatabaseHandler databaseHandler;
     private ArrayList<DataTransferModel> listValveDataSingle;
     public static final String EXTRA_DVC_NAME = "dvc_name";
@@ -85,7 +85,7 @@ public class DeviceDetails extends AppCompatActivity implements InterfaceValveAd
         dvcMacAdd = "98:4F:EE:10:87:66";
         dvcValveCount = 8;
 
-        tvDeviceName.setText(dvcName);
+//        tvDeviceName.setText(dvcName);
 
         //Adding valve name,MAC, and valve data to DB
         databaseHandler = new DatabaseHandler(mContext);
@@ -162,7 +162,7 @@ public class DeviceDetails extends AppCompatActivity implements InterfaceValveAd
         llPauseValve = findViewById(R.id.llPauseValve);
         llFlushValve = findViewById(R.id.llFlushValve);
         llHelpValve = findViewById(R.id.llHelpValve);
-        tvDeviceName = findViewById(R.id.tvDeviceName);
+//        tvDeviceName = findViewById(R.id.tvDeviceName);
         reviValvesList = findViewById(R.id.reviValvesList);
         tvAddNewSesnPlan = findViewById(R.id.tvAddNewSesnPlan);
 

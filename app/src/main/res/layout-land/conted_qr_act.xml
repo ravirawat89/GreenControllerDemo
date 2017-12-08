@@ -8,7 +8,7 @@
     android:layout_marginRight="@dimen/_5sdp"
     tools:context="com.netcommlabs.greencontroller.activities.ConnectedQRAct">
 
-    <LinearLayout
+   <!-- <LinearLayout
         android:id="@+id/llScrnHeader"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
@@ -27,7 +27,7 @@
             android:layout_marginLeft="@dimen/_5sdp"
             android:text="Device Connected"
             android:textSize="@dimen/header_title_size" />
-    </LinearLayout>
+    </LinearLayout>-->
 
     <LinearLayout
         android:id="@+id/llDeviceAddress"

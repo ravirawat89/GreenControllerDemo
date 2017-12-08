@@ -27,7 +27,7 @@ public class AddAddressActivity extends AppCompatActivity {
     private EditText etOtherAddName;
     private LinearLayout llAddAddressName;
     private TextView tvSaveEvent;
-    private LinearLayout llScrnHeader;
+//    private LinearLayout llScrnHeader;
     private EditText et_flat_num, et_street_area, et_city, et_locality_landmark, et_pincode, et_state;
     private String et_other_addrs_name_input;
     private String radio_address_name = "";
@@ -54,7 +54,7 @@ public class AddAddressActivity extends AppCompatActivity {
     private void initBase() {
         mContext = this;
 
-        llScrnHeader = (LinearLayout) findViewById(R.id.llScrnHeader);
+//        llScrnHeader = (LinearLayout) findViewById(R.id.llScrnHeader);
         et_flat_num = findViewById(R.id.et_flat_num);
         et_street_area = findViewById(R.id.et_street_area);
         et_city = findViewById(R.id.et_city);
@@ -71,14 +71,14 @@ public class AddAddressActivity extends AppCompatActivity {
     }
 
     private void initListeners() {
-        llScrnHeader.setOnClickListener(new View.OnClickListener() {
+      /*  llScrnHeader.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               /* Intent intentAddWtrngProfile = new Intent(mContext, ConnectedQRAct.class);
-                mContext.startActivity(intentAddWtrngProfile);*/
+               *//* Intent intentAddWtrngProfile = new Intent(mContext, ConnectedQRAct.class);
+                mContext.startActivity(intentAddWtrngProfile);*//*
                 mContext.finish();
             }
-        });
+        });*/
 
         et_flat_num.setOnTouchListener(new View.OnTouchListener() {
             @Override

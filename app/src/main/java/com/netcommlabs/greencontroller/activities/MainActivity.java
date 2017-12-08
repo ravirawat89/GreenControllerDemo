@@ -53,6 +53,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.netcommlabs.greencontroller.utilities.Constant.AVAILABLE_DEVICES;
+
 public class MainActivity extends AppCompatActivity implements LocationDecetor {
 
     private static final int PERMISSIONS_MULTIPLE_REQUEST = 200;
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
     private Location mLastLocation = null;
     private String usersAddress = null;
     public TextView toolbar_title;
+    public TextView desc_txt;
     private boolean exit = false;
     private Fragment myFragment;
     private String dvcMacAddress;
@@ -113,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
         frm_lyt_container_int = R.id.frm_lyt_container;
         llHamburgerIcon = findViewById(R.id.llHamburgerIcon);
         toolbar_title = findViewById(R.id.toolbar_title);
+        desc_txt = findViewById(R.id.desc_txt);
         nav_drawer_layout = findViewById(R.id.nav_drawer_layout);
         nav_revi_slider = findViewById(R.id.nav_revi_slider);
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
@@ -358,6 +362,10 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
             toolbar_title.setText(currentFragment.getTag());
 
 
+            if(currentFragment.equals(AVAILABLE_DEVICES))
+            {
+
+            }
             Log.e("@@current Fragment ", currentFragment.getTag());
         }
     }

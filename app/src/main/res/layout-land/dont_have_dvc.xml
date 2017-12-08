@@ -7,7 +7,7 @@
     android:layout_marginRight="@dimen/_8sdp"
     tools:context="com.netcommlabs.greencontroller.activities.DontHaveDvc">
 
-    <LinearLayout
+   <!-- <LinearLayout
         android:id="@+id/llScrnHeader"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
@@ -24,7 +24,7 @@
             android:layout_marginLeft="@dimen/_5sdp"
             android:text="My Devices"
             android:textSize="@dimen/header_title_size" />
-    </LinearLayout>
+    </LinearLayout>-->
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -62,7 +62,7 @@ public class FragAddAddress extends Fragment {
     }
 
     private void initBase(View view) {
-        llScrnHeader = view.findViewById(R.id.llScrnHeader);
+//        llScrnHeader = view.findViewById(R.id.llScrnHeader);
         et_flat_num = view.findViewById(R.id.et_flat_num);
         et_street_area = view.findViewById(R.id.et_street_area);
         et_city = view.findViewById(R.id.et_city);
@@ -77,14 +77,14 @@ public class FragAddAddress extends Fragment {
     }
 
     private void initListeners() {
-        llScrnHeader.setOnClickListener(new View.OnClickListener() {
+  /*      llScrnHeader.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               /* Intent intentAddWtrngProfile = new Intent(mContext, ConnectedQRAct.class);
-                mContext.startActivity(intentAddWtrngProfile);*/
+               *//* Intent intentAddWtrngProfile = new Intent(mContext, ConnectedQRAct.class);
+                mContext.startActivity(intentAddWtrngProfile);*//*
                 mContext.finish();
             }
-        });
+        });*/
 
         et_flat_num.setOnTouchListener(new View.OnTouchListener() {
             @Override

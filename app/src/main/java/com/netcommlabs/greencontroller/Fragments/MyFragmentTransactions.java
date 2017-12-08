@@ -31,7 +31,9 @@ public class MyFragmentTransactions {
         ft.commit();
 
 
+
         ((MainActivity)context).toolbar_title.setText(tag);
+        ((MainActivity)context).desc_txt.setText("");
 
     }
 

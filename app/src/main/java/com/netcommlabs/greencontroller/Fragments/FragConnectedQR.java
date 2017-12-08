@@ -76,16 +76,20 @@ public class FragConnectedQR extends Fragment {
         device_name = bundle.getString(EXTRA_NAME);
         dvc_mac_address = bundle.getString(EXTRA_ID);
 
-        llScrnHeader = view.findViewById(R.id.llScrnHeader);
+//        llScrnHeader = view.findViewById(R.id.llScrnHeader);
         llDeviceEditConncted = view.findViewById(R.id.llDeviceEditConncted);
         llAddDeviceAddressConctd = view.findViewById(R.id.llAddDeviceAddressConctd);
 
+/*
         tvTitleConctnt = view.findViewById(R.id.tvTitleConctnt);
+*/
+        tvTitleConctnt =mContext.toolbar_title;
         tvDvcName = view.findViewById(R.id.tvDvcName);
         ivEditDvcName = view.findViewById(R.id.ivEditDvcName);
         ivSaveDvcName = view.findViewById(R.id.ivSaveDvcName);
         etEditDvcName = view.findViewById(R.id.etEditDvcName);
         etQRManually = view.findViewById(R.id.etQRManually);
+
         tvTitleConctnt.setText(device_name + " Connected");
         tvDvcName.setText(device_name);
         tvScanQREvent = view.findViewById(R.id.tvScanQREvent);
@@ -95,14 +99,14 @@ public class FragConnectedQR extends Fragment {
     }
 
     private void initListeners() {
-        llScrnHeader.setOnClickListener(new View.OnClickListener() {
+     /*   llScrnHeader.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intentAddWtrngProfile = new Intent(mContext, AvailableDevices.class);
                 mContext.startActivity(intentAddWtrngProfile);
                 mContext.finish();
             }
-        });
+        });*/
 
         ivEditDvcName.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -169,8 +173,8 @@ public class FragConnectedQR extends Fragment {
                 //zxingQRInitiateCamera();
 
                 //Adding Fragment(FragAvailableDevices)
-                MyFragmentTransactions.replaceFragment(mContext, new FragScanQRCode(), Constant.AVAILABLE_DEVICES, mContext.frm_lyt_container_int, true);
-
+//                MyFragmentTransactions.replaceFragment(mContext, new FragScanQRCode(), Constant.AVAILABLE_DEVICES, mContext.frm_lyt_container_int, true);
+                Toast.makeText(mContext, "In Progress", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -222,7 +226,7 @@ public class FragConnectedQR extends Fragment {
                 databaseHandler.addBLEDevice(modalBleDevice);
 
                 //Adding Fragment(FragAvailableDevices)
-                MyFragmentTransactions.replaceFragment(mContext, new FragMyDevices(), Constant.DEVICE_MAP, mContext.frm_lyt_container_int, true);
+                MyFragmentTransactions.replaceFragment(mContext, new FragMyDevices(), Constant.DEVICE_MAP, mContext.frm_lyt_container_int, false);
 
                 //Toast.makeText(mContext, "Count " + databaseHandler.getBLEDvcCount(), Toast.LENGTH_SHORT).show();
                /* Intent intentAddWtrngProfile = new Intent(mContext, DeviceActivity.class);
@@ -239,6 +243,8 @@ public class FragConnectedQR extends Fragment {
         if (requestCode == 101 && resultCode == Activity.RESULT_OK) {
             if (data.getSerializableExtra("mdlAddressLocation") != null) {
                 mdlLocationAddress = (MdlLocationAddress) data.getSerializableExtra("mdlAddressLocation");
+                Toast.makeText(mContext, "Address Saved", Toast.LENGTH_SHORT).show();
+
             } else {
                 Toast.makeText(mContext, "No data from address", Toast.LENGTH_SHORT).show();
 

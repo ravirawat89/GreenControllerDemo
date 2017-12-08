@@ -25,7 +25,7 @@ public class ConnectedQRAct extends AppCompatActivity {
     private static final int REQUEST_CODE_QR = 2;
     private ConnectedQRAct mContext;
     private LinearLayout llScrnHeader, llDeviceEditConncted, llAddDeviceAddressConctd;
-    private TextView tvScanQREvent, tvNextConctdEvent, tvDvcName, tvTitleConctnt;
+    private TextView tvScanQREvent, tvNextConctdEvent, tvDvcName/*, tvTitleConctnt*/;
     private DatabaseHandler databaseHandler;
     private ImageView ivEditDvcName, ivSaveDvcName;
     private EditText etEditDvcName, etQRManually;
@@ -68,13 +68,13 @@ public class ConnectedQRAct extends AppCompatActivity {
         llDeviceEditConncted = (LinearLayout) findViewById(R.id.llDeviceEditConncted);
         llAddDeviceAddressConctd = (LinearLayout) findViewById(R.id.llAddDeviceAddressConctd);
 
-        tvTitleConctnt=findViewById(R.id.tvTitleConctnt);
+   /*     tvTitleConctnt=findViewById(R.id.tvTitleConctnt);*/
         tvDvcName = findViewById(R.id.tvDvcName);
         ivEditDvcName = findViewById(R.id.ivEditDvcName);
         ivSaveDvcName = findViewById(R.id.ivSaveDvcName);
         etEditDvcName = findViewById(R.id.etEditDvcName);
         etQRManually = findViewById(R.id.etQRManually);
-        tvTitleConctnt.setText(device_name+" Connected");
+       /* tvTitleConctnt.setText(device_name+" Connected");*/
         tvDvcName.setText(device_name);
         tvScanQREvent = findViewById(R.id.tvScanQREvent);
         tvNextConctdEvent = findViewById(R.id.tvNextConctdEvent);

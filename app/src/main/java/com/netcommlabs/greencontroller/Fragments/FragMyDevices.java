@@ -55,7 +55,7 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
     private LinearLayout ll_3st;
     private LinearLayout ll_4st;
     private LinearLayout ll_5st;
-    private LinearLayout ll_add_device, llScrnHeader;
+    private LinearLayout ll_add_device/*, llScrnHeader*/;
 
 
     private RelativeLayout rl_1st;
@@ -74,7 +74,7 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
     private ImageView iv_next;
     private DatabaseHandler databaseHandler;
     private int valvesNum;
-    private TextView tvDeviceNameDyn, tvValveCount, tvShowAddressTop;
+    private TextView tvDeviceNameDyn, tvValveCount, tvShowAddressTop,toolbar_tile;
     private MdlLocationAddress mdlLocationAddress;
     private String addressComplete;
     private List<String> listLocAddressType;
@@ -97,7 +97,7 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
     private void initBase(View view) {
         recyclerView = view.findViewById(R.id.recycler_view);
         ll_add_new = view.findViewById(R.id.ll_add_new);
-        llScrnHeader = view.findViewById(R.id.llScrnHeader);
+//        llScrnHeader = view.findViewById(R.id.llScrnHeader);
 
         ll_1st = view.findViewById(R.id.ll_1st);
         ll_2st = view.findViewById(R.id.ll_2st);
@@ -120,9 +120,12 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
 
         tvDeviceNameDyn = view.findViewById(R.id.tvDeviceNameDyn);
         tvValveCount = view.findViewById(R.id.tvValveCount);
-        tvShowAddressTop = view.findViewById(R.id.tvShowAddressTop);
+//        tvShowAddressTop = view.findViewById(R.id.tvShowAddressTop);
+        tvShowAddressTop =mContext.desc_txt;
+        toolbar_tile =mContext.toolbar_title;
+        toolbar_tile.setText("My Devices");
 
-        llScrnHeader.setOnClickListener(this);
+//        llScrnHeader.setOnClickListener(this);
         ll_add_new.setOnClickListener(this);
 
         ll_2st.setOnClickListener(this);
@@ -223,11 +226,11 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
                /* Intent intent2 = new Intent(mContext, AvailableDevices.class);
                 startActivity(intent2);*/
                 break;
-            case R.id.llScrnHeader:
-               /* Intent intent1 = new Intent(mContext, DashboardPebbleHome.class);
+         /*   case R.id.llScrnHeader:
+               *//* Intent intent1 = new Intent(mContext, DashboardPebbleHome.class);
                 mContext.startActivity(intent1);
-                mContext.finish();*/
-                break;
+                mContext.finish();*//*
+                break;*/
 
         }
     }
