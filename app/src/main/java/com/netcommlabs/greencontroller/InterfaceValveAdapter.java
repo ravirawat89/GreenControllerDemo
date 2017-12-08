@@ -2,6 +2,7 @@ package com.netcommlabs.greencontroller;
 
 import com.netcommlabs.greencontroller.model.DataTransferModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,6 +11,6 @@ import java.util.List;
 
 public interface InterfaceValveAdapter {
 
-    void clickPassDataToAct(List<DataTransferModel> listValveDataSingle,String clickedValveName);
+    void clickPassDataToAct(ArrayList<DataTransferModel> listValveDataSingle, String clickedValveName,int position);
     void onRecyclerItemClickedNameAdress(String name,String address);
 }

@@ -1,10 +1,12 @@
 package com.netcommlabs.greencontroller.model;
 
+import java.io.Serializable;
+
 /**
  * Created by Netcomm on 11/20/2017.
  */
 
-public class DataTransferModel {
+public class DataTransferModel implements Serializable{
 
     private  int index;
     private  int dayOfTheWeek;

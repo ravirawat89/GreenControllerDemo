@@ -136,7 +136,7 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
         device_name = listModalBleDevice.get(0).getName();
         device_address = listModalBleDevice.get(0).getDvcMacAddrs();
         mdlLocationAddress = listModalBleDevice.get(0).getMdlLocationAddress();
-        addressComplete = mdlLocationAddress.getFlat_num() + "," + mdlLocationAddress.getLocality_landmark() + "," + mdlLocationAddress.getStreetName() + "," + mdlLocationAddress.getPincode() + "," + mdlLocationAddress.getCity() + "," + mdlLocationAddress.getState();
+        addressComplete = mdlLocationAddress.getFlat_num() + ", "+ mdlLocationAddress.getStreetName() + ", " + mdlLocationAddress.getLocality_landmark() + ", "+ mdlLocationAddress.getPincode() + ", " + mdlLocationAddress.getCity() + ", " + mdlLocationAddress.getState();
         tvShowAddressTop.setText(addressComplete);
         listLocAddressType = new ArrayList<>();
         listLocAddressType.add(mdlLocationAddress.getAddress_name());
@@ -290,7 +290,7 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
 
                     //((Button) findViewById(R.id.connectButton)).setEnabled(false);
                     //we're connected
-                    // showMsg("CONNECTED");
+                    showMsg("GATT_CONNECTED");
                     // enable the LOW/MID/HIGH alert level selection buttons
                    /* ((Button)findViewById(R.id.lowButton)).setEnabled(true);
                     ((Button) findViewById(R.id.midButton)).setEnabled(true);
@@ -302,7 +302,7 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
                 case BleAdapterService.GATT_DISCONNECT:
                     //((Button) findViewById(R.id.connectButton)).setEnabled(true);
                     //we're disconnected
-                    showMsg("DISCONNECTED");
+                    showMsg("GATT_DISCONNECT");
                    /* // hide the rssi distance colored rectangle
                     ((LinearLayout) findViewById(R.id.rectangle)).setVisibility(View.INVISIBLE);
                     // disable the LOW/MID/HIGH alert level selection buttons

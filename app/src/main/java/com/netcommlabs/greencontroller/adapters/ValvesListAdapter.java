@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.netcommlabs.greencontroller.Fragments.FragDeviceDetails;
 import com.netcommlabs.greencontroller.InterfaceValveAdapter;
 import com.netcommlabs.greencontroller.R;
 import com.netcommlabs.greencontroller.activities.DeviceDetails;
@@ -27,16 +28,20 @@ import java.util.List;
 public class ValvesListAdapter extends RecyclerView.Adapter<ValvesListAdapter.MyViewHolder> {
 
     private List<String> listValves;
-    private DeviceDetails mContext;
+    private Context mContext;
     private List<View> listViewsCollection;
     private DatabaseHandler databaseHandler;
     private String dvcMacAdd;
-    private List<DataTransferModel> listValveDataSingle;
+    private ArrayList<DataTransferModel> listValveDataSingle;
+    private FragDeviceDetails fragDeviceDetails;
+    private int clickedPosition;
 
-    public ValvesListAdapter(DeviceDetails mContext, List<String> listValves, String dvcMacAdd) {
+    public ValvesListAdapter(Context mContext, FragDeviceDetails fragDeviceDetails, ArrayList<String> listValves, String dvcMacAdd, int clickedPosition) {
         this.mContext = mContext;
         this.listValves = listValves;
         this.dvcMacAdd = dvcMacAdd;
+        this.fragDeviceDetails = fragDeviceDetails;
+        this.clickedPosition=clickedPosition;
         listViewsCollection = new ArrayList<>();
         databaseHandler = new DatabaseHandler(mContext);
 
@@ -79,7 +84,7 @@ public class ValvesListAdapter extends RecyclerView.Adapter<ValvesListAdapter.My
 
                     //DB work for valve selection
                     listValveDataSingle = databaseHandler.getValveDataWithMACValveName(dvcMacAdd, clickedValveName);
-                    mContext.clickPassDataToAct(listValveDataSingle,clickedValveName);
+                    fragDeviceDetails.clickPassDataToAct(listValveDataSingle, clickedValveName,pos);
                 }
             });
 

@@ -185,7 +185,7 @@ public class AvailableDevices extends AppCompatActivity implements InterfaceValv
                 if (!listAvailbleDvcs.contains(availbleDvc)) {
                     listAvailbleDvcs.add(availbleDvc);
 
-                    reViListAvailDvc.setAdapter(new AdptrAvailableDVCs(mContext, listAvailbleDvcs, mBluetoothAdapter));
+                    //reViListAvailDvc.setAdapter(new AdptrAvailableDVCs(mContext, listAvailbleDvcs, mBluetoothAdapter));
                 }
 
             }
@@ -244,7 +244,7 @@ public class AvailableDevices extends AppCompatActivity implements InterfaceValv
     }
 
     @Override
-    public void clickPassDataToAct(List<DataTransferModel> listValveDataSingle, String clickedValveName) {
+    public void clickPassDataToAct(ArrayList<DataTransferModel> listValveDataSingle, String clickedValveName,int pos) {
 
     }
 

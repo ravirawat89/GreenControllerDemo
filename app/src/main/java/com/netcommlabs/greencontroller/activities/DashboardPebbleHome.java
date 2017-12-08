@@ -25,7 +25,7 @@ import java.util.List;
 
 public class DashboardPebbleHome extends AppCompatActivity {
 
-    private DashboardPebbleHome mContext;
+    private MainActivity mContext;
     private TextView tvPebbleAsset;
     private LinearLayout llMyDevices, llStatistics, llHamburgerIcon;
     private DrawerLayout nav_drawer_layout;
@@ -43,7 +43,7 @@ public class DashboardPebbleHome extends AppCompatActivity {
     }
 
     private void initBase() {
-        mContext = this;
+        //mContext = this;
 
         tvPebbleAsset = (TextView) findViewById(R.id.tvPebbleAsset);
         Typeface tvPebbleFont = Typeface.createFromAsset(getAssets(), "fonts/CaviarDreams_Bold.ttf");
@@ -71,7 +71,7 @@ public class DashboardPebbleHome extends AppCompatActivity {
             ));
         }
 
-        nav_revi_slider.setAdapter(new NavListAdapter(listNavDrawerRowDat));
+        nav_revi_slider.setAdapter(new NavListAdapter(mContext,listNavDrawerRowDat,nav_drawer_layout));
 
     }
 

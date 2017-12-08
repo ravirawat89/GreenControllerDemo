@@ -3,6 +3,7 @@ package com.netcommlabs.greencontroller.activities;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -29,7 +30,7 @@ public class AddAddressActivity extends AppCompatActivity {
     private LinearLayout llScrnHeader;
     private EditText et_flat_num, et_street_area, et_city, et_locality_landmark, et_pincode, et_state;
     private String et_other_addrs_name_input;
-    private String radio_address_name="";
+    private String radio_address_name = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +80,60 @@ public class AddAddressActivity extends AppCompatActivity {
             }
         });
 
+        et_flat_num.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                et_flat_num.setCursorVisible(true);
+                et_flat_num.setFocusableInTouchMode(true);
+                return false;
+            }
+        });
+
+        et_locality_landmark.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                et_locality_landmark.setCursorVisible(true);
+                et_locality_landmark.setFocusableInTouchMode(true);
+                return false;
+            }
+        });
+
+        et_city.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                et_city.setCursorVisible(true);
+                et_city.setFocusableInTouchMode(true);
+                return false;
+            }
+        });
+
+        et_pincode.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                et_pincode.setCursorVisible(true);
+                et_pincode.setFocusableInTouchMode(true);
+                return false;
+            }
+        });
+
+        et_state.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                et_state.setCursorVisible(true);
+                et_state.setFocusableInTouchMode(true);
+                return false;
+            }
+        });
+
+        et_street_area.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                et_street_area.setCursorVisible(true);
+                et_street_area.setFocusableInTouchMode(true);
+                return false;
+            }
+        });
+
         raGrAddressType.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -121,16 +176,16 @@ public class AddAddressActivity extends AppCompatActivity {
                 String et_pincode_input = et_pincode.getText().toString();
                 String et_city_input = et_city.getText().toString();
                 String et_state_input = et_state.getText().toString();
-                if (etOtherAddName.getVisibility()==View.VISIBLE){
-                    radio_address_name =etOtherAddName.getText().toString();
+                if (etOtherAddName.getVisibility() == View.VISIBLE) {
+                    radio_address_name = etOtherAddName.getText().toString();
                 }
                 if (radio_address_name.isEmpty()) {
                     Toast.makeText(mContext, "Please provide address name", Toast.LENGTH_SHORT).show();
                     return;
-                }else {
+                }/*else {
                     Toast.makeText(mContext, ""+radio_address_name, Toast.LENGTH_SHORT).show();
 
-                }
+                }*/
 
                 MdlLocationAddress mdlLocationAddress = new MdlLocationAddress(et_flat_num_input, et_localty_land_input, et_street_area_input, et_pincode_input, et_city_input, et_state_input, radio_address_name);
                 intent.putExtra("Data", mdlLocationAddress);

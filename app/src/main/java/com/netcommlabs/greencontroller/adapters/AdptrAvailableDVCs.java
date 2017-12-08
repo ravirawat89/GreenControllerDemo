@@ -2,6 +2,7 @@ package com.netcommlabs.greencontroller.adapters;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.netcommlabs.greencontroller.Fragments.FragAvailableDevices;
 import com.netcommlabs.greencontroller.R;
 import com.netcommlabs.greencontroller.activities.AddEditSessionPlan;
 import com.netcommlabs.greencontroller.activities.AvailableDevices;
@@ -20,15 +22,17 @@ import java.util.List;
 
 public class AdptrAvailableDVCs extends RecyclerView.Adapter<AdptrAvailableDVCs.MyViewHolder> {
 
-    AvailableDevices mContext;
+    Context mContext;
     List<BluetoothDevice> listAvailbleDvcs;
     BluetoothAdapter mBluetoothAdapter;
+    FragAvailableDevices fragAvailableDevices;
 
 
-    public AdptrAvailableDVCs(AvailableDevices mContext, List<BluetoothDevice> listAvailbleDvcs, BluetoothAdapter mBluetoothAdapter) {
+    public AdptrAvailableDVCs(Context mContext, FragAvailableDevices fragAvailableDevices, List<BluetoothDevice> listAvailbleDvcs, BluetoothAdapter mBluetoothAdapter) {
         this.mContext = mContext;
         this.listAvailbleDvcs = listAvailbleDvcs;
         this.mBluetoothAdapter = mBluetoothAdapter;
+        this.fragAvailableDevices=fragAvailableDevices;
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -51,7 +55,7 @@ public class AdptrAvailableDVCs extends RecyclerView.Adapter<AdptrAvailableDVCs.
                     int clickedPosi = getAdapterPosition();
                     String dvcName = listAvailbleDvcs.get(clickedPosi).getName();
                     String dvcAddress = listAvailbleDvcs.get(clickedPosi).getAddress();
-                    mContext.onRecyclerItemClickedNameAdress(dvcName,dvcAddress);
+                    fragAvailableDevices.onRecyclerItemClickedNameAdress(dvcName,dvcAddress);
                    /* Toast.makeText(mContext, "Clicked " + dvcName + "\n" + dvcAddress, Toast.LENGTH_LONG).show();
 
                     *//*Intent intentAddWtrngProfile = new Intent(mContext, ConnectedQRAct.class);

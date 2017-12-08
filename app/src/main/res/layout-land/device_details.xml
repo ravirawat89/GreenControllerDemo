@@ -182,7 +182,7 @@
                         </LinearLayout>
 
                         <LinearLayout
-                            android:id="@+id/llStartStopValve"
+                            android:id="@+id/llStopValve"
                             android:layout_width="@dimen/_80sdp"
                             android:layout_height="@dimen/_35sdp"
                             android:layout_marginTop="@dimen/_2sdp"

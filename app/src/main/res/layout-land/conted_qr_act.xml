@@ -69,6 +69,7 @@
                 android:hint="Enter device name"
                 android:paddingLeft="@dimen/_7sdp"
                 android:textSize="@dimen/_12sdp"
+                android:imeOptions="flagNoExtractUi"
                 android:background="@drawable/rect_border_light_line" />
 
             <ImageView
@@ -171,7 +172,8 @@
                 android:padding="@dimen/_10sdp"
                 android:cursorVisible="false"
                 android:focusable="false"
-                android:textSize="@dimen/hint_size" />
+                android:textSize="@dimen/hint_size"
+                android:imeOptions="flagNoExtractUi"/>
 
         </LinearLayout>
 

@@ -70,7 +70,9 @@
                         android:hint="Flat No. / Building Name"
                         android:inputType="textPersonName"
                         android:paddingLeft="@dimen/_5sdp"
-                        android:textSize="@dimen/_13sdp" />
+                        android:textSize="@dimen/_13sdp"
+                        android:text="B-16"
+                        android:imeOptions="flagNoExtractUi"/>
 
                 </LinearLayout>
 
@@ -99,7 +101,9 @@
                         android:gravity="center_vertical"
                         android:hint="Locality / Landmark"
                         android:paddingLeft="@dimen/_5sdp"
-                        android:textSize="@dimen/_13sdp" />
+                        android:textSize="@dimen/_13sdp"
+                        android:text="Near Metro 16"
+                        android:imeOptions="flagNoExtractUi"/>
 
                 </LinearLayout>
 
@@ -137,7 +141,9 @@
                         android:hint="Street / Area"
                         android:inputType="textPersonName"
                         android:paddingLeft="@dimen/_5sdp"
-                        android:textSize="@dimen/_13sdp" />
+                        android:textSize="@dimen/_13sdp"
+                        android:text="Auto Junction"
+                        android:imeOptions="flagNoExtractUi"/>
 
                 </LinearLayout>
 
@@ -166,7 +172,9 @@
                         android:hint="Pincode"
                         android:inputType="number"
                         android:paddingLeft="@dimen/_5sdp"
-                        android:textSize="@dimen/_13sdp" />
+                        android:textSize="@dimen/_13sdp"
+                        android:text="201301"
+                        android:imeOptions="flagNoExtractUi"/>
 
                 </LinearLayout>
 
@@ -204,7 +212,9 @@
                         android:hint="City"
                         android:inputType="textPersonName"
                         android:paddingLeft="@dimen/_5sdp"
-                        android:textSize="@dimen/_13sdp" />
+                        android:textSize="@dimen/_13sdp"
+                        android:text="Noida"
+                        android:imeOptions="flagNoExtractUi"/>
 
                 </LinearLayout>
 
@@ -233,7 +243,9 @@
                         android:hint="State"
                         android:inputType="textPersonName"
                         android:paddingLeft="@dimen/_5sdp"
-                        android:textSize="@dimen/_13sdp" />
+                        android:textSize="@dimen/_13sdp"
+                        android:text="UP"
+                        android:imeOptions="flagNoExtractUi"/>
 
                 </LinearLayout>
 

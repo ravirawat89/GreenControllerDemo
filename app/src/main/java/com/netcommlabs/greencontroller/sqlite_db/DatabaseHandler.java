@@ -189,9 +189,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return listMdlBLEDvcs;
     }
 
-    public List<String> getAllValvesNameWithMAC(String dvcMacAdd) {
+    public ArrayList<String> getAllValvesNameWithMAC(String dvcMacAdd) {
         SQLiteDatabase db = this.getReadableDatabase();
-        List<String> listWithOnlyValves = new ArrayList<>();
+        ArrayList<String> listWithOnlyValves = new ArrayList<>();
 
         Cursor cursor = db.query(TABLE_BLE_VALVE, new String[]{KEY_VALVE_NAME}, KEY_DVC_MAC + "=?",
                 new String[]{dvcMacAdd}, null, null, null, null);
@@ -298,9 +298,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return countReady;
     }
 
-    public List<DataTransferModel> getValveDataWithMACValveName(String dvcMacAdd, String clickedValveName) {
+    public ArrayList<DataTransferModel> getValveDataWithMACValveName(String dvcMacAdd, String clickedValveName) {
         SQLiteDatabase db = this.getReadableDatabase();
-        List<DataTransferModel> listValveDataSingle = new ArrayList<>();
+        ArrayList<DataTransferModel> listValveDataSingle = new ArrayList<>();
 
         Cursor cursor = db.query(TABLE_BLE_VALVE, new String[]{KEY_VALVE_DATA}, KEY_DVC_MAC + " = ? AND " + KEY_VALVE_NAME + " = ? ",
                 new String[]{dvcMacAdd, clickedValveName}, null, null, null, null);
@@ -314,6 +314,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return listValveDataSingle;
     }
 
+    /*public int deleteSesnPlnWithMacValveName(String dvcMacAdd, String clickedValveName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int intDelete=db.delete(TABLE_BLE_VALVE, KEY_DVC_MAC + " = ? AND " + KEY_VALVE_NAME + " = ? ",
+                new String[]{dvcMacAdd, clickedValveName});
+        db.close();
+        return intDelete;
+    }*/
 }
 
 /*public class DatabaseHandler extends SQLiteOpenHelper {

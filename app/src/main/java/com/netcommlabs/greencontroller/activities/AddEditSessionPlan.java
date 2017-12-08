@@ -57,32 +57,34 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
     private int timePointsCounter, sunTimePointsCount, monTimePointsCount, tueTimePointsCount, wedTimePointsCount, thuTimePointsCount, friTimePointsCount, satTimePointsCount, etDurWtrInputInt, etQuantWtrInputInt, etPotsInputInt, inputSunInt, inputMonInt, inputTueInt, inputWedInt, inputThuInt, inputFriInt, inputSatInt;
     private HashMap<Integer, List<Integer>> mapDayTimings;
     private View viewSelectedRound;
-    private List<DataTransferModel> byteDataList;
-    String etGetInputTimePoints = "00:00";
+    private ArrayList<DataTransferModel> listSingleValveData;
+    String etInputTimePointStrn = "00:00";
     private ArrayList<Integer> listTimePntsSun, listTimePntsMon, listTimePntsTue, listTimePntsWed, listTimePntsThu, listTimePntsFri, listTimePntsSat;
-    private int etGetInputTimePointsInt;
+    private int etInputTimePointInt;
     private String etInputDischrgPnts, etInputDursnPlan, etQuantPlan = "";
-    private Dialog dialogShowInfo;
+    private Dialog dialogChooseTmPnt;
     private EditText etInputTimePoint;
     private int etInputDursnPlanInt = 0;
     private int etQuantPlanInt = 0;
     private int etInputDischrgPntsInt = 0;
-    private TextView tvORText, tvTitleTop;
+    private TextView tvORText, tvTitleTop, tvClearEditData;
 
 
     //Mr. Vijay
     public static final String EXTRA_NAME = "name";
     public static final String EXTRA_ID = "id";
-    //public static final String EXTRA_DVC_MAC_DB = "dvc_mac";
     public static final String EXTRA_VALVE_NAME_DB = "valveNameSingle";
+    public static final String EXTRA_VALVE_EDITABLE_DATA = "valveEditableData";
+    public static final String EXTRA_OPERATION_TYPE = "oprtnType";
     private BleAdapterService bluetooth_le_adapter;
 
     private String device_name;
-    private String device_address, clickedValveName;
+    private String device_address, clickedValveName, operationType;
     private boolean back_requested = false;
     private int alert_level;
     private static int dataSendingIndex = 0;
     private static boolean oldTimePointsErased = FALSE;
+    private int plusVisibleOf;
 
 
     @Override
@@ -97,10 +99,10 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
 
     private void initBase() {
         mContext = this;
+        findViews();
 
         mapDayTimings = new HashMap<>();
-        byteDataList = new ArrayList<>();
-
+        listSingleValveData = new ArrayList<>();
         listTimePntsSun = new ArrayList<Integer>();
         listTimePntsMon = new ArrayList<Integer>();
         listTimePntsTue = new ArrayList<Integer>();
@@ -109,7 +111,30 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
         listTimePntsFri = new ArrayList<Integer>();
         listTimePntsSat = new ArrayList<Integer>();
 
-        llScrnHeader =findViewById(R.id.llScrnHeader);
+        final Intent intent = getIntent();
+        device_name = intent.getStringExtra(EXTRA_NAME);
+        device_address = intent.getStringExtra(EXTRA_ID);
+        clickedValveName = intent.getStringExtra(EXTRA_VALVE_NAME_DB);
+        operationType = intent.getStringExtra(AddEditSessionPlan.EXTRA_OPERATION_TYPE);
+        if (operationType.equals("Edit")) {
+            listSingleValveData = (ArrayList<DataTransferModel>) intent.getSerializableExtra(AddEditSessionPlan.EXTRA_VALVE_EDITABLE_DATA);
+            setEditableValveDataToUI();
+        }
+        tvTitleTop.setText(operationType + " Session Plan" + "(" + clickedValveName + ")");
+
+        Intent gattServiceIntent = new Intent(getApplicationContext(), BleAdapterService.class);
+        bindService(gattServiceIntent, service_connection, BIND_AUTO_CREATE);
+
+
+       /* //Getting sent intent
+        dvcName = getIntent().getExtras().getString(EXTRA_NAME);
+        dvcMacAdd = getIntent().getExtras().getString(EXTRA_DVC_MAC);
+        clickedValveName = getIntent().getExtras().getString(EXTRA_DVC_MAC);
+        //dvcValveCount = getIntent().getExtras().getInt(EXTRA_DVC_VALVE_COUNT);*/
+    }
+
+    private void findViews() {
+        llScrnHeader = findViewById(R.id.llScrnHeader);
 
         etDischargePoints = (EditText) findViewById(R.id.etDischargePoints);
         etDurationPlan = (EditText) findViewById(R.id.etDurationPlan);
@@ -122,6 +147,7 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
         tvThuEvent = (TextView) findViewById(R.id.tvThuEvent);
         tvFriEvent = (TextView) findViewById(R.id.tvFriEvent);
         tvSatEvent = (TextView) findViewById(R.id.tvSatEvent);
+        tvClearEditData = findViewById(R.id.tvClearEditData);
 
         tvSunFirst = (TextView) findViewById(R.id.tvSunFirst);
         tvSunSecond = (TextView) findViewById(R.id.tvSunSecond);
@@ -169,22 +195,6 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
         tvTitleTop = findViewById(R.id.tvTitleTop);
         tvORText = findViewById(R.id.tvORText);
         llQuantOfWater = findViewById(R.id.llQuantOfWater);
-
-        final Intent intent = getIntent();
-        device_name = intent.getStringExtra(EXTRA_NAME);
-        device_address = intent.getStringExtra(EXTRA_ID);
-        clickedValveName = intent.getStringExtra(EXTRA_VALVE_NAME_DB);
-        tvTitleTop.setText("Add Session Plan" + "(" + clickedValveName + ")");
-
-        Intent gattServiceIntent = new Intent(this, BleAdapterService.class);
-        bindService(gattServiceIntent, service_connection, BIND_AUTO_CREATE);
-
-
-       /* //Getting sent intent
-        dvcName = getIntent().getExtras().getString(EXTRA_NAME);
-        dvcMacAdd = getIntent().getExtras().getString(EXTRA_DVC_MAC);
-        clickedValveName = getIntent().getExtras().getString(EXTRA_DVC_MAC);
-        //dvcValveCount = getIntent().getExtras().getInt(EXTRA_DVC_VALVE_COUNT);*/
     }
 
     private void initListeners() {
@@ -335,6 +345,14 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
             }
         });
 
+        ivSunAdd.setOnClickListener(this);
+        ivMonAdd.setOnClickListener(this);
+        ivTueAdd.setOnClickListener(this);
+        ivWedAdd.setOnClickListener(this);
+        ivThuAdd.setOnClickListener(this);
+        ivFriAdd.setOnClickListener(this);
+        ivSatAdd.setOnClickListener(this);
+
         tvSunFirst.setOnClickListener(this);
         tvSunSecond.setOnClickListener(this);
         tvSunThird.setOnClickListener(this);
@@ -363,15 +381,6 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
         tvSatSecond.setOnClickListener(this);
         tvSatThird.setOnClickListener(this);
         tvSatFourth.setOnClickListener(this);
-
-        ivSunAdd.setOnClickListener(this);
-        ivMonAdd.setOnClickListener(this);
-        ivTueAdd.setOnClickListener(this);
-        ivWedAdd.setOnClickListener(this);
-        ivThuAdd.setOnClickListener(this);
-        ivFriAdd.setOnClickListener(this);
-        ivSatAdd.setOnClickListener(this);
-
 
         tvLoadSesnPlan.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -404,7 +413,7 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
                     Toast.makeText(mContext, "Please enter Quantity", Toast.LENGTH_SHORT).show();
                     return;
                 }*/
-                if (byteDataList.size() == 0) {
+                if (listSingleValveData.size() == 0) {
                     Toast.makeText(mContext, "Please select at least one day in week", Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -435,6 +444,9 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
                     mapDayTimings.put(7, listTimePntsSat);
                 }*/
                 //Toast.makeText(mContext, "Load check", Toast.LENGTH_SHORT).show();
+
+                //ArrayList list=listSingleValveData;
+
                 eraseOldTimePoints(); //This is automatically followed by loading new time points
 
 
@@ -442,6 +454,459 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
         });
     }
 
+    private void setEditableValveDataToUI() {
+        tvClearEditData.setVisibility(View.VISIBLE);
+        tvClearEditData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialogConfirmAction();
+            }
+        });
+
+        DataTransferModel dataTransferModel;
+        listTimePntsSun = new ArrayList<>();
+        listTimePntsMon = new ArrayList<>();
+        listTimePntsTue = new ArrayList<>();
+        listTimePntsWed = new ArrayList<>();
+        listTimePntsThu = new ArrayList<>();
+        listTimePntsFri = new ArrayList<>();
+        listTimePntsSat = new ArrayList<>();
+        int dischargePnts = 0, duration = 0, quantity = 0;
+        String timePntsUserFriendly = "";
+
+        for (int i = 0; i < listSingleValveData.size(); i++) {
+            dataTransferModel = listSingleValveData.get(i);
+
+            dischargePnts = dataTransferModel.getDischarge();
+            duration = dataTransferModel.getDuration();
+            quantity = dataTransferModel.getQty();
+
+            //For Sunday
+            if (dataTransferModel.getDayOfTheWeek() == 1) {
+                listTimePntsSun.add(dataTransferModel.getHours());
+            }
+            if (dataTransferModel.getDayOfTheWeek() == 2) {
+                listTimePntsMon.add(dataTransferModel.getHours());
+            }
+            if (dataTransferModel.getDayOfTheWeek() == 3) {
+                listTimePntsTue.add(dataTransferModel.getHours());
+            }
+            if (dataTransferModel.getDayOfTheWeek() == 4) {
+                listTimePntsWed.add(dataTransferModel.getHours());
+            }
+            if (dataTransferModel.getDayOfTheWeek() == 5) {
+                listTimePntsThu.add(dataTransferModel.getHours());
+            }
+            if (dataTransferModel.getDayOfTheWeek() == 6) {
+                listTimePntsFri.add(dataTransferModel.getHours());
+            }
+            if (dataTransferModel.getDayOfTheWeek() == 7) {
+                listTimePntsSat.add(dataTransferModel.getHours());
+            }
+
+        }
+
+        if (dischargePnts == 0) {
+            etDischargePoints.setText(dischargePnts + "");
+            etDurationPlan.setText(duration + "");
+            tvORText.setVisibility(View.GONE);
+            llQuantOfWater.setVisibility(View.GONE);
+        } else {
+            etDischargePoints.setText(dischargePnts + "");
+            etDurationPlan.setText(duration + "");
+            etQuantityPlan.setText(quantity + "");
+        }
+
+        if (listTimePntsSun.size() > 0) {
+            for (int i = 0; i < listTimePntsSun.size(); i++) {
+                if (tvSunFirst.getVisibility() != View.VISIBLE) {
+                    tvSunFirst.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsSun.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvSunFirst.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvSunSecond.getVisibility() != View.VISIBLE) {
+                    tvSunSecond.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsSun.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvSunSecond.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvSunThird.getVisibility() != View.VISIBLE) {
+                    tvSunThird.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsSun.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvSunThird.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvSunFourth.getVisibility() != View.VISIBLE) {
+                    tvSunFourth.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsSun.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvSunFourth.setText(timePntsUserFriendly);
+                    continue;
+                }
+            }
+        }
+
+        if (listTimePntsMon.size() > 0) {
+            for (int i = 0; i < listTimePntsMon.size(); i++) {
+                if (tvMonFirst.getVisibility() != View.VISIBLE) {
+                    tvMonFirst.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsMon.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvMonFirst.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvMonSecond.getVisibility() != View.VISIBLE) {
+                    tvMonSecond.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsMon.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvMonSecond.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvMonThird.getVisibility() != View.VISIBLE) {
+                    tvMonThird.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsMon.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvMonThird.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvMonFourth.getVisibility() != View.VISIBLE) {
+                    tvMonFourth.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsMon.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvMonFourth.setText(timePntsUserFriendly);
+                    continue;
+                }
+            }
+        }
+
+        if (listTimePntsTue.size() > 0) {
+            for (int i = 0; i < listTimePntsTue.size(); i++) {
+                if (tvTueFirst.getVisibility() != View.VISIBLE) {
+                    tvTueFirst.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsTue.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvTueFirst.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvTueSecond.getVisibility() != View.VISIBLE) {
+                    tvTueSecond.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsTue.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvTueSecond.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvTueThird.getVisibility() != View.VISIBLE) {
+                    tvTueThird.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsTue.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvTueThird.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvTueFourth.getVisibility() != View.VISIBLE) {
+                    tvTueFourth.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsTue.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvTueFourth.setText(timePntsUserFriendly);
+                    continue;
+                }
+            }
+        }
+
+        if (listTimePntsWed.size() > 0) {
+            for (int i = 0; i < listTimePntsWed.size(); i++) {
+                if (tvWedFirst.getVisibility() != View.VISIBLE) {
+                    tvWedFirst.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsWed.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvWedFirst.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvWedSecond.getVisibility() != View.VISIBLE) {
+                    tvWedSecond.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsWed.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvWedSecond.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvWedThird.getVisibility() != View.VISIBLE) {
+                    tvWedThird.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsWed.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvWedThird.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvWedFourth.getVisibility() != View.VISIBLE) {
+                    tvWedFourth.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsWed.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvWedFourth.setText(timePntsUserFriendly);
+                    continue;
+                }
+            }
+        }
+
+        if (listTimePntsThu.size() > 0) {
+            for (int i = 0; i < listTimePntsThu.size(); i++) {
+                if (tvThuFirst.getVisibility() != View.VISIBLE) {
+                    tvThuFirst.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsThu.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvThuFirst.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvThuSecond.getVisibility() != View.VISIBLE) {
+                    tvThuSecond.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsThu.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvThuSecond.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvThuThird.getVisibility() != View.VISIBLE) {
+                    tvThuThird.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsThu.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvThuThird.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvThuFourth.getVisibility() != View.VISIBLE) {
+                    tvThuFourth.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsThu.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvThuFourth.setText(timePntsUserFriendly);
+                    continue;
+                }
+            }
+        }
+
+        if (listTimePntsFri.size() > 0) {
+            for (int i = 0; i < listTimePntsFri.size(); i++) {
+                if (tvFriFirst.getVisibility() != View.VISIBLE) {
+                    tvFriFirst.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsFri.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvFriFirst.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvFriSecond.getVisibility() != View.VISIBLE) {
+                    tvFriSecond.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsFri.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvFriSecond.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvFriThird.getVisibility() != View.VISIBLE) {
+                    tvFriThird.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsFri.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvFriThird.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvFriFourth.getVisibility() != View.VISIBLE) {
+                    tvFriFourth.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsFri.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvFriFourth.setText(timePntsUserFriendly);
+                    continue;
+                }
+            }
+        }
+
+        if (listTimePntsSat.size() > 0) {
+            for (int i = 0; i < listTimePntsSat.size(); i++) {
+                if (tvSatFirst.getVisibility() != View.VISIBLE) {
+                    tvSatFirst.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsSat.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvSatFirst.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvSatSecond.getVisibility() != View.VISIBLE) {
+                    tvSatSecond.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsSat.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvSatSecond.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvSatThird.getVisibility() != View.VISIBLE) {
+                    tvSatThird.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsSat.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvSatThird.setText(timePntsUserFriendly);
+                    continue;
+                }
+                if (tvSatFourth.getVisibility() != View.VISIBLE) {
+                    tvSatFourth.setVisibility(View.VISIBLE);
+                    String timePntString = listTimePntsSat.get(i).toString();
+                    if (timePntString.length() == 1) {
+                        timePntsUserFriendly = "0" + timePntString + ":00";
+                    } else {
+                        timePntsUserFriendly = timePntString + ":00";
+                    }
+                    tvSatFourth.setText(timePntsUserFriendly);
+                    continue;
+                }
+            }
+        }
+
+
+    }
+
+    private void clearWholeDataFromUI() {
+        llQuantOfWater.setVisibility(View.VISIBLE);
+        etDischargePoints.setText("");
+        etDurationPlan.setText("");
+        etQuantityPlan.setText("");
+        tvClearEditData.setVisibility(View.GONE);
+
+        tvSunFirst.setVisibility(View.GONE);
+        tvSunSecond.setVisibility(View.GONE);
+        tvSunThird.setVisibility(View.GONE);
+        tvSunFourth.setVisibility(View.GONE);
+
+        tvMonFirst.setVisibility(View.GONE);
+        tvMonSecond.setVisibility(View.GONE);
+        tvMonThird.setVisibility(View.GONE);
+        tvMonFourth.setVisibility(View.GONE);
+
+        tvTueFirst.setVisibility(View.GONE);
+        tvTueSecond.setVisibility(View.GONE);
+        tvTueThird.setVisibility(View.GONE);
+        tvTueFourth.setVisibility(View.GONE);
+
+        tvWedFirst.setVisibility(View.GONE);
+        tvWedSecond.setVisibility(View.GONE);
+        tvWedThird.setVisibility(View.GONE);
+        tvWedFourth.setVisibility(View.GONE);
+
+        tvThuFirst.setVisibility(View.GONE);
+        tvThuSecond.setVisibility(View.GONE);
+        tvThuThird.setVisibility(View.GONE);
+        tvThuFourth.setVisibility(View.GONE);
+
+        tvFriFirst.setVisibility(View.GONE);
+        tvFriSecond.setVisibility(View.GONE);
+        tvFriThird.setVisibility(View.GONE);
+        tvFriFourth.setVisibility(View.GONE);
+
+        tvSatFirst.setVisibility(View.GONE);
+        tvSatSecond.setVisibility(View.GONE);
+        tvSatThird.setVisibility(View.GONE);
+        tvSatFourth.setVisibility(View.GONE);
+
+        Toast.makeText(mContext, "Data cleared successfully", Toast.LENGTH_SHORT).show();
+    }
 
     private void setViewSelectedRound() {
         tvSunEvent.setSelected(false);
@@ -464,56 +929,69 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
             tvSunEvent.setSelected(true);
             if (sunTimePointsCount != 4) {
                 ivSunAdd.setVisibility(View.VISIBLE);
+                plusVisibleOf = 1;
             }
 
         }
         if (viewSelectedRound.getId() == R.id.tvMonEvent) {
             tvMonEvent.setSelected(true);
-            if (monTimePointsCount != 4)
+            if (monTimePointsCount != 4) {
                 ivMonAdd.setVisibility(View.VISIBLE);
+                plusVisibleOf = 2;
+            }
         }
         if (viewSelectedRound.getId() == R.id.tvTueEvent) {
             tvTueEvent.setSelected(true);
-            if (tueTimePointsCount != 4)
+            if (tueTimePointsCount != 4) {
                 ivTueAdd.setVisibility(View.VISIBLE);
+                plusVisibleOf = 3;
+            }
         }
         if (viewSelectedRound.getId() == R.id.tvWedEvent) {
             tvWedEvent.setSelected(true);
-            if (wedTimePointsCount != 4)
+            if (wedTimePointsCount != 4) {
                 ivWedAdd.setVisibility(View.VISIBLE);
+                plusVisibleOf = 4;
+            }
         }
         if (viewSelectedRound.getId() == R.id.tvThuEvent) {
             tvThuEvent.setSelected(true);
-            if (thuTimePointsCount != 4)
+            if (thuTimePointsCount != 4) {
                 ivThuAdd.setVisibility(View.VISIBLE);
+                plusVisibleOf = 5;
+            }
         }
         if (viewSelectedRound.getId() == R.id.tvFriEvent) {
             tvFriEvent.setSelected(true);
-            if (friTimePointsCount != 4)
+            if (friTimePointsCount != 4) {
                 ivFriAdd.setVisibility(View.VISIBLE);
+                plusVisibleOf = 6;
+            }
         }
         if (viewSelectedRound.getId() == R.id.tvSatEvent) {
             tvSatEvent.setSelected(true);
-            if (satTimePointsCount != 4)
+            if (satTimePointsCount != 4) {
                 ivSatAdd.setVisibility(View.VISIBLE);
+                plusVisibleOf = 7;
+            }
         }
     }
 
-    private void dialogTimePoints() {
+    private void dialogChooseTimePoints() {
         LayoutInflater inflater = getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_time_points, null);
 
-        dialogShowInfo = new Dialog(mContext);
-        dialogShowInfo.setContentView(dialogView);
-        dialogShowInfo.setCancelable(false);
+        dialogChooseTmPnt = new Dialog(mContext);
+        dialogChooseTmPnt.setContentView(dialogView);
+        dialogChooseTmPnt.setCancelable(false);
 
-        ImageView ivArrowUp = (ImageView) dialogShowInfo.findViewById(R.id.ivArrowUp);
-        ImageView ivArrowDown = (ImageView) dialogShowInfo.findViewById(R.id.ivArrowDown);
-        etInputTimePoint = (EditText) dialogShowInfo.findViewById(R.id.etInputTimePoint);
+        ImageView ivArrowUp = (ImageView) dialogChooseTmPnt.findViewById(R.id.ivArrowUp);
+        ImageView ivArrowDown = (ImageView) dialogChooseTmPnt.findViewById(R.id.ivArrowDown);
+        etInputTimePoint = (EditText) dialogChooseTmPnt.findViewById(R.id.etInputTimePoint);
         //Carry on with dialog counter
-        etInputTimePoint.setText(etGetInputTimePoints);
-        TextView tvDoneDialog = (TextView) dialogShowInfo.findViewById(R.id.tvDoneDialog);
-        final TextView tvCancelDialog = (TextView) dialogShowInfo.findViewById(R.id.tvCancelDialog);
+        etInputTimePoint.setText(etInputTimePointStrn);
+        TextView tvDoneDialog = (TextView) dialogChooseTmPnt.findViewById(R.id.tvDoneDialog);
+        final TextView tvCancelDialog = (TextView) dialogChooseTmPnt.findViewById(R.id.tvCancelDialog);
 
         ivArrowUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -560,26 +1038,60 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
         tvCancelDialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialogShowInfo.dismiss();
+                dialogChooseTmPnt.dismiss();
             }
         });
         //Show dialog in Landscape mode
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
-        Window windowAlDl = dialogShowInfo.getWindow();
+        Window windowAlDl = dialogChooseTmPnt.getWindow();
 
         layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
         layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
         windowAlDl.setAttributes(layoutParams);
-        dialogShowInfo.show();
+        dialogChooseTmPnt.show();
 
     }
 
     private void doneTimePointSelection() {
-        dialogShowInfo.dismiss();
+        DataTransferModel dataTransferModel;
+        etInputTimePointStrn = etInputTimePoint.getText().toString();
+        etInputTimePointInt = Integer.parseInt(etInputTimePointStrn.substring(0, 2));
 
-        etGetInputTimePoints = etInputTimePoint.getText().toString();
-        etGetInputTimePointsInt = Integer.parseInt(etGetInputTimePoints.substring(0, 2));
+        for (int i = 0; i < listSingleValveData.size(); i++) {
+            dataTransferModel = listSingleValveData.get(i);
+
+            if (plusVisibleOf == 1 && dataTransferModel.getDayOfTheWeek() == 1 && dataTransferModel.getHours() == etInputTimePointInt) {
+                Toast.makeText(mContext, "Time Point is already made in this day", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (plusVisibleOf == 2 && dataTransferModel.getDayOfTheWeek() == 2 && dataTransferModel.getHours() == etInputTimePointInt) {
+                Toast.makeText(mContext, "Time Point is already made in this day", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (plusVisibleOf == 3 && dataTransferModel.getDayOfTheWeek() == 3 && dataTransferModel.getHours() == etInputTimePointInt) {
+                Toast.makeText(mContext, "Time Point is already made in this day", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (plusVisibleOf == 4 && dataTransferModel.getDayOfTheWeek() == 4 && dataTransferModel.getHours() == etInputTimePointInt) {
+                Toast.makeText(mContext, "Time Point is already made in this day", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (plusVisibleOf == 5 && dataTransferModel.getDayOfTheWeek() == 5 && dataTransferModel.getHours() == etInputTimePointInt) {
+                Toast.makeText(mContext, "Time Point is already made in this day", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (plusVisibleOf == 6 && dataTransferModel.getDayOfTheWeek() == 6 && dataTransferModel.getHours() == etInputTimePointInt) {
+                Toast.makeText(mContext, "Time Point is already made in this day", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (plusVisibleOf == 7 && dataTransferModel.getDayOfTheWeek() == 7 && dataTransferModel.getHours() == etInputTimePointInt) {
+                Toast.makeText(mContext, "Time Point is already made in this day", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        dialogChooseTmPnt.dismiss();
 
         if (viewSelectedRound.getId() == R.id.tvSunEvent) {
             ++sunTimePointsCount;
@@ -590,32 +1102,32 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
 
             if (tvSunFirst.getVisibility() != View.VISIBLE) {
                 tvSunFirst.setVisibility(View.VISIBLE);
-                tvSunFirst.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(1, etGetInputTimePointsInt));
+                tvSunFirst.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(1, etInputTimePointInt));
 
-                //listTimePntsSun.add(etGetInputTimePointsInt);
+                //listTimePntsSun.add(etInputTimePointInt);
                 return;
             }
             if (tvSunSecond.getVisibility() != View.VISIBLE) {
                 tvSunSecond.setVisibility(View.VISIBLE);
-                tvSunSecond.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(1, etGetInputTimePointsInt));
+                tvSunSecond.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(1, etInputTimePointInt));
 
-                //listTimePntsSun.add(etGetInputTimePointsInt);
+                //listTimePntsSun.add(etInputTimePointInt);
                 return;
             }
             if (tvSunThird.getVisibility() != View.VISIBLE) {
                 tvSunThird.setVisibility(View.VISIBLE);
-                tvSunThird.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(1, etGetInputTimePointsInt));
-                // listTimePntsSun.add(etGetInputTimePointsInt);
+                tvSunThird.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(1, etInputTimePointInt));
+                // listTimePntsSun.add(etInputTimePointInt);
                 return;
             }
             if (tvSunFourth.getVisibility() != View.VISIBLE) {
                 tvSunFourth.setVisibility(View.VISIBLE);
-                tvSunFourth.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(1, etGetInputTimePointsInt));
-                //listTimePntsSun.add(etGetInputTimePointsInt);
+                tvSunFourth.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(1, etInputTimePointInt));
+                //listTimePntsSun.add(etInputTimePointInt);
 
                 return;
             }
@@ -631,30 +1143,30 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
 
             if (tvMonFirst.getVisibility() != View.VISIBLE) {
                 tvMonFirst.setVisibility(View.VISIBLE);
-                tvMonFirst.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(2, etGetInputTimePointsInt));
-                //listTimePntsMon.add(etGetInputTimePointsInt);
+                tvMonFirst.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(2, etInputTimePointInt));
+                //listTimePntsMon.add(etInputTimePointInt);
                 return;
             }
             if (tvMonSecond.getVisibility() != View.VISIBLE) {
                 tvMonSecond.setVisibility(View.VISIBLE);
-                tvMonSecond.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(2, etGetInputTimePointsInt));
-                //listTimePntsMon.add(etGetInputTimePointsInt);
+                tvMonSecond.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(2, etInputTimePointInt));
+                //listTimePntsMon.add(etInputTimePointInt);
                 return;
             }
             if (tvMonThird.getVisibility() != View.VISIBLE) {
                 tvMonThird.setVisibility(View.VISIBLE);
-                tvMonThird.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(2, etGetInputTimePointsInt));
-                //listTimePntsMon.add(etGetInputTimePointsInt);
+                tvMonThird.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(2, etInputTimePointInt));
+                //listTimePntsMon.add(etInputTimePointInt);
                 return;
             }
             if (tvMonFourth.getVisibility() != View.VISIBLE) {
                 tvMonFourth.setVisibility(View.VISIBLE);
-                tvMonFourth.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(2, etGetInputTimePointsInt));
-                //listTimePntsMon.add(etGetInputTimePointsInt);
+                tvMonFourth.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(2, etInputTimePointInt));
+                //listTimePntsMon.add(etInputTimePointInt);
                 return;
             }
         }
@@ -669,30 +1181,30 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
 
             if (tvTueFirst.getVisibility() != View.VISIBLE) {
                 tvTueFirst.setVisibility(View.VISIBLE);
-                tvTueFirst.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(3, etGetInputTimePointsInt));
-                //listTimePntsTue.add(etGetInputTimePointsInt);
+                tvTueFirst.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(3, etInputTimePointInt));
+                //listTimePntsTue.add(etInputTimePointInt);
                 return;
             }
             if (tvTueSecond.getVisibility() != View.VISIBLE) {
                 tvTueSecond.setVisibility(View.VISIBLE);
-                tvTueSecond.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(3, etGetInputTimePointsInt));
-                //listTimePntsTue.add(etGetInputTimePointsInt);
+                tvTueSecond.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(3, etInputTimePointInt));
+                //listTimePntsTue.add(etInputTimePointInt);
                 return;
             }
             if (tvTueThird.getVisibility() != View.VISIBLE) {
                 tvTueThird.setVisibility(View.VISIBLE);
-                tvTueThird.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(3, etGetInputTimePointsInt));
-                //listTimePntsTue.add(etGetInputTimePointsInt);
+                tvTueThird.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(3, etInputTimePointInt));
+                //listTimePntsTue.add(etInputTimePointInt);
                 return;
             }
             if (tvTueFourth.getVisibility() != View.VISIBLE) {
                 tvTueFourth.setVisibility(View.VISIBLE);
-                tvTueFourth.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(3, etGetInputTimePointsInt));
-                //listTimePntsTue.add(etGetInputTimePointsInt);
+                tvTueFourth.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(3, etInputTimePointInt));
+                //listTimePntsTue.add(etInputTimePointInt);
                 return;
             }
         }
@@ -707,33 +1219,33 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
 
             if (tvWedFirst.getVisibility() != View.VISIBLE) {
                 tvWedFirst.setVisibility(View.VISIBLE);
-                tvWedFirst.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(4, etGetInputTimePointsInt));
-                //listTimePntsWed.add(etGetInputTimePointsInt);
+                tvWedFirst.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(4, etInputTimePointInt));
+                //listTimePntsWed.add(etInputTimePointInt);
                 return;
             }
             if (tvWedSecond.getVisibility() != View.VISIBLE) {
                 tvWedSecond.setVisibility(View.VISIBLE);
-                tvWedSecond.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(4, etGetInputTimePointsInt));
+                tvWedSecond.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(4, etInputTimePointInt));
 
-                //listTimePntsWed.add(etGetInputTimePointsInt);
+                //listTimePntsWed.add(etInputTimePointInt);
                 return;
             }
             if (tvWedThird.getVisibility() != View.VISIBLE) {
                 tvWedThird.setVisibility(View.VISIBLE);
-                tvWedThird.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(4, etGetInputTimePointsInt));
+                tvWedThird.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(4, etInputTimePointInt));
 
-                //listTimePntsWed.add(etGetInputTimePointsInt);
+                //listTimePntsWed.add(etInputTimePointInt);
                 return;
             }
             if (tvWedFourth.getVisibility() != View.VISIBLE) {
                 tvWedFourth.setVisibility(View.VISIBLE);
-                tvWedFourth.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(4, etGetInputTimePointsInt));
+                tvWedFourth.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(4, etInputTimePointInt));
 
-                //listTimePntsWed.add(etGetInputTimePointsInt);
+                //listTimePntsWed.add(etInputTimePointInt);
                 return;
             }
         }
@@ -748,33 +1260,33 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
 
             if (tvThuFirst.getVisibility() != View.VISIBLE) {
                 tvThuFirst.setVisibility(View.VISIBLE);
-                tvThuFirst.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(5, etGetInputTimePointsInt));
-                //listTimePntsThu.add(etGetInputTimePointsInt);
+                tvThuFirst.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(5, etInputTimePointInt));
+                //listTimePntsThu.add(etInputTimePointInt);
                 return;
             }
             if (tvThuSecond.getVisibility() != View.VISIBLE) {
                 tvThuSecond.setVisibility(View.VISIBLE);
-                tvThuSecond.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(5, etGetInputTimePointsInt));
+                tvThuSecond.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(5, etInputTimePointInt));
 
-                //listTimePntsThu.add(etGetInputTimePointsInt);
+                //listTimePntsThu.add(etInputTimePointInt);
                 return;
             }
             if (tvThuThird.getVisibility() != View.VISIBLE) {
                 tvThuThird.setVisibility(View.VISIBLE);
-                tvThuThird.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(5, etGetInputTimePointsInt));
+                tvThuThird.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(5, etInputTimePointInt));
 
-                //listTimePntsThu.add(etGetInputTimePointsInt);
+                //listTimePntsThu.add(etInputTimePointInt);
                 return;
             }
             if (tvThuFourth.getVisibility() != View.VISIBLE) {
                 tvThuFourth.setVisibility(View.VISIBLE);
-                tvThuFourth.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(5, etGetInputTimePointsInt));
+                tvThuFourth.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(5, etInputTimePointInt));
 
-                //listTimePntsThu.add(etGetInputTimePointsInt);
+                //listTimePntsThu.add(etInputTimePointInt);
                 return;
             }
         }
@@ -789,34 +1301,34 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
 
             if (tvFriFirst.getVisibility() != View.VISIBLE) {
                 tvFriFirst.setVisibility(View.VISIBLE);
-                tvFriFirst.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(6, etGetInputTimePointsInt));
+                tvFriFirst.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(6, etInputTimePointInt));
 
-                //listTimePntsFri.add(etGetInputTimePointsInt);
+                //listTimePntsFri.add(etInputTimePointInt);
                 return;
             }
             if (tvFriSecond.getVisibility() != View.VISIBLE) {
                 tvFriSecond.setVisibility(View.VISIBLE);
-                tvFriSecond.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(6, etGetInputTimePointsInt));
+                tvFriSecond.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(6, etInputTimePointInt));
 
-                //listTimePntsFri.add(etGetInputTimePointsInt);
+                //listTimePntsFri.add(etInputTimePointInt);
                 return;
             }
             if (tvFriThird.getVisibility() != View.VISIBLE) {
                 tvFriThird.setVisibility(View.VISIBLE);
-                tvFriThird.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(6, etGetInputTimePointsInt));
+                tvFriThird.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(6, etInputTimePointInt));
 
-                //listTimePntsFri.add(etGetInputTimePointsInt);
+                //listTimePntsFri.add(etInputTimePointInt);
                 return;
             }
             if (tvFriFourth.getVisibility() != View.VISIBLE) {
                 tvFriFourth.setVisibility(View.VISIBLE);
-                tvFriFourth.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(6, etGetInputTimePointsInt));
+                tvFriFourth.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(6, etInputTimePointInt));
 
-                //listTimePntsFri.add(etGetInputTimePointsInt);
+                //listTimePntsFri.add(etInputTimePointInt);
                 return;
             }
         }
@@ -831,34 +1343,34 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
 
             if (tvSatFirst.getVisibility() != View.VISIBLE) {
                 tvSatFirst.setVisibility(View.VISIBLE);
-                tvSatFirst.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(7, etGetInputTimePointsInt));
+                tvSatFirst.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(7, etInputTimePointInt));
 
-                // listTimePntsSat.add(etGetInputTimePointsInt);
+                // listTimePntsSat.add(etInputTimePointInt);
                 return;
             }
             if (tvSatSecond.getVisibility() != View.VISIBLE) {
                 tvSatSecond.setVisibility(View.VISIBLE);
-                tvSatSecond.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(7, etGetInputTimePointsInt));
+                tvSatSecond.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(7, etInputTimePointInt));
 
-                //listTimePntsSat.add(etGetInputTimePointsInt);
+                //listTimePntsSat.add(etInputTimePointInt);
                 return;
             }
             if (tvSatThird.getVisibility() != View.VISIBLE) {
                 tvSatThird.setVisibility(View.VISIBLE);
-                tvSatThird.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(7, etGetInputTimePointsInt));
+                tvSatThird.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(7, etInputTimePointInt));
 
-                //listTimePntsSat.add(etGetInputTimePointsInt);
+                //listTimePntsSat.add(etInputTimePointInt);
                 return;
             }
             if (tvSatFourth.getVisibility() != View.VISIBLE) {
                 tvSatFourth.setVisibility(View.VISIBLE);
-                tvSatFourth.setText(etGetInputTimePoints);
-                byteDataList.add(getObject(7, etGetInputTimePointsInt));
+                tvSatFourth.setText(etInputTimePointStrn);
+                listSingleValveData.add(getObject(7, etInputTimePointInt));
 
-                //listTimePntsSat.add(etGetInputTimePointsInt);
+                //listTimePntsSat.add(etInputTimePointInt);
                 return;
             }
         }
@@ -879,25 +1391,25 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.ivSunAdd:
-                dialogTimePoints();
+                dialogChooseTimePoints();
                 break;
             case R.id.ivMonAdd:
-                dialogTimePoints();
+                dialogChooseTimePoints();
                 break;
             case R.id.ivTueAdd:
-                dialogTimePoints();
+                dialogChooseTimePoints();
                 break;
             case R.id.ivWedAdd:
-                dialogTimePoints();
+                dialogChooseTimePoints();
                 break;
             case R.id.ivThuAdd:
-                dialogTimePoints();
+                dialogChooseTimePoints();
                 break;
             case R.id.ivFriAdd:
-                dialogTimePoints();
+                dialogChooseTimePoints();
                 break;
             case R.id.ivSatAdd:
-                dialogTimePoints();
+                dialogChooseTimePoints();
                 break;
             default:
                 dialogDeleteEditTPts(v);
@@ -905,8 +1417,7 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
         }
     }
 
-    private void dialogDeleteEditTPts(View view) {
-        final int clickedItemId = view.getId();
+    private void dialogDeleteEditTPts(final View view) {
         String clickedItemText = ((TextView) view).getText().toString();
 
         AlertDialog.Builder alBu = new AlertDialog.Builder(mContext);
@@ -922,223 +1433,453 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
         alBu.setNegativeButton("DELETE", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                deleteTPnts(clickedItemId);
+                deleteTPnts(view);
             }
         });
         alBu.create().show();
     }
 
-    private void deleteTPnts(int clickedItemId) {
-        {
-            Toast.makeText(mContext, "Time point deleted", Toast.LENGTH_SHORT).show();
-            switch (clickedItemId) {
-                case R.id.tvSunFirst:
-                    tvSunFirst.setVisibility(View.GONE);
-                    if (sunTimePointsCount == 4) {
-                        ivSunAdd.setVisibility(View.VISIBLE);
-                    }
-                    sunTimePointsCount--;
-                    break;
-                case R.id.tvSunSecond:
-                    tvSunSecond.setVisibility(View.GONE);
-                    if (sunTimePointsCount == 4) {
-                        ivSunAdd.setVisibility(View.VISIBLE);
-                    }
-                    sunTimePointsCount--;
-                    break;
-                case R.id.tvSunThird:
-                    tvSunThird.setVisibility(View.GONE);
-                    if (sunTimePointsCount == 4) {
-                        ivSunAdd.setVisibility(View.VISIBLE);
-                    }
-                    sunTimePointsCount--;
-                    break;
-                case R.id.tvSunFourth:
-                    tvSunFourth.setVisibility(View.GONE);
-                    if (sunTimePointsCount == 4) {
-                        ivSunAdd.setVisibility(View.VISIBLE);
-                    }
-                    sunTimePointsCount--;
-                    break;
+    private void deleteTPnts(View view) {
+        int clickedItemId = view.getId();
+        String timePntName = ((TextView) view).getText().toString();
+        int timePntInt = 0;
+        int zeroORNot = Integer.parseInt(timePntName.substring(0, 1));
+        if (zeroORNot == 0) {
+            timePntInt = Integer.parseInt(timePntName.substring(1, 2));
+        } else {
+            timePntInt = Integer.parseInt(timePntName.substring(0, 2));
+        }
 
-                case R.id.tvMonFirst:
-                    tvMonFirst.setVisibility(View.GONE);
-                    if (monTimePointsCount == 4) {
-                        ivMonAdd.setVisibility(View.VISIBLE);
+        Toast.makeText(mContext, "Time point deleted", Toast.LENGTH_SHORT).show();
+        switch (clickedItemId) {
+            case R.id.tvSunFirst:
+                tvSunFirst.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 1 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    monTimePointsCount--;
-                    break;
-                case R.id.tvMonSecond:
-                    tvMonSecond.setVisibility(View.GONE);
-                    if (monTimePointsCount == 4) {
-                        ivMonAdd.setVisibility(View.VISIBLE);
+                }
+                if (sunTimePointsCount == 4) {
+                    ivSunAdd.setVisibility(View.VISIBLE);
+                }
+                sunTimePointsCount--;
+                break;
+            case R.id.tvSunSecond:
+                tvSunSecond.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 1 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    monTimePointsCount--;
-                    break;
-                case R.id.tvMonThird:
-                    tvMonThird.setVisibility(View.GONE);
-                    if (monTimePointsCount == 4) {
-                        ivMonAdd.setVisibility(View.VISIBLE);
+                }
+                if (sunTimePointsCount == 4) {
+                    ivSunAdd.setVisibility(View.VISIBLE);
+                }
+                sunTimePointsCount--;
+                break;
+            case R.id.tvSunThird:
+                tvSunThird.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 1 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    monTimePointsCount--;
-                    break;
-                case R.id.tvMonFourth:
-                    tvMonFourth.setVisibility(View.GONE);
-                    if (monTimePointsCount == 4) {
-                        ivMonAdd.setVisibility(View.VISIBLE);
+                }
+                if (sunTimePointsCount == 4) {
+                    ivSunAdd.setVisibility(View.VISIBLE);
+                }
+                sunTimePointsCount--;
+                break;
+            case R.id.tvSunFourth:
+                tvSunFourth.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 1 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    monTimePointsCount--;
-                    break;
+                }
+                if (sunTimePointsCount == 4) {
+                    ivSunAdd.setVisibility(View.VISIBLE);
+                }
+                sunTimePointsCount--;
+                break;
 
-                case R.id.tvTueFirst:
-                    tvTueFirst.setVisibility(View.GONE);
-                    if (tueTimePointsCount == 4) {
-                        ivTueAdd.setVisibility(View.VISIBLE);
+            case R.id.tvMonFirst:
+                tvMonFirst.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 2 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    tueTimePointsCount--;
-                    break;
-                case R.id.tvTueSecond:
-                    tvTueSecond.setVisibility(View.GONE);
-                    if (tueTimePointsCount == 4) {
-                        ivTueAdd.setVisibility(View.VISIBLE);
+                }
+                if (monTimePointsCount == 4) {
+                    ivMonAdd.setVisibility(View.VISIBLE);
+                }
+                monTimePointsCount--;
+                break;
+            case R.id.tvMonSecond:
+                tvMonSecond.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 2 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    tueTimePointsCount--;
-                    break;
-                case R.id.tvTueThird:
-                    tvTueThird.setVisibility(View.GONE);
-                    if (tueTimePointsCount == 4) {
-                        ivTueAdd.setVisibility(View.VISIBLE);
+                }
+                if (monTimePointsCount == 4) {
+                    ivMonAdd.setVisibility(View.VISIBLE);
+                }
+                monTimePointsCount--;
+                break;
+            case R.id.tvMonThird:
+                tvMonThird.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 2 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    tueTimePointsCount--;
-                    break;
-                case R.id.tvTueFourth:
-                    tvTueFourth.setVisibility(View.GONE);
-                    if (tueTimePointsCount == 4) {
-                        ivTueAdd.setVisibility(View.VISIBLE);
+                }
+                if (monTimePointsCount == 4) {
+                    ivMonAdd.setVisibility(View.VISIBLE);
+                }
+                monTimePointsCount--;
+                break;
+            case R.id.tvMonFourth:
+                tvMonFourth.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 2 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    tueTimePointsCount--;
-                    break;
+                }
+                if (monTimePointsCount == 4) {
+                    ivMonAdd.setVisibility(View.VISIBLE);
+                }
+                monTimePointsCount--;
+                break;
 
-                case R.id.tvWedFirst:
-                    tvWedFirst.setVisibility(View.GONE);
-                    if (wedTimePointsCount == 4) {
-                        ivWedAdd.setVisibility(View.VISIBLE);
+            case R.id.tvTueFirst:
+                tvTueFirst.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 3 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    wedTimePointsCount--;
-                    break;
-                case R.id.tvWedSecond:
-                    tvWedSecond.setVisibility(View.GONE);
-                    if (wedTimePointsCount == 4) {
-                        ivWedAdd.setVisibility(View.VISIBLE);
+                }
+                if (tueTimePointsCount == 4) {
+                    ivTueAdd.setVisibility(View.VISIBLE);
+                }
+                tueTimePointsCount--;
+                break;
+            case R.id.tvTueSecond:
+                tvTueSecond.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 3 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    wedTimePointsCount--;
-                    break;
-                case R.id.tvWedThird:
-                    tvWedThird.setVisibility(View.GONE);
-                    if (wedTimePointsCount == 4) {
-                        ivWedAdd.setVisibility(View.VISIBLE);
+                }
+                if (tueTimePointsCount == 4) {
+                    ivTueAdd.setVisibility(View.VISIBLE);
+                }
+                tueTimePointsCount--;
+                break;
+            case R.id.tvTueThird:
+                tvTueThird.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 3 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    wedTimePointsCount--;
-                    break;
-                case R.id.tvWedFourth:
-                    tvWedFourth.setVisibility(View.GONE);
-                    if (wedTimePointsCount == 4) {
-                        ivWedAdd.setVisibility(View.VISIBLE);
+                }
+                if (tueTimePointsCount == 4) {
+                    ivTueAdd.setVisibility(View.VISIBLE);
+                }
+                tueTimePointsCount--;
+                break;
+            case R.id.tvTueFourth:
+                tvTueFourth.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 3 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    wedTimePointsCount--;
-                    break;
+                }
+                if (tueTimePointsCount == 4) {
+                    ivTueAdd.setVisibility(View.VISIBLE);
+                }
+                tueTimePointsCount--;
+                break;
 
-                case R.id.tvThuFirst:
-                    tvThuFirst.setVisibility(View.GONE);
-                    if (thuTimePointsCount == 4) {
-                        ivThuAdd.setVisibility(View.VISIBLE);
+            case R.id.tvWedFirst:
+                tvWedFirst.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 4 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    thuTimePointsCount--;
-                    break;
-                case R.id.tvThuSecond:
-                    tvThuSecond.setVisibility(View.GONE);
-                    if (thuTimePointsCount == 4) {
-                        ivThuAdd.setVisibility(View.VISIBLE);
+                }
+                if (wedTimePointsCount == 4) {
+                    ivWedAdd.setVisibility(View.VISIBLE);
+                }
+                wedTimePointsCount--;
+                break;
+            case R.id.tvWedSecond:
+                tvWedSecond.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 4 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    thuTimePointsCount--;
-                    break;
-                case R.id.tvThuThird:
-                    tvThuThird.setVisibility(View.GONE);
-                    if (thuTimePointsCount == 4) {
-                        ivThuAdd.setVisibility(View.VISIBLE);
+                }
+                if (wedTimePointsCount == 4) {
+                    ivWedAdd.setVisibility(View.VISIBLE);
+                }
+                wedTimePointsCount--;
+                break;
+            case R.id.tvWedThird:
+                tvWedThird.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 4 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    thuTimePointsCount--;
-                    break;
-                case R.id.tvThuFourth:
-                    tvThuFourth.setVisibility(View.GONE);
-                    if (thuTimePointsCount == 4) {
-                        ivThuAdd.setVisibility(View.VISIBLE);
+                }
+                if (wedTimePointsCount == 4) {
+                    ivWedAdd.setVisibility(View.VISIBLE);
+                }
+                wedTimePointsCount--;
+                break;
+            case R.id.tvWedFourth:
+                tvWedFourth.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 4 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    thuTimePointsCount--;
-                    break;
+                }
+                if (wedTimePointsCount == 4) {
+                    ivWedAdd.setVisibility(View.VISIBLE);
+                }
+                wedTimePointsCount--;
+                break;
 
-                case R.id.tvFriFirst:
-                    tvFriFirst.setVisibility(View.GONE);
-                    if (friTimePointsCount == 4) {
-                        ivFriAdd.setVisibility(View.VISIBLE);
+            case R.id.tvThuFirst:
+                tvThuFirst.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 5 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    friTimePointsCount--;
-                    break;
-                case R.id.tvFriSecond:
-                    tvFriSecond.setVisibility(View.GONE);
-                    if (friTimePointsCount == 4) {
-                        ivFriAdd.setVisibility(View.VISIBLE);
+                }
+                if (thuTimePointsCount == 4) {
+                    ivThuAdd.setVisibility(View.VISIBLE);
+                }
+                thuTimePointsCount--;
+                break;
+            case R.id.tvThuSecond:
+                tvThuSecond.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 5 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    friTimePointsCount--;
-                    break;
-                case R.id.tvFriThird:
-                    tvFriThird.setVisibility(View.GONE);
-                    if (friTimePointsCount == 4) {
-                        ivFriAdd.setVisibility(View.VISIBLE);
+                }
+                if (thuTimePointsCount == 4) {
+                    ivThuAdd.setVisibility(View.VISIBLE);
+                }
+                thuTimePointsCount--;
+                break;
+            case R.id.tvThuThird:
+                tvThuThird.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 5 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    friTimePointsCount--;
-                    break;
-                case R.id.tvFriFourth:
-                    tvFriFourth.setVisibility(View.GONE);
-                    if (friTimePointsCount == 4) {
-                        ivFriAdd.setVisibility(View.VISIBLE);
+                }
+                if (thuTimePointsCount == 4) {
+                    ivThuAdd.setVisibility(View.VISIBLE);
+                }
+                thuTimePointsCount--;
+                break;
+            case R.id.tvThuFourth:
+                tvThuFourth.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 5 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    friTimePointsCount--;
-                    break;
+                }
+                if (thuTimePointsCount == 4) {
+                    ivThuAdd.setVisibility(View.VISIBLE);
+                }
+                thuTimePointsCount--;
+                break;
 
-                case R.id.tvSatFirst:
-                    tvSatFirst.setVisibility(View.GONE);
-                    if (satTimePointsCount == 4) {
-                        ivSatAdd.setVisibility(View.VISIBLE);
+            case R.id.tvFriFirst:
+                tvFriFirst.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 6 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    satTimePointsCount--;
-                    break;
-                case R.id.tvSatSecond:
-                    tvSatSecond.setVisibility(View.GONE);
-                    if (satTimePointsCount == 4) {
-                        ivSatAdd.setVisibility(View.VISIBLE);
+                }
+                if (friTimePointsCount == 4) {
+                    ivFriAdd.setVisibility(View.VISIBLE);
+                }
+                friTimePointsCount--;
+                break;
+            case R.id.tvFriSecond:
+                tvFriSecond.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 6 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    satTimePointsCount--;
-                    break;
-                case R.id.tvSatThird:
-                    tvSatThird.setVisibility(View.GONE);
-                    if (satTimePointsCount == 4) {
-                        ivSatAdd.setVisibility(View.VISIBLE);
+                }
+                if (friTimePointsCount == 4) {
+                    ivFriAdd.setVisibility(View.VISIBLE);
+                }
+                friTimePointsCount--;
+                break;
+            case R.id.tvFriThird:
+                tvFriThird.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 6 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    satTimePointsCount--;
-                    break;
-                case R.id.tvSatFourth:
-                    tvSatFourth.setVisibility(View.GONE);
-                    if (satTimePointsCount == 4) {
-                        ivSatAdd.setVisibility(View.VISIBLE);
+                }
+                if (friTimePointsCount == 4) {
+                    ivFriAdd.setVisibility(View.VISIBLE);
+                }
+                friTimePointsCount--;
+                break;
+            case R.id.tvFriFourth:
+                tvFriFourth.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 6 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
                     }
-                    satTimePointsCount--;
-                    break;
-            }
+                }
+                if (friTimePointsCount == 4) {
+                    ivFriAdd.setVisibility(View.VISIBLE);
+                }
+                friTimePointsCount--;
+                break;
+
+            case R.id.tvSatFirst:
+                tvSatFirst.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 7 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
+                    }
+                }
+                if (satTimePointsCount == 4) {
+                    ivSatAdd.setVisibility(View.VISIBLE);
+                }
+                satTimePointsCount--;
+                break;
+            case R.id.tvSatSecond:
+                tvSatSecond.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 7 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
+                    }
+                }
+                if (satTimePointsCount == 4) {
+                    ivSatAdd.setVisibility(View.VISIBLE);
+                }
+                satTimePointsCount--;
+                break;
+            case R.id.tvSatThird:
+                tvSatThird.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 7 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
+                    }
+                }
+                if (satTimePointsCount == 4) {
+                    ivSatAdd.setVisibility(View.VISIBLE);
+                }
+                satTimePointsCount--;
+                break;
+            case R.id.tvSatFourth:
+                tvSatFourth.setVisibility(View.GONE);
+                //deleting Time point form list
+                for (int i = 0; i < listSingleValveData.size(); i++) {
+                    if (listSingleValveData.get(i).getDayOfTheWeek() == 7 && listSingleValveData.get(i).getHours() == timePntInt) {
+                        listSingleValveData.remove(i);
+                        break;
+                    }
+                }
+                if (satTimePointsCount == 4) {
+                    ivSatAdd.setVisibility(View.VISIBLE);
+                }
+                satTimePointsCount--;
+                break;
         }
     }
 
-//End of Class
+    private void dialogConfirmAction() {
+        String title, msg;
+        title = "Clear Valve Data";
+        msg = "This will delete valve data completely";
+
+        android.support.v7.app.AlertDialog.Builder builder;
+       /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder = new AlertDialog.Builder(mContext, android.R.style.Theme_Material_Dialog_Alert);
+        } else {*/
+        builder = new android.support.v7.app.AlertDialog.Builder(mContext);
+        //}
+        builder.setTitle(title)
+                .setMessage(msg)
+                .setCancelable(false)
+                .setPositiveButton("CLEAR", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        listSingleValveData.clear();
+                        clearWholeDataFromUI();
+                    }
+                })
+                .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
 
     private final ServiceConnection service_connection = new ServiceConnection() {
         @Override
@@ -1177,7 +1918,7 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
 
                     //((Button) findViewById(R.id.connectButton)).setEnabled(false);
                     //we're connected
-                    // showMsg("CONNECTED");
+                    showMsg("GATT_CONNECTED");
                     // enable the LOW/MID/HIGH alert level selection buttons
                    /* ((Button)findViewById(R.id.lowButton)).setEnabled(true);
                     ((Button) findViewById(R.id.midButton)).setEnabled(true);
@@ -1264,7 +2005,7 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
                         Log.e("@@@@@@@@@@@@", "Ack Received For" + dataSendingIndex);
                         if (oldTimePointsErased == FALSE) {
                             oldTimePointsErased = TRUE;
-                            if (dataSendingIndex < byteDataList.size()) {
+                            if (dataSendingIndex < listSingleValveData.size()) {
                                 startSendData();
                             } else {
 
@@ -1272,7 +2013,7 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
                             }
                         } else {
                             dataSendingIndex++;
-                            if (dataSendingIndex < byteDataList.size()) {
+                            if (dataSendingIndex < listSingleValveData.size()) {
                                 startSendData();
                             } else {
                                 saveValveDatatoDB();
@@ -1330,7 +2071,7 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
         }
     }
 
-    @Override
+    /*@Override
     public void onBackPressed() {
         back_requested = true;
         if (bluetooth_le_adapter.isConnected()) {
@@ -1341,15 +2082,22 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
         } else {
             finish();
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     protected void onDestroy() {
-        super.onDestroy();
+        if (bluetooth_le_adapter.isConnected()) {
+            try {
+                bluetooth_le_adapter.disconnect();
+            } catch (Exception e) {
+            }
+        }
         unbindService(service_connection);
         bluetooth_le_adapter = null;
-    }
+        super.onDestroy();
+
+    }*/
 
     void eraseOldTimePoints() {
         byte[] timePoint = {0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -1359,10 +2107,10 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
 
     void startSendData() {
         Log.e("@@@@@@@@@@@", "" + dataSendingIndex);
-        //byte index = (byte) (byteDataList.get(dataSendingIndex).getIndex() + 1);
+        //byte index = (byte) (listSingleValveData.get(dataSendingIndex).getIndex() + 1);
         byte index = (byte) (dataSendingIndex + 1);
-        byte hours = (byte) byteDataList.get(dataSendingIndex).getHours();
-        byte dayOfTheWeek = (byte) byteDataList.get(dataSendingIndex).getDayOfTheWeek();
+        byte hours = (byte) listSingleValveData.get(dataSendingIndex).getHours();
+        byte dayOfTheWeek = (byte) listSingleValveData.get(dataSendingIndex).getDayOfTheWeek();
 
         int iDurationMSB = (etInputDursnPlanInt / 256);
         int iDurationLSB = (etInputDursnPlanInt % 256);
@@ -1373,16 +2121,16 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
         int iVolumeLSB = (etQuantPlanInt % 256);
         byte bVolumeMSB = (byte) iVolumeMSB;
         byte bVolumeLSB = (byte) iVolumeLSB;
-        byteDataList.get(dataSendingIndex).setIndex(index);
-        byteDataList.get(dataSendingIndex).setbDurationLSB(bDurationLSB);
-        byteDataList.get(dataSendingIndex).setbDurationMSB(bDurationMSB);
-        byteDataList.get(dataSendingIndex).setbVolumeLSB(bVolumeLSB);
-        byteDataList.get(dataSendingIndex).setbVolumeMSB(bVolumeMSB);
-        byteDataList.get(dataSendingIndex).setMinutes(0);
-        byteDataList.get(dataSendingIndex).setSeconds(0);
-        byteDataList.get(dataSendingIndex).setQty(etQuantPlanInt);
-        byteDataList.get(dataSendingIndex).setDuration(etInputDursnPlanInt);
-        byteDataList.get(dataSendingIndex).setDischarge(etInputDischrgPntsInt);
+        listSingleValveData.get(dataSendingIndex).setIndex(index);
+        listSingleValveData.get(dataSendingIndex).setbDurationLSB(bDurationLSB);
+        listSingleValveData.get(dataSendingIndex).setbDurationMSB(bDurationMSB);
+        listSingleValveData.get(dataSendingIndex).setbVolumeLSB(bVolumeLSB);
+        listSingleValveData.get(dataSendingIndex).setbVolumeMSB(bVolumeMSB);
+        listSingleValveData.get(dataSendingIndex).setMinutes(0);
+        listSingleValveData.get(dataSendingIndex).setSeconds(0);
+        listSingleValveData.get(dataSendingIndex).setQty(etQuantPlanInt);
+        listSingleValveData.get(dataSendingIndex).setDuration(etInputDursnPlanInt);
+        listSingleValveData.get(dataSendingIndex).setDischarge(etInputDischrgPntsInt);
 
         Log.e("@@", "" + index + "-" + dayOfTheWeek + "-" + hours + "-" + 0 + "-" + 0 + "-" + bDurationMSB + "-" + bDurationLSB + "-" + bVolumeMSB + "-" + bVolumeLSB);
         byte[] timePoint = {index, dayOfTheWeek, hours, 0, 0, bDurationMSB, bDurationLSB, bVolumeMSB, bVolumeLSB};
@@ -1390,14 +2138,12 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
                 BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint);
     }
 
-
     DataTransferModel getObject(int dayOfTheWeek, int hours) {
         DataTransferModel data = new DataTransferModel();
         data.setDayOfTheWeek(dayOfTheWeek);
         data.setHours(hours);
         return data;
     }
-
 
     public void onSetTime() {
         String[] ids = TimeZone.getAvailableIDs(+5 * 60 * 60 * 1000);
@@ -1429,10 +2175,10 @@ public class AddEditSessionPlan extends AppCompatActivity implements View.OnClic
 
     void saveValveDatatoDB() {
         DatabaseHandler databaseHandler = new DatabaseHandler(mContext);
-        databaseHandler.updateValveDataWithMAC_ValveName(device_address, clickedValveName, byteDataList);
+        databaseHandler.updateValveDataWithMAC_ValveName(device_address, clickedValveName, listSingleValveData);
 
-        //byteDataList;
-        //byteDataList.clear();
+        //listSingleValveData;
+        //listSingleValveData.clear();
         //Toast.makeText(mContext, "Got All ACK", Toast.LENGTH_SHORT).show();
         Toast.makeText(mContext, "Session plan Loaded successfully", Toast.LENGTH_SHORT).show();
        /* Intent intentValveDataSuces=new Intent();

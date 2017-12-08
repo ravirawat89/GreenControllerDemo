@@ -7,8 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.netcommlabs.greencontroller.R;
 import com.netcommlabs.greencontroller.model.DeviceAddressModel;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +24,7 @@ public class DeviceAddressAdapter extends RecyclerView.Adapter<DeviceAddressAdap
     List<String> listLocAddressType;
     //List<DeviceAddressModel> listLocAddressType;
 
-    public DeviceAddressAdapter(Context mContext,List<String> listLocAddressType /*List<DeviceAddressModel> listLocAddressType*/) {
+    public DeviceAddressAdapter(Context mContext, List<String> listLocAddressType /*List<DeviceAddressModel> listLocAddressType*/) {
         this.mContext = mContext;
         this.listLocAddressType = listLocAddressType;
         listViews = new ArrayList<>();

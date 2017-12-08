@@ -117,6 +117,7 @@ public class ConnectedQRAct extends AppCompatActivity {
                 etEditDvcName.setVisibility(View.GONE);
                 ivSaveDvcName.setVisibility(View.GONE);
                 tvDvcName.setText(dvcNameStrngEdited);
+                Toast.makeText(mContext, "Device name edited", Toast.LENGTH_SHORT).show();
             }
         });
 

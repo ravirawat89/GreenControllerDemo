@@ -187,7 +187,7 @@ public class BleAdapterService extends Service {
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-            sendConsoleMessage("Services Discovered");
+            //sendConsoleMessage("Services Discovered");
             Message msg = Message.obtain(activity_handler, GATT_SERVICES_DISCOVERED);
             msg.sendToTarget();
         }
