@@ -44,6 +44,7 @@ import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.Constant;
 import com.netcommlabs.greencontroller.utilities.GeocodingLocation;
 import com.netcommlabs.greencontroller.utilities.LocationUtils;
+import com.netcommlabs.greencontroller.utilities.MySharedPreference;
 import com.netcommlabs.greencontroller.utilities.Navigation_Drawer_Data;
 import com.netcommlabs.greencontroller.utilities.NetworkUtils;
 import com.netcommlabs.greencontroller.utilities.RowDataArrays;
@@ -54,6 +55,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.netcommlabs.greencontroller.utilities.Constant.AVAILABLE_DEVICES;
+import static com.netcommlabs.greencontroller.utilities.Constant.DEVICE_DETAILS;
+import static com.netcommlabs.greencontroller.utilities.Constant.DEVICE_MAP;
+import static com.netcommlabs.greencontroller.utilities.SharedPrefsConstants.ADDRESS;
+import static com.netcommlabs.greencontroller.utilities.SharedPrefsConstants.lAST_CONNECTED;
 
 public class MainActivity extends AppCompatActivity implements LocationDecetor {
 
@@ -361,12 +366,35 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(frm_lyt_container_int);
             toolbar_title.setText(currentFragment.getTag());
 
+            backPressHeaderHandle(currentFragment.getTag());
 
-            if(currentFragment.equals(AVAILABLE_DEVICES))
-            {
 
-            }
             Log.e("@@current Fragment ", currentFragment.getTag());
+        }
+    }
+
+    private void backPressHeaderHandle(String tag) {
+        switch (tag) {
+         /*   case AVAILABLE_DEVICES:
+                BLEAppLevel bleAppLevel = BLEAppLevel.getInstanceOnly();
+                if (bleAppLevel != null) {
+                    bleAppLevel.disconnectBLECompletely();
+                }
+                break;*/
+
+            case DEVICE_MAP:
+                if (MySharedPreference.getInstance(this).getStringData(ADDRESS).equalsIgnoreCase(""))
+                    desc_txt.setText(MySharedPreference.getInstance(this).getStringData(ADDRESS));
+                break;
+
+            case DEVICE_DETAILS:
+                if (MySharedPreference.getInstance(this).getStringData(lAST_CONNECTED).equalsIgnoreCase(""))
+                    desc_txt.setText(MySharedPreference.getInstance(this).getStringData(lAST_CONNECTED));
+                break;
+
+            default:
+                desc_txt.setText("");
+                break;
         }
     }
 

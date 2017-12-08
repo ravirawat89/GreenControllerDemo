@@ -34,9 +34,12 @@ import com.netcommlabs.greencontroller.services.BleAdapterService;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
 import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.Constant;
+import com.netcommlabs.greencontroller.utilities.MySharedPreference;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.netcommlabs.greencontroller.utilities.SharedPrefsConstants.ADDRESS;
 
 /**
  * Created by Android on 12/6/2017.
@@ -154,6 +157,7 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
         mdlLocationAddress = listModalBleDevice.get(0).getMdlLocationAddress();
         addressComplete = mdlLocationAddress.getFlat_num() + ", " + mdlLocationAddress.getStreetName() + ", " + mdlLocationAddress.getLocality_landmark() + ", " + mdlLocationAddress.getPincode() + ", " + mdlLocationAddress.getCity() + ", " + mdlLocationAddress.getState();
         tvShowAddressTop.setText(addressComplete);
+        MySharedPreference.getInstance(getActivity()).setStringData(ADDRESS,addressComplete);
         listLocAddressType = new ArrayList<>();
         listLocAddressType.add(mdlLocationAddress.getAddress_name());
         valvesNum = listModalBleDevice.get(0).getValvesNum();

@@ -36,6 +36,7 @@ import com.netcommlabs.greencontroller.services.BleAdapterService;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
 import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.Constant;
+import com.netcommlabs.greencontroller.utilities.MySharedPreference;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,6 +45,8 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
+
+import static com.netcommlabs.greencontroller.utilities.SharedPrefsConstants.lAST_CONNECTED;
 
 /**
  * Created by Android on 12/6/2017.
@@ -896,6 +899,7 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
         tvDeviceName = mContext.toolbar_title;
         desc_txt=mContext.desc_txt;
         desc_txt.setText("Last Connected : 02-11-2017  11:00 am");
+        MySharedPreference.getInstance(getActivity()).setStringData(lAST_CONNECTED,"Last Connected : 02-11-2017  11:00 am");
         reviValvesList = view.findViewById(R.id.reviValvesList);
         tvAddNewSesnPlan = view.findViewById(R.id.tvAddNewSesnPlan);
         tvPauseText = view.findViewById(R.id.tvPauseText);
