@@ -143,8 +143,8 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         }
 //        tvTitleTop.setText(operationType + " Session Plan" + "(" + clickedValveName + ")");
 
-        Intent gattServiceIntent = new Intent(mContext, BleAdapterService.class);
-        mContext.bindService(gattServiceIntent, service_connection, BIND_AUTO_CREATE);
+       /* Intent gattServiceIntent = new Intent(mContext, BleAdapterService.class);
+        mContext.bindService(gattServiceIntent, service_connection, BIND_AUTO_CREATE);*/
 
        /* //Getting sent intent
         dvcName = getIntent().getExtras().getString(EXTRA_NAME);
@@ -460,14 +460,14 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
 
                 //ArrayList list=listSingleValveData;
 
-               /* BLEAppLevel bleAppLevel = BLEAppLevel.getInstanceOnly();
+                BLEAppLevel bleAppLevel = BLEAppLevel.getInstanceOnly();
                 if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
-                    bleAppLevel.eraseOldTimePoints();//This is automatically followed by loading new time points
+                    bleAppLevel.eraseOldTimePoints(FragAddEditSesnPlan.this, etQuantPlanInt, etInputDursnPlanInt, etInputDischrgPntsInt, listSingleValveData);//This is automatically followed by loading new time points
                 } else {
                     Toast.makeText(mContext, "BLE lost connection", Toast.LENGTH_SHORT).show();
-                }*/
+                }
 
-                eraseOldTimePoints();
+                //eraseOldTimePoints();
 
 
             }
@@ -2204,4 +2204,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
     }
 
 
+    public void doneWrtingAllTP() {
+        saveValveDatatoDB();
+    }
 }
