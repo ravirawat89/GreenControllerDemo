@@ -369,7 +369,7 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
             backPressHeaderHandle(currentFragment.getTag());
 
 
-            Log.e("@@current Fragment ", currentFragment.getTag());
+            Log.e("@@current Fragment@@", currentFragment.getTag());
         }
     }
 
