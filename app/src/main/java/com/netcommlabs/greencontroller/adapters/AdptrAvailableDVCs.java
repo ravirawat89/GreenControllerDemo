@@ -3,20 +3,15 @@ package com.netcommlabs.greencontroller.adapters;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.netcommlabs.greencontroller.Fragments.FragAvailableDevices;
 import com.netcommlabs.greencontroller.R;
-import com.netcommlabs.greencontroller.activities.AddEditSessionPlan;
-import com.netcommlabs.greencontroller.activities.AvailableDevices;
-import com.netcommlabs.greencontroller.activities.ConnectedQRAct;
 
 import java.util.List;
 

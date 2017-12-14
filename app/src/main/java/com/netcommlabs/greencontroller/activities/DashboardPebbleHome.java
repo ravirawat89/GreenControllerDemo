@@ -35,7 +35,7 @@ public class DashboardPebbleHome extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.navigation_pebble);
+        setContentView(R.layout.frag_pebble_statis_dash);
 
         initBase();
 

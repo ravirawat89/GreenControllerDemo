@@ -19,10 +19,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.netcommlabs.greencontroller.R;
-import com.netcommlabs.greencontroller.activities.AddAddressActivity;
 import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.model.MdlLocationAddress;
-import com.netcommlabs.greencontroller.utilities.Constant;
 
 /**
  * Created by Android on 12/6/2017.

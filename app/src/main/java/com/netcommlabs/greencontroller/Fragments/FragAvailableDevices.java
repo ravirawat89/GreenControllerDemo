@@ -3,22 +3,15 @@ package com.netcommlabs.greencontroller.Fragments;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +20,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.netcommlabs.greencontroller.Constants;
 import com.netcommlabs.greencontroller.InterfaceValveAdapter;
 import com.netcommlabs.greencontroller.Interfaces.BLEInterface;
 import com.netcommlabs.greencontroller.R;
@@ -35,18 +27,11 @@ import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.adapters.AdptrAvailableDVCs;
 import com.netcommlabs.greencontroller.model.DataTransferModel;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
-import com.netcommlabs.greencontroller.utilities.AppAlertDialog;
 import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.Constant;
-import com.netcommlabs.greencontroller.utilities.NetworkUtils;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.SimpleTimeZone;
-import java.util.TimeZone;
 
 /**
  * Created by Android on 12/6/2017.
@@ -69,6 +54,7 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
     ProgressDialog progressDialog;
     private static final int REQUEST_CODE_ENABLE = 1;
     Fragment myFragment;
+    IntentFilter intentFilterActnFound;
 
 
     @Override
@@ -93,14 +79,14 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
         //llScrnHeader = view.findViewById(R.id.llScrnHeader);
         progrsBarIndetmnt = view.findViewById(R.id.progrsBarIndetmnt);
         reViListAvailDvc = view.findViewById(R.id.reViListAvailDvc);
-        if (NetworkUtils.isConnected(mContext)) {
+        //if (NetworkUtils.isConnected(mContext)) {
             //Location work starts
             mContext.getLocation();
             //Bluetooth work starts
             startBTWork();
-        } else {
+        /*} else {
             AppAlertDialog.showDialogFinishWithActivity(mContext, "Internet", "You are not Connected to internet");
-        }
+        }*/
 
         LinearLayoutManager llManagerAailDvcs = new LinearLayoutManager(mContext);
         reViListAvailDvc.setLayoutManager(llManagerAailDvcs);
@@ -138,7 +124,7 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
     private void startDvcDiscovery() {
         if (mBluetoothAdapter.isEnabled()) {
 
-            IntentFilter intentFilterActnFound = new IntentFilter();
+            intentFilterActnFound = new IntentFilter();
             intentFilterActnFound.addAction(BluetoothDevice.ACTION_FOUND);
             intentFilterActnFound.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
             intentFilterActnFound.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
@@ -212,6 +198,10 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
 
     @Override
     public void onRecyclerItemClickedNameAdress(String name, String address) {
+        if (BLEAppLevel.getInstanceOnly() != null) {
+            Toast.makeText(mContext, "An other BLE device connected already", Toast.LENGTH_SHORT).show();
+            return;
+        }
         dvcMacAddress = address;
         deviceName = name;
 
@@ -220,13 +210,23 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        myFragment=FragAvailableDevices.this;
+        myFragment = FragAvailableDevices.this;
         BLEAppLevel.getInstance(mContext, myFragment, dvcMacAddress);
     }
 
     @Override
     public void dvcHasExptdServices() {
-        progressDialog.dismiss();
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+        }
+        if (mContext != null) {
+            try {
+                mBluetoothAdapter.cancelDiscovery();
+                mContext.unregisterReceiver(mBroadcastReceiver);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         //Adding Fragment(FragConnectedQR)
         Fragment fragConnectedQR = new FragConnectedQR();
         Bundle bundle = new Bundle();
@@ -234,6 +234,12 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
         bundle.putString(FragConnectedQR.EXTRA_NAME, deviceName);
         fragConnectedQR.setArguments(bundle);
         MyFragmentTransactions.replaceFragment(mContext, fragConnectedQR, Constant.CONNECTED_QR, mContext.frm_lyt_container_int, true);
+    }
+
+    public void dvcDoesNotHasExptdServices() {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+        }
     }
 
    /* public void onSetTime() {
@@ -290,5 +296,18 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
                     mContext.finish();
                 }
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (mContext != null) {
+            try {
+                mBluetoothAdapter.cancelDiscovery();
+                mContext.unregisterReceiver(mBroadcastReceiver);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        super.onDestroyView();
     }
 }

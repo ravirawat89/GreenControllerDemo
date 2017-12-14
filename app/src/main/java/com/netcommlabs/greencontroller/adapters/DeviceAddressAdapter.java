@@ -9,7 +9,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.netcommlabs.greencontroller.R;
-import com.netcommlabs.greencontroller.model.DeviceAddressModel;
 
 import java.util.ArrayList;
 import java.util.List;

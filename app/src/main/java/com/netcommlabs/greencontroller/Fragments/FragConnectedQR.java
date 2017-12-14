@@ -16,13 +16,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import com.netcommlabs.greencontroller.R;
-import com.netcommlabs.greencontroller.activities.AddAddressActivity;
-import com.netcommlabs.greencontroller.activities.AvailableDevices;
-import com.netcommlabs.greencontroller.activities.ConnectedQRAct;
-import com.netcommlabs.greencontroller.activities.DeviceActivity;
 import com.netcommlabs.greencontroller.activities.MainActivity;
-import com.netcommlabs.greencontroller.activities.QRScanAct;
 import com.netcommlabs.greencontroller.model.MdlLocationAddress;
 import com.netcommlabs.greencontroller.model.ModalBLEDevice;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
@@ -83,7 +80,7 @@ public class FragConnectedQR extends Fragment {
 /*
         tvTitleConctnt = view.findViewById(R.id.tvTitleConctnt);
 */
-        tvTitleConctnt =mContext.toolbar_title;
+        tvTitleConctnt = mContext.tvToolbar_title;
         tvDvcName = view.findViewById(R.id.tvDvcName);
         ivEditDvcName = view.findViewById(R.id.ivEditDvcName);
         ivSaveDvcName = view.findViewById(R.id.ivSaveDvcName);
@@ -147,34 +144,18 @@ public class FragConnectedQR extends Fragment {
         llAddDeviceAddressConctd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragAddAddress fragAddAddress=new FragAddAddress();
-
+                FragAddAddress fragAddAddress = new FragAddAddress();
                 //First child---then parent
                 fragAddAddress.setTargetFragment(FragConnectedQR.this, 101);
                 //Adding Fragment(FragAddAddress)
                 MyFragmentTransactions.replaceFragment(mContext, fragAddAddress, Constant.ADD_ADDRESS, mContext.frm_lyt_container_int, true);
-
-              /*  Intent intentAddWtrngProfile = new Intent(mContext, AddAddressActivity.class);
-                mContext.startActivityForResult(intentAddWtrngProfile, REQUEST_CODE_ADDRESS);*/
-                //mContext.startActivity(intentAddWtrngProfile);
-                //mContext.finish();
             }
         });
 
         tvScanQREvent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*databaseHandler.getContactsCount();
-                Toast.makeText(mContext, "", Toast.LENGTH_SHORT).show();
-                */
-               /* Intent intent = new Intent(mContext, QRScanAct.class);
-                startActivityForResult(intent, REQUEST_CODE_QR);*/
-
-                //zxingQRInitiateCamera();
-
-                //Adding Fragment(FragAvailableDevices)
-//                MyFragmentTransactions.replaceFragment(mContext, new FragScanQRCode(), Constant.AVAILABLE_DEVICES, mContext.frm_lyt_container_int, true);
-                Toast.makeText(mContext, "In Progress", Toast.LENGTH_SHORT).show();
+                IntentIntegrator.forSupportFragment(FragConnectedQR.this).initiateScan();
             }
         });
 
@@ -248,6 +229,14 @@ public class FragConnectedQR extends Fragment {
             } else {
                 Toast.makeText(mContext, "No data from address", Toast.LENGTH_SHORT).show();
 
+            }
+        }
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null) {
+            if (result.getContents() == null) {
+                Toast.makeText(mContext, "Cancelled", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(mContext, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
             }
         }
     }

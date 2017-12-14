@@ -46,9 +46,6 @@
             android:name=".activities.AddAddressActivity"
             android:screenOrientation="landscape"></activity>
         <activity
-            android:name=".activities.QRScanAct"
-            android:screenOrientation="landscape" />
-        <activity
             android:name=".activities.DeviceActivity"
             android:screenOrientation="landscape"></activity>
         <activity

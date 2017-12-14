@@ -32,10 +32,10 @@ import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.adapters.ValvesListAdapter;
 import com.netcommlabs.greencontroller.model.DataTransferModel;
 import com.netcommlabs.greencontroller.model.ModalBLEValve;
+import com.netcommlabs.greencontroller.model.ModalVlNameSelect;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
 import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
-import com.netcommlabs.greencontroller.utilities.Constant;
 import com.netcommlabs.greencontroller.utilities.MySharedPreference;
 
 import java.util.ArrayList;
@@ -59,10 +59,11 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
     private static final int REQUEST_CODE_SESN_PLAN = 201;
     public static final int RESULT_CODE_VALVE_INDB = 202;
     private RecyclerView reviValvesList;
-    private ArrayList<String> listValves;
+    private ArrayList<String> listValvesNameOnly;
+    public static ArrayList<ModalVlNameSelect> listModalValveNameSelect=new ArrayList<>();
     private LinearLayout /*llScrnHeader,*/ llNoSesnPlan, llSesnPlanDetails, llControllerNameEdit, llControllerNameSave;
     private LinearLayout llEditValve, llStopValve, llPauseValve, llFlushValve, llHelpValve;
-    private TextView tvDeviceName,desc_txt, tvAddNewSesnPlan;
+    private TextView tvDeviceName, tvDesc_txt, tvAddNewSesnPlan;
     private DatabaseHandler databaseHandler;
     private ArrayList<DataTransferModel> listValveDataSingle;
     public static final String EXTRA_DVC_NAME = "dvc_name";
@@ -79,6 +80,9 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
     private boolean back_requested = false;
     private int position = 0;
     private String cmdName = "PAUSE";
+    private String titleDynamicAddEdit;
+    private ValvesListAdapter valveListAdp;
+    private boolean isValveSelected = true;
 
     @Override
     public void onAttach(Context context) {
@@ -106,57 +110,54 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
         /*dvcName = "PEBBLE";
         dvcMacAdd = "98:4F:EE:10:87:66";
         dvcValveCount = 8;*/
-
+        //listModalValveNameSelect = new ArrayList<>();
         initView(view);
         initListeners();
         tvDeviceName.setText(dvcName);
-
         //Adding valve name,MAC, and valve data to DB
         databaseHandler = new DatabaseHandler(mContext);
         List<ModalBLEValve> listGotModalBLEValvesNdData = databaseHandler.getAllValvesNdData();
         if (listGotModalBLEValvesNdData.size() == 0) {
             for (int i = 1; i <= dvcValveCount; i++) {
                 valveConctName = "Valve " + i;
-                //modalBLEValveDataHolder = ;
                 //List for adding data to DB
                 databaseHandler.addValveNdData(new ModalBLEValve(dvcMacAdd, valveConctName, listValveDataSingle));
-                //listMdlBLEValve.add(modalBLEValveDataHolder);
             }
-            listValves = databaseHandler.getAllValvesNameWithMAC(dvcMacAdd);
+            listValvesNameOnly = databaseHandler.getAllValvesNameWithMAC(dvcMacAdd);
         } else {
             for (ModalBLEValve modalBLEValve : listGotModalBLEValvesNdData) {
                 if (modalBLEValve.getDvcMacAddrs().equalsIgnoreCase(dvcMacAdd)) {
-                    //Toast.makeText(mContext, "This MAC, Valve and Valve Data alrady added", Toast.LENGTH_SHORT).show();
-
                     //List for Valve RecyclerView to show valves
-                    //listValves = new ArrayList<>();
-                    listValves = databaseHandler.getAllValvesNameWithMAC(dvcMacAdd);
-                  /*  if (modalBLEValve.getValveName().equalsIgnoreCase("Valve 1")){
-
-                    }*/
+                    listValvesNameOnly = databaseHandler.getAllValvesNameWithMAC(dvcMacAdd);
                     break;
                 } else {
-                    //listMdlBLEValve = new ArrayList<>();
                     for (int i = 1; i <= dvcValveCount; i++) {
                         valveConctName = "Valve " + i;
-                        //modalBLEValveDataHolder = ;
                         //List for adding data to DB
                         databaseHandler.addValveNdData(new ModalBLEValve(valveConctName, dvcMacAdd, listValveDataSingle));
-                        //listMdlBLEValve.add(modalBLEValveDataHolder);
                     }
-               /* for (ModalBLEValve modalBLEValveLocal : listMdlBLEValve) {
-
-                }*/
                     break;
                 }
             }
         }
 
-
-        if (listValves != null && listValves.size() > 0) {
+        if (FragDeviceDetails.listModalValveNameSelect != null && FragDeviceDetails.listModalValveNameSelect.size() > 0) {
             LinearLayoutManager gridLayoutManager = new LinearLayoutManager(mContext);
             reviValvesList.setLayoutManager(gridLayoutManager);
-            reviValvesList.setAdapter(new ValvesListAdapter(mContext, FragDeviceDetails.this, listValves, dvcMacAdd, position));
+            valveListAdp = new ValvesListAdapter(mContext, FragDeviceDetails.this, dvcMacAdd, position);
+            reviValvesList.setAdapter(valveListAdp);
+        } else {
+            if (listValvesNameOnly != null && listValvesNameOnly.size() > 0) {
+                listModalValveNameSelect=new ArrayList<>();
+                for (String valveName : listValvesNameOnly) {
+                    listModalValveNameSelect.add(new ModalVlNameSelect(valveName, isValveSelected));
+                    isValveSelected = false;
+                }
+                LinearLayoutManager gridLayoutManager = new LinearLayoutManager(mContext);
+                reviValvesList.setLayoutManager(gridLayoutManager);
+                valveListAdp = new ValvesListAdapter(mContext, FragDeviceDetails.this, dvcMacAdd, position);
+                reviValvesList.setAdapter(valveListAdp);
+            }
         }
 
 
@@ -642,11 +643,10 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
                 bundle.putString(AddEditSessionPlan.EXTRA_OPERATION_TYPE, "Edit");
                 //bundle.putString(AddEditSessionPlan.EXTRA_NAME, dvcName);
                 fragAddEditSesnPlan.setArguments(bundle);
-
                 fragAddEditSesnPlan.setTargetFragment(FragDeviceDetails.this, 101);
-
-                //Adding Fragment(FragAvailableDevices)
-                MyFragmentTransactions.replaceFragment(mContext, fragAddEditSesnPlan, Constant.ADD_EDIT, mContext.frm_lyt_container_int, true);
+                //Adding Fragment(FragAddEditSesnPlan)
+                titleDynamicAddEdit = "Edit ".concat("Plane (").concat(clickedValveName).concat(")");
+                MyFragmentTransactions.replaceFragment(mContext, fragAddEditSesnPlan, titleDynamicAddEdit, mContext.frm_lyt_container_int, true);
 
                 /*Intent intentAddNewSesnPln = new Intent(mContext, AddEditSessionPlan.class);
                 intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_NAME, dvcName);
@@ -670,11 +670,10 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
                 bundle.putString(AddEditSessionPlan.EXTRA_OPERATION_TYPE, "Add");
                 //bundle.putString(AddEditSessionPlan.EXTRA_NAME, dvcName);
                 fragAddEditSesnPlan.setArguments(bundle);
-
                 fragAddEditSesnPlan.setTargetFragment(FragDeviceDetails.this, 101);
-
+                titleDynamicAddEdit = "Add ".concat("Plane (").concat(clickedValveName).concat(")");
                 //Adding Fragment(FragAvailableDevices)
-                MyFragmentTransactions.replaceFragment(mContext, fragAddEditSesnPlan, Constant.ADD_EDIT, mContext.frm_lyt_container_int, true);
+                MyFragmentTransactions.replaceFragment(mContext, fragAddEditSesnPlan, titleDynamicAddEdit, mContext.frm_lyt_container_int, true);
 
               /*  Intent intentAddNewSesnPln = new Intent(mContext, AddEditSessionPlan.class);
                 intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_NAME, dvcName);
@@ -866,8 +865,8 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
             tvPauseText.setText("Pause");
             llEditValve.setEnabled(true);
             this.cmdName = "PAUSE";
-        }else if (cmdName.equals("FLUSH")) {
-            Toast.makeText(mContext, cmdName+" Started", Toast.LENGTH_SHORT).show();
+        } else if (cmdName.equals("FLUSH")) {
+            Toast.makeText(mContext, cmdName + " Started", Toast.LENGTH_SHORT).show();
            /* tvPauseText.setText("Pause");
             llEditValve.setEnabled(true);
             this.cmdName = "PAUSE";*/
@@ -896,10 +895,10 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
         llFlushValve = view.findViewById(R.id.llFlushValve);
         llHelpValve = view.findViewById(R.id.llHelpValve);
 //        tvDeviceName = view.findViewById(R.id.tvDeviceName);
-        tvDeviceName = mContext.toolbar_title;
-        desc_txt=mContext.desc_txt;
-        desc_txt.setText("Last Connected : 02-11-2017  11:00 am");
-        MySharedPreference.getInstance(getActivity()).setStringData(lAST_CONNECTED,"Last Connected : 02-11-2017  11:00 am");
+        tvDeviceName = mContext.tvToolbar_title;
+        tvDesc_txt = mContext.tvDesc_txt;
+        tvDesc_txt.setText("Last Connected : 02-11-2017  11:00 am");
+        MySharedPreference.getInstance(getActivity()).setStringData(lAST_CONNECTED, "Last Connected : 02-11-2017  11:00 am");
         reviValvesList = view.findViewById(R.id.reviValvesList);
         tvAddNewSesnPlan = view.findViewById(R.id.tvAddNewSesnPlan);
         tvPauseText = view.findViewById(R.id.tvPauseText);
@@ -946,9 +945,16 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
 
     @Override
     public void clickPassDataToAct(ArrayList<DataTransferModel> listValveDataSingleLocal, String clickedValveName, int position) {
-        this.clickedValveName = clickedValveName;
         this.listValveDataSingle = listValveDataSingleLocal;
-        this.position = position;
+        this.clickedValveName = clickedValveName;
+        //this.position = position;
+        checkValveDataUpdtUIFrmDB();
+    }
+
+    public void clickedPassDataToParent(ArrayList<DataTransferModel> listValveDataSingleLocal, String clickedValveName) {
+        this.listValveDataSingle = listValveDataSingleLocal;
+        this.clickedValveName = clickedValveName;
+        //this.position = position;
         checkValveDataUpdtUIFrmDB();
     }
 
@@ -1183,7 +1189,10 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
             if (data.getExtras().getString("dataKey").equals("Success")) {
                 this.listValveDataSingle = databaseHandler.getValveDataWithMACValveName(dvcMacAdd, clickedValveName);
                 checkValveDataUpdtUIFrmDB();
-                listValves.clear();
+               /* reviValvesList = null;
+                valveListAdp = null;
+                listValvesNameOnly.clear();
+                listModalValveNameSelect.clear();*/
             } else {
                 Toast.makeText(mContext, "Load data not succeeded", Toast.LENGTH_SHORT).show();
 

@@ -20,7 +20,7 @@ public class Constant {
 
 
     //Fragment titles
-    public static final String DASHBOARD_PEBBLE_HOME="V.1.2";
+    public static final String DASHBOARD_PEBBLE_HOME="V.1.3";
     public static final String DO_NOT_HAVE_DEVICE="Don't have Device";
     public static final String DEVICE_MAP="My Devices";
     public static final String AVAILABLE_DEVICES="Add New Device";
@@ -37,6 +37,8 @@ public class Constant {
     public static final String RECOMM="Recommendation";
     public static final String METER_DEVICE="Meter Device";
     public static final String AVAILABLE_DEVICE="Available Device";
+    public static final String MY_PROFILE="My Profile";
+
 
 
 

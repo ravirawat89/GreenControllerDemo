@@ -144,8 +144,8 @@ public class ConnectedQRAct extends AppCompatActivity {
                 /*databaseHandler.getContactsCount();
                 Toast.makeText(mContext, "", Toast.LENGTH_SHORT).show();
                 */
-                Intent intent = new Intent(mContext, QRScanAct.class);
-                startActivityForResult(intent, REQUEST_CODE_QR);
+                /*Intent intent = new Intent(mContext, QRScanAct.class);
+                startActivityForResult(intent, REQUEST_CODE_QR);*/
 
                 //zxingQRInitiateCamera();
             }

@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.netcommlabs.greencontroller.Constants;
 import com.netcommlabs.greencontroller.Fragments.FragAddEditSesnPlan;
 import com.netcommlabs.greencontroller.Fragments.FragAvailableDevices;
+import com.netcommlabs.greencontroller.Fragments.FragDashboardPebbleHome;
 import com.netcommlabs.greencontroller.Fragments.FragDeviceDetails;
 import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.model.DataTransferModel;
@@ -182,7 +183,9 @@ public class BLEAppLevel {
                         onSetTime();
                         if (myFragment instanceof FragAvailableDevices) {
                             ((FragAvailableDevices) myFragment).dvcHasExptdServices();
-                        }
+                        } /*else if (myFragment instanceof FragDashboardPebbleHome) {
+                            ((FragDashboardPebbleHome) myFragment).dvcHasExptdServcsDashboard();
+                        }*/
 
                         //progressDialog.dismiss();
                         //Adding Fragment(FragConnectedQR)
@@ -202,6 +205,8 @@ public class BLEAppLevel {
                     } else {
                         bluetooth_le_adapter.disconnect();
                         showMsg("Device does not have expected GATT services");
+                        bleAppLevel = null;
+                        ((FragAvailableDevices) myFragment).dvcDoesNotHasExptdServices();
                     }
                     break;
 
@@ -354,14 +359,16 @@ public class BLEAppLevel {
     }
 
     public void disconnectBLECompletely() {
-        if (bluetooth_le_adapter!=null && bluetooth_le_adapter.isConnected()) {
+        if (bluetooth_le_adapter != null && bluetooth_le_adapter.isConnected()) {
             try {
                 bluetooth_le_adapter.disconnect();
+                mContext.unbindService(service_connection);
+                bluetooth_le_adapter = null;
+                bleAppLevel=null;
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
-        mContext.unbindService(service_connection);
-        bluetooth_le_adapter = null;
     }
 
     public void cmdButtonMethod(FragDeviceDetails fragDeviceDetails, String cmdTypeName) {

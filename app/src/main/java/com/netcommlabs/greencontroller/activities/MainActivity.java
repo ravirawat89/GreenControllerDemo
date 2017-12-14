@@ -34,7 +34,6 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.netcommlabs.greencontroller.Fragments.FragDashboardPebbleHome;
 import com.netcommlabs.greencontroller.Fragments.MyFragmentTransactions;
 import com.netcommlabs.greencontroller.Interfaces.LocationDecetor;
-import com.netcommlabs.greencontroller.Interfaces.ResponseListener;
 import com.netcommlabs.greencontroller.R;
 import com.netcommlabs.greencontroller.adapters.NavListAdapter;
 import com.netcommlabs.greencontroller.model.ModalBLEDevice;
@@ -49,12 +48,9 @@ import com.netcommlabs.greencontroller.utilities.Navigation_Drawer_Data;
 import com.netcommlabs.greencontroller.utilities.NetworkUtils;
 import com.netcommlabs.greencontroller.utilities.RowDataArrays;
 
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.netcommlabs.greencontroller.utilities.Constant.AVAILABLE_DEVICES;
 import static com.netcommlabs.greencontroller.utilities.Constant.DEVICE_DETAILS;
 import static com.netcommlabs.greencontroller.utilities.Constant.DEVICE_MAP;
 import static com.netcommlabs.greencontroller.utilities.SharedPrefsConstants.ADDRESS;
@@ -76,8 +72,7 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
     private ProgressDialog progressDoalog;
     private Location mLastLocation = null;
     private String usersAddress = null;
-    public TextView toolbar_title;
-    public TextView desc_txt;
+    public TextView tvToolbar_title, tvDesc_txt, tvClearEditData;
     private boolean exit = false;
     private Fragment myFragment;
     private String dvcMacAddress;
@@ -120,8 +115,9 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
 
         frm_lyt_container_int = R.id.frm_lyt_container;
         llHamburgerIcon = findViewById(R.id.llHamburgerIcon);
-        toolbar_title = findViewById(R.id.toolbar_title);
-        desc_txt = findViewById(R.id.desc_txt);
+        tvToolbar_title = findViewById(R.id.toolbar_title);
+        tvClearEditData = findViewById(R.id.tvClearEditData);
+        tvDesc_txt = findViewById(R.id.desc_txt);
         nav_drawer_layout = findViewById(R.id.nav_drawer_layout);
         nav_revi_slider = findViewById(R.id.nav_revi_slider);
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
@@ -177,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
         if (progressDoalog != null) {
             progressDoalog.dismiss();
         }
-        AppAlertDialog.showDialogSelfFinish(this, "Error", msg);
+        //AppAlertDialog.showDialogSelfFinish(this, "Error", msg);
     }
 
     @Override
@@ -349,7 +345,7 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.nav_drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.nav_drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -357,23 +353,31 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
                 super.onBackPressed();
             } else {
                 if (!exit) {
-                    Toast.makeText(this, "Press back press to exit", Toast.LENGTH_SHORT).show();
                     exit = true;
+                    Toast.makeText(this, "Press back again to exit App", Toast.LENGTH_SHORT).show();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            exit = false;
+                        }
+                    }, 3000);
                 } else
                     finish();
             }
 
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(frm_lyt_container_int);
-            toolbar_title.setText(currentFragment.getTag());
-
+            tvToolbar_title.setText(currentFragment.getTag());
             backPressHeaderHandle(currentFragment.getTag());
-
 
             Log.e("@@current Fragment ", currentFragment.getTag());
         }
     }
 
     private void backPressHeaderHandle(String tag) {
+        //Except Add/Edit Fragment, this View will be gone
+        if (tvClearEditData.getVisibility() == View.VISIBLE) {
+            tvClearEditData.setVisibility(View.GONE);
+        }
         switch (tag) {
          /*   case AVAILABLE_DEVICES:
                 BLEAppLevel bleAppLevel = BLEAppLevel.getInstanceOnly();
@@ -384,16 +388,16 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
 
             case DEVICE_MAP:
                 if (MySharedPreference.getInstance(this).getStringData(ADDRESS).equalsIgnoreCase(""))
-                    desc_txt.setText(MySharedPreference.getInstance(this).getStringData(ADDRESS));
+                    tvDesc_txt.setText(MySharedPreference.getInstance(this).getStringData(ADDRESS));
                 break;
 
             case DEVICE_DETAILS:
                 if (MySharedPreference.getInstance(this).getStringData(lAST_CONNECTED).equalsIgnoreCase(""))
-                    desc_txt.setText(MySharedPreference.getInstance(this).getStringData(lAST_CONNECTED));
+                    tvDesc_txt.setText(MySharedPreference.getInstance(this).getStringData(lAST_CONNECTED));
                 break;
 
             default:
-                desc_txt.setText("");
+                tvDesc_txt.setText("");
                 break;
         }
     }

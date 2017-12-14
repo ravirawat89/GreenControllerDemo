@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -25,7 +24,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -35,24 +33,17 @@ import android.widget.Toast;
 import com.netcommlabs.greencontroller.Constants;
 import com.netcommlabs.greencontroller.R;
 import com.netcommlabs.greencontroller.activities.AddEditSessionPlan;
-import com.netcommlabs.greencontroller.activities.DeviceDetails;
 import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.model.DataTransferModel;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
 import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
-import com.netcommlabs.greencontroller.utilities.Constant;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.SimpleTimeZone;
-import java.util.TimeZone;
 
-import static android.content.Context.BIND_AUTO_CREATE;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
@@ -83,7 +74,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
     private int etInputDursnPlanInt = 0;
     private int etQuantPlanInt = 0;
     private int etInputDischrgPntsInt = 0;
-    private TextView tvORText/*, tvTitleTop, tvClearEditData*/;
+    private TextView tvORText/*, tvTitleTop, tvClearEditData*/, tvClearEditData;
 
 
     //Mr. Vijay
@@ -101,7 +92,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
     private static int dataSendingIndex = 0;
     private static boolean oldTimePointsErased = FALSE;
     private int plusVisibleOf;
-    TextView header;
+    //TextView header;
 
     @Override
     public void onAttach(Context context) {
@@ -138,8 +129,11 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         clickedValveName = bundle.getString(EXTRA_VALVE_NAME_DB);
         operationType = bundle.getString(AddEditSessionPlan.EXTRA_OPERATION_TYPE);
         if (operationType.equals("Edit")) {
+            tvClearEditData = mContext.tvClearEditData;
             listSingleValveData = (ArrayList<DataTransferModel>) bundle.getSerializable(AddEditSessionPlan.EXTRA_VALVE_EDITABLE_DATA);
             setEditableValveDataToUI();
+        } else {
+
         }
 //        tvTitleTop.setText(operationType + " Session Plan" + "(" + clickedValveName + ")");
 
@@ -168,7 +162,6 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         tvFriEvent = view.findViewById(R.id.tvFriEvent);
         tvSatEvent = view.findViewById(R.id.tvSatEvent);
 //        tvClearEditData = view.findViewById(R.id.tvClearEditData);
-       header= mContext.desc_txt;
 
         tvSunFirst = view.findViewById(R.id.tvSunFirst);
         tvSunSecond = view.findViewById(R.id.tvSunSecond);
@@ -475,14 +468,8 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
     }
 
     private void setEditableValveDataToUI() {
- /*       tvClearEditData.setVisibility(View.VISIBLE);
+        tvClearEditData.setVisibility(View.VISIBLE);
         tvClearEditData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialogConfirmAction();
-            }
-        }); */ header.setVisibility(View.VISIBLE);
-        header.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialogConfirmAction();
@@ -895,7 +882,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         etDurationPlan.setText("");
         etQuantityPlan.setText("");
 //        tvClearEditData.setVisibility(View.GONE);
-        header.setVisibility(View.GONE);
+        tvClearEditData.setVisibility(View.GONE);
 
         tvSunFirst.setVisibility(View.GONE);
         tvSunSecond.setVisibility(View.GONE);

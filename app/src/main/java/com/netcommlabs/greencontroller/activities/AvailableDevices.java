@@ -32,7 +32,6 @@ import android.widget.Toast;
 import com.netcommlabs.greencontroller.Constants;
 import com.netcommlabs.greencontroller.InterfaceValveAdapter;
 import com.netcommlabs.greencontroller.R;
-import com.netcommlabs.greencontroller.adapters.AdptrAvailableDVCs;
 import com.netcommlabs.greencontroller.model.DataTransferModel;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
 
@@ -43,9 +42,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
-
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 
 public class AvailableDevices extends AppCompatActivity implements InterfaceValveAdapter {
 

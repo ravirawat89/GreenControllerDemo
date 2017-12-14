@@ -1,15 +1,11 @@
 package com.netcommlabs.greencontroller.Fragments;
 
+import android.app.ProgressDialog;
 import android.support.v4.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,18 +14,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.netcommlabs.greencontroller.R;
-import com.netcommlabs.greencontroller.activities.DeviceActivity;
-import com.netcommlabs.greencontroller.activities.DontHaveDvc;
 import com.netcommlabs.greencontroller.activities.MainActivity;
-import com.netcommlabs.greencontroller.adapters.NavListAdapter;
 import com.netcommlabs.greencontroller.model.ModalBLEDevice;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
-import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.Constant;
-import com.netcommlabs.greencontroller.utilities.Navigation_Drawer_Data;
-import com.netcommlabs.greencontroller.utilities.RowDataArrays;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,7 +31,9 @@ public class FragDashboardPebbleHome extends Fragment {
     private View view;
     private TextView tvPebbleAsset;
     private LinearLayout llMyDevices, llStatistics;
-
+    private Fragment myFragment;
+    private String dvcMacAddress;
+    ProgressDialog progressDialog;
 
     @Override
     public void onAttach(Context context) {
@@ -52,7 +43,7 @@ public class FragDashboardPebbleHome extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.navigation_pebble, null);
+        view = inflater.inflate(R.layout.frag_pebble_statis_dash, null);
 
         initBase(view);
         initListeners();
@@ -62,6 +53,20 @@ public class FragDashboardPebbleHome extends Fragment {
 
 
     private void initBase(View view) {
+        /*DatabaseHandler databaseHandler = new DatabaseHandler(mContext);
+        List<ModalBLEDevice> listBLEDvcFromDB = databaseHandler.getAllBLEDvcs();
+        if (listBLEDvcFromDB != null && listBLEDvcFromDB.size() > 0) {
+
+            progressDialog = new ProgressDialog(mContext);
+            progressDialog.setMessage("Please Wait...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+
+            dvcMacAddress = listBLEDvcFromDB.get(0).getDvcMacAddrs();
+            myFragment = FragDashboardPebbleHome.this;
+            BLEAppLevel.getInstance(mContext, myFragment, dvcMacAddress, progressDialog);
+        }*/
+
         tvPebbleAsset = view.findViewById(R.id.tvPebbleAsset);
         Typeface tvPebbleFont = Typeface.createFromAsset(mContext.getAssets(), "fonts/CaviarDreams_Bold.ttf");
         tvPebbleAsset.setTypeface(tvPebbleFont);
@@ -96,4 +101,10 @@ public class FragDashboardPebbleHome extends Fragment {
             }
         });
     }
+
+    /*public void dvcHasExptdServcsDashboard() {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+        }
+    }*/
 }

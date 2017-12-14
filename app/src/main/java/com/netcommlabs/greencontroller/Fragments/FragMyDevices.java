@@ -22,8 +22,6 @@ import android.widget.Toast;
 
 import com.netcommlabs.greencontroller.R;
 import com.netcommlabs.greencontroller.activities.AddAddressActivity;
-import com.netcommlabs.greencontroller.activities.AvailableDevices;
-import com.netcommlabs.greencontroller.activities.DashboardPebbleHome;
 import com.netcommlabs.greencontroller.activities.DeviceDetails;
 import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.adapters.DeviceAddressAdapter;
@@ -98,6 +96,7 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
     }
 
     private void initBase(View view) {
+        FragDeviceDetails.listModalValveNameSelect=null;
         recyclerView = view.findViewById(R.id.recycler_view);
         ll_add_new = view.findViewById(R.id.ll_add_new);
 //        llScrnHeader = view.findViewById(R.id.llScrnHeader);
@@ -124,8 +123,8 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
         tvDeviceNameDyn = view.findViewById(R.id.tvDeviceNameDyn);
         tvValveCount = view.findViewById(R.id.tvValveCount);
 //        tvShowAddressTop = view.findViewById(R.id.tvShowAddressTop);
-        tvShowAddressTop =mContext.desc_txt;
-        toolbar_tile =mContext.toolbar_title;
+        tvShowAddressTop =mContext.tvDesc_txt;
+        toolbar_tile =mContext.tvToolbar_title;
         toolbar_tile.setText("My Devices");
 
 //        llScrnHeader.setOnClickListener(this);

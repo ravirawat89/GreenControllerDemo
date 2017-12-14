@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.netcommlabs.greencontroller.Fragments.FragAvailableDevices;
 import com.netcommlabs.greencontroller.Fragments.FragDontHvDevice;
@@ -29,7 +28,6 @@ import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
 import com.netcommlabs.greencontroller.utilities.Constant;
 import com.netcommlabs.greencontroller.utilities.Navigation_Drawer_Data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -70,7 +68,7 @@ public class NavListAdapter extends RecyclerView.Adapter<NavListAdapter.MyViewHo
                     switch (clickedNavItem) {
                         case "My Profile":
                             //Replacing Fragment(FragAddAddress)
-                            MyFragmentTransactions.replaceFragment(mContext, new FragMyProfile(), Constant.ADD_ADDRESS, mContext.frm_lyt_container_int, false);
+                            MyFragmentTransactions.replaceFragment(mContext, new FragMyProfile(), Constant.MY_PROFILE, mContext.frm_lyt_container_int, false);
                             break;
                         case "My Devices":
                             DatabaseHandler databaseHandler = new DatabaseHandler(mContext);
