@@ -197,7 +197,7 @@ public class FragAddAddress extends Fragment {
                         Activity.RESULT_OK,
                         new Intent().putExtra("mdlAddressLocation",mdlLocationAddress)
                 );
-                getActivity().onBackPressed();
+                mContext.onBackPressed();
                 //intent.putExtra("Data", mdlLocationAddress);
                 //setResult(RESULT_CODE_ADDRESS, intent);
                 //mContext.finish();

@@ -56,7 +56,7 @@ public class DeviceAddressAdapter extends RecyclerView.Adapter<DeviceAddressAdap
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mContext).inflate(R.layout.device_address_item, parent, false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.row_map_addresss, parent, false);
         return new MyViewHolder(view);
     }
 

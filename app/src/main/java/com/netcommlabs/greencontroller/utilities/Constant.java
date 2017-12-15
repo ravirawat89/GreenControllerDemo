@@ -36,7 +36,7 @@ public class Constant {
     public static final String DEVICE_STATS="Device Statistics";
     public static final String RECOMM="Recommendation";
     public static final String METER_DEVICE="Meter Device";
-    public static final String AVAILABLE_DEVICE="Available Device";
+    public static final String AVAILABLE_DEVICE="Find & Connect";
     public static final String MY_PROFILE="My Profile";
 
 

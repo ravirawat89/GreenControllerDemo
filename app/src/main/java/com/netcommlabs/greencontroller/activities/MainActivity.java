@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Build;
 import android.os.Handler;
@@ -51,6 +52,7 @@ import com.netcommlabs.greencontroller.utilities.RowDataArrays;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.netcommlabs.greencontroller.utilities.Constant.DASHBOARD_PEBBLE_HOME;
 import static com.netcommlabs.greencontroller.utilities.Constant.DEVICE_DETAILS;
 import static com.netcommlabs.greencontroller.utilities.Constant.DEVICE_MAP;
 import static com.netcommlabs.greencontroller.utilities.SharedPrefsConstants.ADDRESS;
@@ -104,8 +106,6 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
         } else {
             //Toast.makeText(mContext, "No need to ask runtime permissions", Toast.LENGTH_SHORT).show();
             if (NetworkUtils.isConnected(this)) {
-                //Location work starts
-                getLocation();
                 //Bluetooth work starts
                 startBTWork();
             } else {
@@ -214,8 +214,6 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
         } else {
             //Toast.makeText(mContext, "All permissions already granted", Toast.LENGTH_SHORT).show();
             if (NetworkUtils.isConnected(this)) {
-                //Location work starts
-                getLocation();
                 //Bluetooth work starts
                 startBTWork();
             } else {
@@ -238,8 +236,6 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
                     if (fineLocation && cameraPermission) {
                         //Toast.makeText(mContext, "Thanks for granting permissions", Toast.LENGTH_SHORT).show();
                         if (NetworkUtils.isConnected(this)) {
-                            //Location work starts
-                            getLocation();
                             //Bluetooth work starts
                             startBTWork();
                         } else {
@@ -261,6 +257,8 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
             Toast.makeText(mContext, "Device don't support Bluetooth", Toast.LENGTH_SHORT).show();
         } else {
             if (mBluetoothAdapter.isEnabled()) {
+                //Now starts Location work
+                getLocation();
                 //startDvcDiscovery();
                 //Toast.makeText(mContext, "Bluetooth is enabled", Toast.LENGTH_SHORT).show();
                 return;
@@ -283,23 +281,26 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case LocationUtils.LocationTag:
-                if (resultCode == Activity.RESULT_OK) {
-                    //Toast.makeText(mContext, "GPS Enabled", Toast.LENGTH_SHORT).show();
-                } else if (resultCode == Activity.RESULT_CANCELED) {
-                    Toast.makeText(mContext, "GPS enabling is mandatory", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-                break;
-            case REQUEST_CODE_ENABLE:
-                if (resultCode == Activity.RESULT_OK) {
-                    //Toast.makeText(mContext, "Bluetooth is enabled...", Toast.LENGTH_SHORT).show();
-                } else if (resultCode == Activity.RESULT_CANCELED) {
-                    Toast.makeText(mContext, "Bluetooth enabling is mandatory", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-                break;
+        if (requestCode == REQUEST_CODE_ENABLE) {
+            if (resultCode == Activity.RESULT_OK) {
+                Log.e("GGG ", "Bluetooth is enabled...");
+                //Now starts Location work
+                getLocation();
+                //Toast.makeText(mContext, "Bluetooth is enabled...", Toast.LENGTH_SHORT).show();
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                Toast.makeText(mContext, "Bluetooth enabling is mandatory", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
+
+        if (requestCode == LocationUtils.LocationTag) {
+            if (resultCode == Activity.RESULT_OK) {
+                Log.e("GGG ", "GPS is enabled...");
+                //Toast.makeText(mContext, "GPS Enabled", Toast.LENGTH_SHORT).show();
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                Toast.makeText(mContext, "GPS enabling is mandatory", Toast.LENGTH_SHORT).show();
+                finish();
+            }
         }
     }
 
@@ -402,5 +403,18 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
         }
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        int countFrag = getSupportFragmentManager().getBackStackEntryCount();
+        if (countFrag > 1) {
+            for (int i = countFrag; i > 1; i--) {
+                getSupportFragmentManager().popBackStack();
+            }
 
+            Log.e("GGG Frag count ", getSupportFragmentManager().getBackStackEntryCount() + "");
+            //Dashboard title
+            tvToolbar_title.setText(DASHBOARD_PEBBLE_HOME);
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package com.netcommlabs.greencontroller.Fragments;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -21,7 +22,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.netcommlabs.greencontroller.R;
-import com.netcommlabs.greencontroller.activities.AddAddressActivity;
 import com.netcommlabs.greencontroller.activities.DeviceDetails;
 import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.adapters.DeviceAddressAdapter;
@@ -189,8 +189,15 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
         int id = view.getId();
         switch (id) {
             case R.id.ll_add_new:
-                Intent intent = new Intent(mContext, AddAddressActivity.class);
-                startActivityForResult(intent, 100);
+                FragAddAddress fragAddAddress = new FragAddAddress();
+                //First child---then parent
+                fragAddAddress.setTargetFragment(FragMyDevices.this, 101);
+                //Adding Fragment(FragAddAddress)
+                MyFragmentTransactions.replaceFragment(mContext, fragAddAddress, Constant.ADD_ADDRESS, mContext.frm_lyt_container_int, true);
+
+
+               /* Intent intent = new Intent(mContext, AddAddressActivity.class);
+                startActivityForResult(intent, 100);*/
                 break;
             case R.id.ll_1st:
                 FragDeviceDetails fragDeviceDetails = new FragDeviceDetails();
@@ -447,6 +454,20 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
         ll_1st.setOnClickListener(this);
         ll_1st.setOnLongClickListener(this);
         ll_1st.setBackgroundResource(R.drawable.round_back_shadow_green_small);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 101 && resultCode == Activity.RESULT_OK) {
+            if (data.getSerializableExtra("mdlAddressLocation") != null) {
+                mdlLocationAddress = (MdlLocationAddress) data.getSerializableExtra("mdlAddressLocation");
+                Toast.makeText(mContext, "Saved address is "+mdlLocationAddress.getAddress_name(), Toast.LENGTH_SHORT).show();
+
+            } else {
+                Toast.makeText(mContext, "No data from address", Toast.LENGTH_SHORT).show();
+
+            }
+        }
     }
 
 }

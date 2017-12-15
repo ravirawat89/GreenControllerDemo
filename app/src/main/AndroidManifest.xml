@@ -18,7 +18,8 @@
         android:theme="@style/FullScreen">
         <activity
             android:name=".activities.MainActivity"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|keyboard">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -45,6 +46,7 @@
         <activity
             android:name=".activities.AddAddressActivity"
             android:screenOrientation="landscape"></activity>
+
         <activity
             android:name=".activities.DeviceActivity"
             android:screenOrientation="landscape"></activity>

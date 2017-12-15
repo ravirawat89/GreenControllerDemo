@@ -346,7 +346,6 @@
                     android:background="@drawable/rect_border_light_line"
                     android:hint="Enter other address name"
                     android:paddingLeft="@dimen/_10sdp"
-                    android:imeOptions="flagNoExtractUi"
                     android:visibility="gone" />
 
             </LinearLayout>
