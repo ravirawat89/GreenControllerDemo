@@ -13,6 +13,7 @@ public class MySharedPreference {
     public static final String MyPREFERENCES = "greenContrllerPrefs";
     private SharedPreferences sharedpreferences;
     private Context mContext;
+    private String keySetMacAd = "macAddkey";
 
 
     public static MySharedPreference getInstance(Context mContext) {
@@ -50,4 +51,13 @@ public class MySharedPreference {
         return sharedpreferences.getBoolean(key, false);
     }
 
+    public void setConnectedDvcMacAdd(String macAdd) {
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        editor.putString(this.keySetMacAd, macAdd);
+        editor.commit();
+    }
+
+    public String getConnectedDvcMacAdd() {
+        return sharedpreferences.getString(this.keySetMacAd, null);
+    }
 }

@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothGattService;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -15,8 +16,8 @@ import android.widget.Toast;
 import com.netcommlabs.greencontroller.Constants;
 import com.netcommlabs.greencontroller.Fragments.FragAddEditSesnPlan;
 import com.netcommlabs.greencontroller.Fragments.FragAvailableDevices;
-import com.netcommlabs.greencontroller.Fragments.FragDashboardPebbleHome;
 import com.netcommlabs.greencontroller.Fragments.FragDeviceDetails;
+import com.netcommlabs.greencontroller.Fragments.FragMyDevices;
 import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.model.DataTransferModel;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
@@ -45,7 +46,7 @@ public class BLEAppLevel {
     private BleAdapterService bluetooth_le_adapter;
     private boolean back_requested = false;
     private Fragment myFragment;
-    private boolean isBLEContected = false;
+    private boolean isBLEConnected = false;
     private int alert_level;
     private String cmdTypeName;
     private static int dataSendingIndex = 0;
@@ -54,6 +55,7 @@ public class BLEAppLevel {
     private int etInputDursnPlanInt = 0;
     private int etQuantPlanInt = 0;
     private int etInputDischrgPntsInt = 0;
+    private boolean isServiceBound = false;
 
 
     public static BLEAppLevel getInstance(MainActivity mContext, Fragment myFragment, String macAddress) {
@@ -80,6 +82,7 @@ public class BLEAppLevel {
     private void initBLEDevice() {
         Intent gattServiceIntent = new Intent(mContext, BleAdapterService.class);
         mContext.bindService(gattServiceIntent, service_connection, BIND_AUTO_CREATE);
+        isServiceBound = true;
     }
 
     private final ServiceConnection service_connection = new ServiceConnection() {
@@ -90,7 +93,7 @@ public class BLEAppLevel {
             if (bluetooth_le_adapter != null) {
                 bluetooth_le_adapter.connect(macAddress);
             } else {
-                showMsg("onConnect: bluetooth_le_adapter=null");
+                //showMsg("onConnect: bluetooth_le_adapter=null");
             }
         }
 
@@ -112,38 +115,22 @@ public class BLEAppLevel {
                 case BleAdapterService.MESSAGE:
                     bundle = msg.getData();
                     String text = bundle.getString(BleAdapterService.PARCEL_TEXT);
-                    showMsg(text);
+                    //showMsg(text);
                     break;
-
                 case BleAdapterService.GATT_CONNECTED:
-
-                    //((Button) findViewById(R.id.connectButton)).setEnabled(false);
                     //we're connected
                     showMsg("CONNECTED");
-                    // enable the LOW/MID/HIGH alert level selection buttons
-                   /* ((Button)findViewById(R.id.lowButton)).setEnabled(true);
-                    ((Button) findViewById(R.id.midButton)).setEnabled(true);
-                    ((Button) findViewById(R.id.highButton)).setEnabled(true);*/
                     bluetooth_le_adapter.discoverServices();
-
                     break;
-
                 case BleAdapterService.GATT_DISCONNECT:
-                    //((Button) findViewById(R.id.connectButton)).setEnabled(true);
                     //we're disconnected
-                    isBLEContected = false;
-                    showMsg("DISCONNECTED");
-                   /* // hide the rssi distance colored rectangle
-                    ((LinearLayout) findViewById(R.id.rectangle)).setVisibility(View.INVISIBLE);
-                    // disable the LOW/MID/HIGH alert level selection buttons
-                    ((Button) findViewById(R.id.lowButton)).setEnabled(false);
-                    ((Button) findViewById(R.id.midButton)).setEnabled(false);
-                    ((Button) findViewById(R.id.highButton)).setEnabled(false);*/
+                    isBLEConnected = false;
+                    //bluetooth_le_adapter = null;
+                    showMsg("DISCONNECTED_ACK");
                     if (back_requested) {
                         //finish();
                     }
                     break;
-
                 case BleAdapterService.GATT_SERVICES_DISCOVERED:
                     //validate services and if ok...
                     List<BluetoothGattService> slist = bluetooth_le_adapter.getSupportedGattServices();
@@ -179,29 +166,20 @@ public class BLEAppLevel {
                     }
                     if (time_point_service_present && current_time_service_present && pots_service_present && battery_service_present) {
                         showMsg("Device has expected services");
-                        isBLEContected = true;
+                        //Recent connected device saved in SP
+                        MySharedPreference.getInstance(mContext).setConnectedDvcMacAdd(macAddress);
+                        isBLEConnected = true;
                         onSetTime();
                         if (myFragment instanceof FragAvailableDevices) {
                             ((FragAvailableDevices) myFragment).dvcHasExptdServices();
-                        } /*else if (myFragment instanceof FragDashboardPebbleHome) {
-                            ((FragDashboardPebbleHome) myFragment).dvcHasExptdServcsDashboard();
-                        }*/
-
-                        //progressDialog.dismiss();
-                        //Adding Fragment(FragConnectedQR)
-                        //MyFragmentTransactions.replaceFragment(mContext, new FragConnectedQR(), Constant.CONNECTED_QR, mContext.frm_lyt_container_int, true);
-
-
-                       /* Intent intentAddWtrngProfile = new Intent(mContext, ConnectedQRAct.class);
-                        intentAddWtrngProfile.putExtra(AddEditSessionPlan.EXTRA_NAME, deviceName);
-                        intentAddWtrngProfile.putExtra(AddEditSessionPlan.EXTRA_ID, macAddress);
-                        mContext.startActivity(intentAddWtrngProfile);
-
-                        mContext.unbindService(service_connection);
+                        }
+                        if (myFragment instanceof FragMyDevices) {
+                            ((FragMyDevices) myFragment).connectedChangeBLEBackground();
+                        }
+                        /*mContext.unbindService(service_connection);
                         bluetooth_le_adapter = null;
-                        mContext.finish();*/
-                        //onSetTime();
-
+                        mContext.finish();
+                        onSetTime();*/
                     } else {
                         bluetooth_le_adapter.disconnect();
                         showMsg("Device does not have expected GATT services");
@@ -209,7 +187,6 @@ public class BLEAppLevel {
                         ((FragAvailableDevices) myFragment).dvcDoesNotHasExptdServices();
                     }
                     break;
-
                 case BleAdapterService.GATT_CHARACTERISTIC_READ:
                     bundle = msg.getData();
                     Log.d(Constants.TAG, "Service=" + bundle.get(BleAdapterService.PARCEL_SERVICE_UUID).toString().toUpperCase() + " Characteristic=" + bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase());
@@ -223,7 +200,6 @@ public class BLEAppLevel {
                         }
                     }
                     break;
-
                 case BleAdapterService.GATT_CHARACTERISTIC_WRITTEN:
                     bundle = msg.getData();
                     //ACK for command button valve
@@ -296,11 +272,7 @@ public class BLEAppLevel {
     }
 
     public boolean getBLEConnectedOrNot() {
-        if (isBLEContected) {
-            return true;
-        } else {
-            return false;
-        }
+        return isBLEConnected;
     }
 
     public void onSetTime() {
@@ -359,12 +331,16 @@ public class BLEAppLevel {
     }
 
     public void disconnectBLECompletely() {
-        if (bluetooth_le_adapter != null && bluetooth_le_adapter.isConnected()) {
+        if (bluetooth_le_adapter != null) {
             try {
-                bluetooth_le_adapter.disconnect();
-                mContext.unbindService(service_connection);
-                bluetooth_le_adapter = null;
-                bleAppLevel=null;
+                bleAppLevel = null;
+                if (isServiceBound) {
+                    mContext.unbindService(service_connection);
+                    isServiceBound = false;
+                }
+                if (getBLEConnectedOrNot()) {
+                    bluetooth_le_adapter.disconnect();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

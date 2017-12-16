@@ -148,7 +148,7 @@
 
 
                     <LinearLayout
-                        android:id="@+id/ll_1st"
+                        android:id="@+id/llPebbleRoundBack"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginTop="@dimen/_8sdp"

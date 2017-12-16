@@ -87,7 +87,7 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
         ll_add_new = (LinearLayout) findViewById(R.id.ll_add_new);
 //        llScrnHeader = findViewById(R.id.llScrnHeader);
 
-        ll_1st = (LinearLayout) findViewById(R.id.ll_1st);
+        ll_1st = (LinearLayout) findViewById(R.id.llPebbleRoundBack);
         ll_2st = (LinearLayout) findViewById(R.id.ll_2st);
         ll_3st = (LinearLayout) findViewById(R.id.ll_3st);
         ll_4st = (LinearLayout) findViewById(R.id.ll_4st);
@@ -183,7 +183,7 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
                 Intent intent = new Intent(this, AddAddressActivity.class);
                 startActivityForResult(intent, 100);
                 break;
-            case R.id.ll_1st:
+            case R.id.llPebbleRoundBack:
                 Intent intentDvcDetails = new Intent(mContext, DeviceDetails.class);
                 intentDvcDetails.putExtra(DeviceDetails.EXTRA_DVC_NAME, device_name);
                 intentDvcDetails.putExtra(DeviceDetails.EXTRA_DVC_MAC, device_address);
@@ -225,7 +225,7 @@ public class DeviceActivity extends AppCompatActivity implements View.OnClickLis
     public boolean onLongClick(View view) {
         int id = view.getId();
         switch (id) {
-            case R.id.ll_1st:
+            case R.id.llPebbleRoundBack:
                 showpopupLongClick();
                 break;
             case R.id.ll_2st:

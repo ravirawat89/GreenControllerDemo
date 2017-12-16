@@ -2,6 +2,7 @@ package com.netcommlabs.greencontroller.Fragments;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -17,27 +18,33 @@ import org.w3c.dom.Text;
  */
 
 public class MyFragmentTransactions {
+
     static TextView tvClearEditDataLocal;
 
     public static void replaceFragment(Context context, Fragment fragment, String tag, int layout, Boolean isAddFrag) {
-        FragmentTransaction ft = ((AppCompatActivity) context).getSupportFragmentManager().beginTransaction();
+        MainActivity mContext = (MainActivity) context;
+
+        FragmentManager myFragmentManager = mContext.getSupportFragmentManager();
+        FragmentTransaction ft = myFragmentManager.beginTransaction();
         ft.replace(layout, fragment, tag);
         ft.addToBackStack(tag);
 
+        int backStackCount = myFragmentManager.getBackStackEntryCount();
         if (!isAddFrag) {
-            if (((AppCompatActivity) context).getSupportFragmentManager().getBackStackEntryCount() > 1) {
-                for (int i = ((AppCompatActivity) context).getSupportFragmentManager().getBackStackEntryCount(); i > 1; i--) {
-                    ((AppCompatActivity) context).getSupportFragmentManager().popBackStack();
+            if (backStackCount > 1) {
+                for (int i = backStackCount; i > 1; i--) {
+                    myFragmentManager.popBackStack();
                 }
             }
-
         }
-        Log.e("FragmentCount", "" + ((AppCompatActivity) context).getSupportFragmentManager().getBackStackEntryCount() + " Tag " + tag);
         ft.commit();
 
-        ((MainActivity) context).tvToolbar_title.setText(tag);
-        ((MainActivity) context).tvDesc_txt.setText("");
-        tvClearEditDataLocal = ((MainActivity) context).tvClearEditData;
+        myFragmentManager.executePendingTransactions();
+        Log.e("$$$ FRAG COUNT", "" + myFragmentManager.getBackStackEntryCount() + ", TAG: " + tag);
+
+        mContext.tvToolbar_title.setText(tag);
+        mContext.tvDesc_txt.setText("");
+        tvClearEditDataLocal = mContext.tvClearEditData;
         if (tvClearEditDataLocal.getVisibility() == View.VISIBLE) {
             tvClearEditDataLocal.setVisibility(View.GONE);
         }

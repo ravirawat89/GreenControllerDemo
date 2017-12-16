@@ -37,7 +37,9 @@ import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.model.DataTransferModel;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
+import com.netcommlabs.greencontroller.utilities.AppAlertDialog;
 import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
+import com.netcommlabs.greencontroller.utilities.MySharedPreference;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -75,7 +77,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
     private int etQuantPlanInt = 0;
     private int etInputDischrgPntsInt = 0;
     private TextView tvORText/*, tvTitleTop, tvClearEditData*/, tvClearEditData;
-
+    private Fragment myRequestedFrag;
 
     //Mr. Vijay
     public static final String EXTRA_NAME = "name";
@@ -92,6 +94,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
     private static int dataSendingIndex = 0;
     private static boolean oldTimePointsErased = FALSE;
     private int plusVisibleOf;
+    private BLEAppLevel bleAppLevel;
     //TextView header;
 
     @Override
@@ -111,6 +114,17 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
     }
 
     private void initBase(View view) {
+        //Check BLE Connection
+        myRequestedFrag = FragAddEditSesnPlan.this;
+        bleAppLevel = BLEAppLevel.getInstanceOnly();
+        if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+            //setConnectionIsDone();
+            //Toast.makeText(mContext, "BLE connected", Toast.LENGTH_SHORT).show();
+        } else {
+            AppAlertDialog.dialogBLENotConnected(mContext, myRequestedFrag, bleAppLevel);
+            //Toast.makeText(mContext, "BLE not connected", Toast.LENGTH_SHORT).show();
+        }
+
         findViews(view);
 
         mapDayTimings = new HashMap<>();
@@ -452,12 +466,19 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
                 //Toast.makeText(mContext, "Load check", Toast.LENGTH_SHORT).show();
 
                 //ArrayList list=listSingleValveData;
+               /* bleAppLevel=BLEAppLevel.getInstanceOnly();
+                if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+                    //dialogSTOPConfirm();
+                } else {
 
-                BLEAppLevel bleAppLevel = BLEAppLevel.getInstanceOnly();
+                }*/
+
+                bleAppLevel = BLEAppLevel.getInstanceOnly();
                 if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
                     bleAppLevel.eraseOldTimePoints(FragAddEditSesnPlan.this, etQuantPlanInt, etInputDursnPlanInt, etInputDischrgPntsInt, listSingleValveData);//This is automatically followed by loading new time points
                 } else {
-                    Toast.makeText(mContext, "BLE lost connection", Toast.LENGTH_SHORT).show();
+                    AppAlertDialog.dialogBLENotConnected(mContext, myRequestedFrag, bleAppLevel);
+                    //Toast.makeText(mContext, "BLE lost connection", Toast.LENGTH_SHORT).show();
                 }
 
                 //eraseOldTimePoints();

@@ -30,6 +30,7 @@ import com.netcommlabs.greencontroller.model.MdlLocationAddress;
 import com.netcommlabs.greencontroller.model.ModalBLEDevice;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
+import com.netcommlabs.greencontroller.utilities.AppAlertDialog;
 import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.Constant;
 import com.netcommlabs.greencontroller.utilities.MySharedPreference;
@@ -51,7 +52,7 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
     private DeviceAddressAdapter mAdapter;
     private List<DeviceAddressModel> list;
     private LinearLayout ll_add_new;
-    private LinearLayout ll_1st;
+    private LinearLayout llPebbleRoundBack;
     private LinearLayout ll_2st;
     private LinearLayout ll_3st;
     private LinearLayout ll_4st;
@@ -75,10 +76,13 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
     private ImageView iv_next;
     private DatabaseHandler databaseHandler;
     private int valvesNum;
-    private TextView tvDeviceNameDyn, tvValveCount, tvShowAddressTop,toolbar_tile;
+    private TextView tvDeviceNameDyn, tvValveCount, tvShowAddressTop, toolbar_tile;
     private MdlLocationAddress mdlLocationAddress;
     private String addressComplete;
     private List<String> listLocAddressType;
+    private BLEAppLevel bleAppLevel;
+    private Fragment myRequestedFrag;
+    //private boolean isBLEConnectedOnFrag = false;
 
     @Override
     public void onAttach(Context context) {
@@ -96,12 +100,59 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
     }
 
     private void initBase(View view) {
-        FragDeviceDetails.listModalValveNameSelect=null;
+        findFragViews(view);
+        myRequestedFrag = FragMyDevices.this;
+
+        bleAppLevel = BLEAppLevel.getInstanceOnly();
+        if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+            //Change background on BLE connected
+            llPebbleRoundBack.setBackgroundResource(R.drawable.round_back_shadow_green_small);
+            //isBLEConnectedOnFrag = true;
+        } else {
+            //isBLEConnectedOnFrag = false;
+            AppAlertDialog.dialogBLENotConnected(mContext, myRequestedFrag, bleAppLevel);
+        }
+
+        listenersOnViews();
+
+        FragDeviceDetails.listModalValveNameSelect = null;
+
+        tvShowAddressTop = mContext.tvDesc_txt;
+        toolbar_tile = mContext.tvToolbar_title;
+        toolbar_tile.setText("My Devices");
+
+        //Getting BLE data from DB
+        databaseHandler = new DatabaseHandler(mContext);
+        List<ModalBLEDevice> listModalBleDevice = databaseHandler.getAllBLEDvcs();
+        rl_1st.setVisibility(View.VISIBLE);
+
+        /*device_name ="Pebble";
+        device_address ="98:4F:EE:10:87:66";
+        valvesNum = 8;*/
+        device_name = listModalBleDevice.get(0).getName();
+        device_address = listModalBleDevice.get(0).getDvcMacAddrs();
+        mdlLocationAddress = listModalBleDevice.get(0).getMdlLocationAddress();
+        addressComplete = mdlLocationAddress.getFlat_num() + ", " + mdlLocationAddress.getStreetName() + ", " + mdlLocationAddress.getLocality_landmark() + ", " + mdlLocationAddress.getPincode() + ", " + mdlLocationAddress.getCity() + ", " + mdlLocationAddress.getState();
+        tvShowAddressTop.setText(addressComplete);
+        MySharedPreference.getInstance(getActivity()).setStringData(ADDRESS, addressComplete);
+        listLocAddressType = new ArrayList<>();
+        listLocAddressType.add(mdlLocationAddress.getAddress_name());
+        valvesNum = listModalBleDevice.get(0).getValvesNum();
+
+        tvDeviceNameDyn.setText(device_name + "\n" + device_address);
+        tvValveCount.setText(valvesNum + "");
+        //initController();
+
+        setRecyclerViewAdapter();
+
+    }
+
+    private void findFragViews(View view) {
         recyclerView = view.findViewById(R.id.recycler_view);
         ll_add_new = view.findViewById(R.id.ll_add_new);
 //        llScrnHeader = view.findViewById(R.id.llScrnHeader);
 
-        ll_1st = view.findViewById(R.id.ll_1st);
+        llPebbleRoundBack = view.findViewById(R.id.llPebbleRoundBack);
         ll_2st = view.findViewById(R.id.ll_2st);
         ll_3st = view.findViewById(R.id.ll_3st);
         ll_4st = view.findViewById(R.id.ll_4st);
@@ -123,13 +174,14 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
         tvDeviceNameDyn = view.findViewById(R.id.tvDeviceNameDyn);
         tvValveCount = view.findViewById(R.id.tvValveCount);
 //        tvShowAddressTop = view.findViewById(R.id.tvShowAddressTop);
-        tvShowAddressTop =mContext.tvDesc_txt;
-        toolbar_tile =mContext.tvToolbar_title;
-        toolbar_tile.setText("My Devices");
+    }
 
-//        llScrnHeader.setOnClickListener(this);
+    private void listenersOnViews() {
+        //        llScrnHeader.setOnClickListener(this);
         ll_add_new.setOnClickListener(this);
 
+        llPebbleRoundBack.setOnClickListener(this);
+        llPebbleRoundBack.setOnLongClickListener(this);
         ll_2st.setOnClickListener(this);
         ll_3st.setOnClickListener(this);
         ll_4st.setOnClickListener(this);
@@ -142,37 +194,6 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
         ll_3st.setOnLongClickListener(this);
         ll_4st.setOnLongClickListener(this);
         ll_5st.setOnLongClickListener(this);
-
-        //Getting BLE data from DB
-        databaseHandler = new DatabaseHandler(mContext);
-        List<ModalBLEDevice> listModalBleDevice = databaseHandler.getAllBLEDvcs();
-        rl_1st.setVisibility(View.VISIBLE);
-
-        /*device_name ="Pebble";
-        device_address ="98:4F:EE:10:87:66";
-        valvesNum = 8;*/
-        device_name = listModalBleDevice.get(0).getName();
-        device_address = listModalBleDevice.get(0).getDvcMacAddrs();
-        mdlLocationAddress = listModalBleDevice.get(0).getMdlLocationAddress();
-        addressComplete = mdlLocationAddress.getFlat_num() + ", " + mdlLocationAddress.getStreetName() + ", " + mdlLocationAddress.getLocality_landmark() + ", " + mdlLocationAddress.getPincode() + ", " + mdlLocationAddress.getCity() + ", " + mdlLocationAddress.getState();
-        tvShowAddressTop.setText(addressComplete);
-        MySharedPreference.getInstance(getActivity()).setStringData(ADDRESS,addressComplete);
-        listLocAddressType = new ArrayList<>();
-        listLocAddressType.add(mdlLocationAddress.getAddress_name());
-        valvesNum = listModalBleDevice.get(0).getValvesNum();
-
-        tvDeviceNameDyn.setText(device_name + "\n" + device_address);
-        tvValveCount.setText(valvesNum + "");
-        //initController();
-
-
-        BLEAppLevel bleAppLevel = BLEAppLevel.getInstanceOnly();
-        if (bleAppLevel!=null && bleAppLevel.getBLEConnectedOrNot()) {
-            setConnectionIsDone();
-        } else {
-            Toast.makeText(mContext, "BLE lost connection", Toast.LENGTH_SHORT).show();
-        }
-        setRecyclerViewAdapter();
     }
 
     void setRecyclerViewAdapter() {
@@ -199,23 +220,41 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
                /* Intent intent = new Intent(mContext, AddAddressActivity.class);
                 startActivityForResult(intent, 100);*/
                 break;
-            case R.id.ll_1st:
-                FragDeviceDetails fragDeviceDetails = new FragDeviceDetails();
-                Bundle bundle = new Bundle();
-                bundle.putString(DeviceDetails.EXTRA_DVC_NAME, device_name);
-                bundle.putString(DeviceDetails.EXTRA_DVC_MAC, device_address);
-                bundle.putInt(DeviceDetails.EXTRA_DVC_VALVE_COUNT, valvesNum);
-                fragDeviceDetails.setArguments(bundle);
-                //Adding Fragment(FragAvailableDevices)
-                MyFragmentTransactions.replaceFragment(mContext, fragDeviceDetails, Constant.DEVICE_DETAILS, mContext.frm_lyt_container_int, true);
+            case R.id.llPebbleRoundBack:
+                bleAppLevel = BLEAppLevel.getInstanceOnly();
+                if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+                    FragDeviceDetails fragDeviceDetails = new FragDeviceDetails();
+                    Bundle bundle = new Bundle();
+                    bundle.putString(DeviceDetails.EXTRA_DVC_NAME, device_name);
+                    bundle.putString(DeviceDetails.EXTRA_DVC_MAC, device_address);
+                    bundle.putInt(DeviceDetails.EXTRA_DVC_VALVE_COUNT, valvesNum);
+                    fragDeviceDetails.setArguments(bundle);
+                    //Adding Fragment(FragAvailableDevices)
+                    MyFragmentTransactions.replaceFragment(mContext, fragDeviceDetails, Constant.DEVICE_DETAILS, mContext.frm_lyt_container_int, true);
 
-               /* Intent intentDvcDetails = new Intent(mContext, DeviceDetails.class);
-                intentDvcDetails.putExtra(DeviceDetails.EXTRA_DVC_NAME, device_name);
-                intentDvcDetails.putExtra(DeviceDetails.EXTRA_DVC_MAC, device_address);
-                intentDvcDetails.putExtra(DeviceDetails.EXTRA_DVC_VALVE_COUNT, valvesNum);
-                mContext.startActivity(intentDvcDetails);
-                mContext.finish();*/
-                //Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show();
+                    //Change background on BLE connected
+                    /*llPebbleRoundBack.setBackgroundResource(R.drawable.round_back_shadow_green_small);
+                    isBLEConnectedOnFrag=true;*/
+                } else {
+                    //isBLEConnectedOnFrag=false;
+                    llPebbleRoundBack.setBackgroundResource(R.drawable.round_back_shadow_small);
+                    AppAlertDialog.dialogBLENotConnected(mContext, myRequestedFrag, bleAppLevel);
+                }
+
+
+               /* if (isBLEConnectedOnFrag){
+                    FragDeviceDetails fragDeviceDetails = new FragDeviceDetails();
+                    Bundle bundle = new Bundle();
+                    bundle.putString(DeviceDetails.EXTRA_DVC_NAME, device_name);
+                    bundle.putString(DeviceDetails.EXTRA_DVC_MAC, device_address);
+                    bundle.putInt(DeviceDetails.EXTRA_DVC_VALVE_COUNT, valvesNum);
+                    fragDeviceDetails.setArguments(bundle);
+                    //Adding Fragment(FragAvailableDevices)
+                    MyFragmentTransactions.replaceFragment(mContext, fragDeviceDetails, Constant.DEVICE_DETAILS, mContext.frm_lyt_container_int, true);
+                }
+                else {
+                    AppAlertDialog.dialogBLENotConnected(mContext, bleAppLevel);
+                }*/
                 break;
             case R.id.ll_2st:
                 break;
@@ -249,7 +288,7 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
     public boolean onLongClick(View v) {
         int id = view.getId();
         switch (id) {
-            case R.id.ll_1st:
+            case R.id.llPebbleRoundBack:
                 showpopupLongClick();
                 break;
             case R.id.ll_2st:
@@ -450,18 +489,18 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
         bluetooth_le_adapter = null;
     }*/
 
-    void setConnectionIsDone() {
-        ll_1st.setOnClickListener(this);
-        ll_1st.setOnLongClickListener(this);
-        ll_1st.setBackgroundResource(R.drawable.round_back_shadow_green_small);
-    }
+   /* void setConnectionIsDone() {
+       *//* llPebbleRoundBack.setOnClickListener(this);
+        llPebbleRoundBack.setOnLongClickListener(this);*//*
+        llPebbleRoundBack.setBackgroundResource(R.drawable.round_back_shadow_green_small);
+    }*/
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 101 && resultCode == Activity.RESULT_OK) {
             if (data.getSerializableExtra("mdlAddressLocation") != null) {
                 mdlLocationAddress = (MdlLocationAddress) data.getSerializableExtra("mdlAddressLocation");
-                Toast.makeText(mContext, "Saved address is "+mdlLocationAddress.getAddress_name(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "Saved address is " + mdlLocationAddress.getAddress_name(), Toast.LENGTH_SHORT).show();
 
             } else {
                 Toast.makeText(mContext, "No data from address", Toast.LENGTH_SHORT).show();
@@ -470,4 +509,7 @@ public class FragMyDevices extends Fragment implements View.OnClickListener, Vie
         }
     }
 
+    public void connectedChangeBLEBackground() {
+        llPebbleRoundBack.setBackgroundResource(R.drawable.round_back_shadow_green_small);
+    }
 }

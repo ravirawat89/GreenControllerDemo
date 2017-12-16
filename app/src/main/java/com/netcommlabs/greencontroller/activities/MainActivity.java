@@ -52,6 +52,7 @@ import com.netcommlabs.greencontroller.utilities.RowDataArrays;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.netcommlabs.greencontroller.utilities.Constant.AVAILABLE_DEVICE;
 import static com.netcommlabs.greencontroller.utilities.Constant.DASHBOARD_PEBBLE_HOME;
 import static com.netcommlabs.greencontroller.utilities.Constant.DEVICE_DETAILS;
 import static com.netcommlabs.greencontroller.utilities.Constant.DEVICE_MAP;
@@ -347,11 +348,17 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = findViewById(R.id.nav_drawer_layout);
+        //Is drawer opened, Close it
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            if (getSupportFragmentManager().getBackStackEntryCount() >= 2) {
+            if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
                 super.onBackPressed();
+
+                Fragment currentFragment = getSupportFragmentManager().findFragmentById(frm_lyt_container_int);
+                String tagCurrFrag = currentFragment.getTag();
+                backPressHeaderHandle(tagCurrFrag);
+                Log.e("GGG CURR FRAG ", tagCurrFrag);
             } else {
                 if (!exit) {
                     exit = true;
@@ -365,38 +372,32 @@ public class MainActivity extends AppCompatActivity implements LocationDecetor {
                 } else
                     finish();
             }
-
-            Fragment currentFragment = getSupportFragmentManager().findFragmentById(frm_lyt_container_int);
-            tvToolbar_title.setText(currentFragment.getTag());
-            backPressHeaderHandle(currentFragment.getTag());
-
-            Log.e("@@current Fragment ", currentFragment.getTag());
         }
     }
 
     private void backPressHeaderHandle(String tag) {
+        //Setting title of current Fragment
+        tvToolbar_title.setText(tag);
         //Except Add/Edit Fragment, this View will be gone
         if (tvClearEditData.getVisibility() == View.VISIBLE) {
             tvClearEditData.setVisibility(View.GONE);
         }
+
         switch (tag) {
-         /*   case AVAILABLE_DEVICES:
+            case AVAILABLE_DEVICE:
                 BLEAppLevel bleAppLevel = BLEAppLevel.getInstanceOnly();
                 if (bleAppLevel != null) {
                     bleAppLevel.disconnectBLECompletely();
                 }
-                break;*/
-
+                break;
             case DEVICE_MAP:
                 if (MySharedPreference.getInstance(this).getStringData(ADDRESS).equalsIgnoreCase(""))
                     tvDesc_txt.setText(MySharedPreference.getInstance(this).getStringData(ADDRESS));
                 break;
-
             case DEVICE_DETAILS:
                 if (MySharedPreference.getInstance(this).getStringData(lAST_CONNECTED).equalsIgnoreCase(""))
                     tvDesc_txt.setText(MySharedPreference.getInstance(this).getStringData(lAST_CONNECTED));
                 break;
-
             default:
                 tvDesc_txt.setText("");
                 break;

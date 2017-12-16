@@ -20,10 +20,10 @@ public class Constant {
 
 
     //Fragment titles
-    public static final String DASHBOARD_PEBBLE_HOME="V.1.3";
+    public static final String DASHBOARD_PEBBLE_HOME="V 1.4";
     public static final String DO_NOT_HAVE_DEVICE="Don't have Device";
     public static final String DEVICE_MAP="My Devices";
-    public static final String AVAILABLE_DEVICES="Add New Device";
+    //public static final String AVAILABLE_DEVICES="Add New Device";
     public static final String CONNECTED_QR="Pebbel Connected";
     public static final String SCAN_QR_CODE="scan_qr_code";
     public static final String ADD_ADDRESS="Add Address";

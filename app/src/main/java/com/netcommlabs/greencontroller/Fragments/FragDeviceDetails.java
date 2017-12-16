@@ -35,6 +35,7 @@ import com.netcommlabs.greencontroller.model.ModalBLEValve;
 import com.netcommlabs.greencontroller.model.ModalVlNameSelect;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
+import com.netcommlabs.greencontroller.utilities.AppAlertDialog;
 import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.MySharedPreference;
 
@@ -60,9 +61,9 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
     public static final int RESULT_CODE_VALVE_INDB = 202;
     private RecyclerView reviValvesList;
     private ArrayList<String> listValvesNameOnly;
-    public static ArrayList<ModalVlNameSelect> listModalValveNameSelect=new ArrayList<>();
+    public static ArrayList<ModalVlNameSelect> listModalValveNameSelect = new ArrayList<>();
     private LinearLayout /*llScrnHeader,*/ llNoSesnPlan, llSesnPlanDetails, llControllerNameEdit, llControllerNameSave;
-    private LinearLayout llEditValve, llStopValve, llPauseValve, llFlushValve, llHelpValve;
+    private LinearLayout llEditValve, llStopValve, llPausePlayValve, llFlushValve, llHelpValve;
     private TextView tvDeviceName, tvDesc_txt, tvAddNewSesnPlan;
     private DatabaseHandler databaseHandler;
     private ArrayList<DataTransferModel> listValveDataSingle;
@@ -83,6 +84,8 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
     private String titleDynamicAddEdit;
     private ValvesListAdapter valveListAdp;
     private boolean isValveSelected = true;
+    BLEAppLevel bleAppLevel;
+    private Fragment myRequestedFrag;
 
     @Override
     public void onAttach(Context context) {
@@ -106,6 +109,16 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
         dvcName = bundle.getString(EXTRA_DVC_NAME);
         dvcMacAdd = bundle.getString(EXTRA_DVC_MAC);
         dvcValveCount = bundle.getInt(EXTRA_DVC_VALVE_COUNT);
+        //Check BLE Connection
+        myRequestedFrag=FragDeviceDetails.this;
+        bleAppLevel = BLEAppLevel.getInstanceOnly();
+        if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+            //setConnectionIsDone();
+            //Toast.makeText(mContext, "BLE connected", Toast.LENGTH_SHORT).show();
+        } else {
+            AppAlertDialog.dialogBLENotConnected(mContext,myRequestedFrag,bleAppLevel);
+            //Toast.makeText(mContext, "BLE not connected", Toast.LENGTH_SHORT).show();
+        }
 
         /*dvcName = "PEBBLE";
         dvcMacAdd = "98:4F:EE:10:87:66";
@@ -148,7 +161,7 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
             reviValvesList.setAdapter(valveListAdp);
         } else {
             if (listValvesNameOnly != null && listValvesNameOnly.size() > 0) {
-                listModalValveNameSelect=new ArrayList<>();
+                listModalValveNameSelect = new ArrayList<>();
                 for (String valveName : listValvesNameOnly) {
                     listModalValveNameSelect.add(new ModalVlNameSelect(valveName, isValveSelected));
                     isValveSelected = false;
@@ -242,7 +255,7 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
         if (llEditValve.getVisibility() != View.VISIBLE) {
             llEditValve.setVisibility(View.VISIBLE);
             llStopValve.setVisibility(View.VISIBLE);
-            llPauseValve.setVisibility(View.VISIBLE);
+            llPausePlayValve.setVisibility(View.VISIBLE);
             llFlushValve.setVisibility(View.VISIBLE);
             llHelpValve.setVisibility(View.VISIBLE);
         }
@@ -699,17 +712,27 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
         llStopValve.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialogSTOPConfirm();
+                bleAppLevel=BLEAppLevel.getInstanceOnly();
+                if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+                    dialogSTOPConfirm();
+                } else {
+                    AppAlertDialog.dialogBLENotConnected(mContext,myRequestedFrag,bleAppLevel);
+                }
             }
         });
 
-        llPauseValve.setOnClickListener(new View.OnClickListener() {
+        llPausePlayValve.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (cmdName.equals("PAUSE")) {
-                    dialogPAUSEConfirm();
-                } else if (cmdName.equals("PLAY")) {
-                    dialogPLAYConfirm();
+                bleAppLevel=BLEAppLevel.getInstanceOnly();
+                if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+                    if (cmdName.equals("PAUSE")) {
+                        dialogPAUSEConfirm();
+                    } else if (cmdName.equals("PLAY")) {
+                        dialogPLAYConfirm();
+                    }
+                } else {
+                    AppAlertDialog.dialogBLENotConnected(mContext,myRequestedFrag,bleAppLevel);
                 }
             }
         });
@@ -717,7 +740,12 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
         llFlushValve.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialogFlushStart();
+                bleAppLevel=BLEAppLevel.getInstanceOnly();
+                if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+                    dialogFlushStart();
+                } else {
+                    AppAlertDialog.dialogBLENotConnected(mContext,myRequestedFrag,bleAppLevel);
+                }
             }
         });
     }
@@ -891,7 +919,7 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
         llSesnPlanDetails = view.findViewById(R.id.llSesnPlanDetails);
         llEditValve = view.findViewById(R.id.llEditValve);
         llStopValve = view.findViewById(R.id.llStopValve);
-        llPauseValve = view.findViewById(R.id.llPauseValve);
+        llPausePlayValve = view.findViewById(R.id.llPauseValve);
         llFlushValve = view.findViewById(R.id.llFlushValve);
         llHelpValve = view.findViewById(R.id.llHelpValve);
 //        tvDeviceName = view.findViewById(R.id.tvDeviceName);
