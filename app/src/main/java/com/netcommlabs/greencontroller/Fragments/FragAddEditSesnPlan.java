@@ -2129,13 +2129,13 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         byte hours = (byte) listSingleValveData.get(dataSendingIndex).getHours();
         byte dayOfTheWeek = (byte) listSingleValveData.get(dataSendingIndex).getDayOfTheWeek();
 
-        int iDurationMSB = (etInputDursnPlanInt / 256);
-        int iDurationLSB = (etInputDursnPlanInt % 256);
+        int iDurationMSB = (etInputDursnPlanInt / 128);
+        int iDurationLSB = (etInputDursnPlanInt % 128);
         byte bDurationMSB = (byte) iDurationMSB;
         byte bDurationLSB = (byte) iDurationLSB;
 
-        int iVolumeMSB = (etQuantPlanInt / 256);
-        int iVolumeLSB = (etQuantPlanInt % 256);
+        int iVolumeMSB = (etQuantPlanInt / 128);
+        int iVolumeLSB = (etQuantPlanInt % 128);
         byte bVolumeMSB = (byte) iVolumeMSB;
         byte bVolumeLSB = (byte) iVolumeLSB;
         listSingleValveData.get(dataSendingIndex).setIndex(index);
@@ -2179,8 +2179,8 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         byte seconds = (byte) calendar.get(Calendar.SECOND);
         byte DATE = (byte) calendar.get(Calendar.DAY_OF_MONTH);
         byte MONTH = (byte) (calendar.get(Calendar.MONTH) + 1);
-        int iYEARMSB = (calendar.get(Calendar.YEAR) / 256);
-        int iYEARLSB = (calendar.get(Calendar.YEAR) % 256);
+        int iYEARMSB = (calendar.get(Calendar.YEAR) / 128);
+        int iYEARLSB = (calendar.get(Calendar.YEAR) % 128);
         byte bYEARMSB = (byte) iYEARMSB;
         byte bYEARLSB = (byte) iYEARLSB;
         byte[] currentTime = {hours, minutes, seconds, DATE, MONTH, bYEARMSB, bYEARLSB};
