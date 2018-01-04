@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://C:\Users\Android\Desktop\Rahul GController\greencontroller-master\GreenController.iml" filepath="C:\Users\Android\Desktop\Rahul GController\greencontroller-master\GreenController.iml" />
+      <module fileurl="file://$PROJECT_DIR$/GreenControllerRelease.iml" filepath="$PROJECT_DIR$/GreenControllerRelease.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/greencontroller-master.iml" filepath="$PROJECT_DIR$/greencontroller-master.iml" />
     </modules>
   </component>
 </project>
