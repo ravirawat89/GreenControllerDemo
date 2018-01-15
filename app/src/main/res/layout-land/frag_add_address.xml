@@ -6,31 +6,11 @@
     android:layout_marginBottom="@dimen/_5sdp"
     android:layout_marginLeft="@dimen/_5sdp"
     android:layout_marginRight="@dimen/_5sdp"
-    tools:context="com.netcommlabs.greencontroller.activities.AddAddressActivity">
-<!--
+    tools:context="com.netcommlabs.greencontroller.Fragments.FragAddAddress">
 
-    <LinearLayout
-        android:id="@+id/llScrnHeader"
-        android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:layout_width="@dimen/_20sdp"
-            android:layout_height="wrap_content"
-            android:src="@drawable/back_arrow_circle" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/_5sdp"
-            android:text="Add your address"
-            android:textSize="@dimen/header_title_size" />
-    </LinearLayout>
--->
-
+    <!--Add Address design implementation-->
     <ScrollView
+        android:id="@+id/AddAddressLayoutScrlV"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/llScrnHeader">
@@ -69,14 +49,53 @@
                         android:cursorVisible="false"
                         android:focusable="false"
                         android:gravity="center_vertical"
-                        android:hint="Flat No. / Building Name"
+                        android:hint="Flat/ Building/ House no."
+                        android:imeOptions="flagNoExtractUi"
                         android:inputType="textPersonName"
                         android:paddingLeft="@dimen/_5sdp"
-                        android:textSize="@dimen/_13sdp"
-                        android:text="B-16"
-                        android:imeOptions="flagNoExtractUi"/>
+                        android:textSize="@dimen/_13sdp" />
 
                 </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/_65sdp"
+                    android:layout_weight="1"
+                    android:background="@drawable/rect_shadow_all_bg"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="@dimen/_25sdp"
+                        android:layout_height="@dimen/_25sdp"
+                        android:layout_marginLeft="@dimen/_10sdp"
+                        android:src="@drawable/street" />
+
+                    <EditText
+                        android:id="@+id/et_street_area"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:gravity="center_vertical"
+                        android:hint="Tower/ Street"
+                        android:imeOptions="flagNoExtractUi"
+                        android:inputType="textPersonName"
+                        android:paddingLeft="@dimen/_5sdp"
+                        android:textSize="@dimen/_13sdp" />
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:layout_marginRight="@dimen/_10sdp"
+                android:orientation="horizontal">
 
                 <LinearLayout
                     android:id="@+id/llLocalityLandmark"
@@ -101,51 +120,12 @@
                         android:cursorVisible="false"
                         android:focusable="false"
                         android:gravity="center_vertical"
-                        android:hint="Locality / Landmark"
+                        android:hint="Area/ Locality/ Landmark"
+                        android:imeOptions="flagNoExtractUi"
                         android:paddingLeft="@dimen/_5sdp"
-                        android:textSize="@dimen/_13sdp"
-                        android:text="Near Metro 16"
-                        android:imeOptions="flagNoExtractUi"/>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/_10sdp"
-                android:layout_marginRight="@dimen/_10sdp"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="@dimen/_65sdp"
-                    android:layout_weight="1"
-                    android:background="@drawable/rect_shadow_all_bg"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="@dimen/_25sdp"
-                        android:layout_height="@dimen/_25sdp"
-                        android:layout_marginLeft="@dimen/_10sdp"
-                        android:src="@drawable/street" />
-
-                    <EditText
-                        android:id="@+id/et_street_area"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@android:color/transparent"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:gravity="center_vertical"
-                        android:hint="Street / Area"
-                        android:inputType="textPersonName"
-                        android:paddingLeft="@dimen/_5sdp"
-                        android:textSize="@dimen/_13sdp"
-                        android:text="Auto Junction"
-                        android:imeOptions="flagNoExtractUi"/>
+                        android:paddingRight="@dimen/_15sdp"
+                        android:singleLine="true"
+                        android:textSize="@dimen/_13sdp" />
 
                 </LinearLayout>
 
@@ -171,12 +151,11 @@
                         android:cursorVisible="false"
                         android:focusable="false"
                         android:gravity="center_vertical"
-                        android:hint="Pincode"
+                        android:hint="Pin code"
+                        android:imeOptions="flagNoExtractUi"
                         android:inputType="number"
                         android:paddingLeft="@dimen/_5sdp"
-                        android:textSize="@dimen/_13sdp"
-                        android:text="201301"
-                        android:imeOptions="flagNoExtractUi"/>
+                        android:textSize="@dimen/_13sdp" />
 
                 </LinearLayout>
 
@@ -212,11 +191,10 @@
                         android:focusable="false"
                         android:gravity="center_vertical"
                         android:hint="City"
+                        android:imeOptions="flagNoExtractUi"
                         android:inputType="textPersonName"
                         android:paddingLeft="@dimen/_5sdp"
-                        android:textSize="@dimen/_13sdp"
-                        android:text="Noida"
-                        android:imeOptions="flagNoExtractUi"/>
+                        android:textSize="@dimen/_13sdp" />
 
                 </LinearLayout>
 
@@ -243,11 +221,10 @@
                         android:focusable="false"
                         android:gravity="center_vertical"
                         android:hint="State"
+                        android:imeOptions="flagNoExtractUi"
                         android:inputType="textPersonName"
                         android:paddingLeft="@dimen/_5sdp"
-                        android:textSize="@dimen/_13sdp"
-                        android:text="UP"
-                        android:imeOptions="flagNoExtractUi"/>
+                        android:textSize="@dimen/_13sdp" />
 
                 </LinearLayout>
 
@@ -256,7 +233,7 @@
             <LinearLayout
                 android:id="@+id/llAddAddressName"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/_105sdp"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/_5sdp"
                 android:layout_marginLeft="@dimen/_5sdp"
                 android:layout_marginRight="@dimen/_5sdp"
@@ -345,8 +322,8 @@
                     android:layout_marginTop="@dimen/_10sdp"
                     android:background="@drawable/rect_border_light_line"
                     android:hint="Enter other address name"
-                    android:paddingLeft="@dimen/_10sdp"
                     android:imeOptions="flagNoExtractUi"
+                    android:paddingLeft="@dimen/_10sdp"
                     android:visibility="gone" />
 
             </LinearLayout>
@@ -357,12 +334,12 @@
                 android:gravity="center">
 
                 <TextView
-                    android:id="@+id/tvSaveEvent"
+                    android:id="@+id/tvNextEvent"
                     android:layout_width="@dimen/_130sdp"
                     android:layout_height="@dimen/_45sdp"
                     android:background="@drawable/round_back_shadow_small"
                     android:gravity="center"
-                    android:text="SAVE"
+                    android:text="NEXT"
                     android:textSize="@dimen/_15sdp" />
 
             </LinearLayout>
@@ -370,5 +347,26 @@
         </LinearLayout>
 
     </ScrollView>
+
+    <!--Search with MAP with OK button-->
+    <LinearLayout
+        android:id="@+id/llSearchMAPok"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <fragment
+            android:id="@+id/map"
+            class="com.google.android.gms.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/_4sdp"
+            android:layout_marginLeft="@dimen/_4sdp"
+            android:layout_marginRight="@dimen/_4sdp"
+            android:layout_marginTop="@dimen/_3sdp" />
+
+
+    </LinearLayout>
 
 </RelativeLayout>

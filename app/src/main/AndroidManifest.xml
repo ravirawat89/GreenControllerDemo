@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.netcommlabs.greencontroller">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -18,8 +19,8 @@
         android:theme="@style/FullScreen">
         <activity
             android:name=".activities.MainActivity"
-            android:screenOrientation="landscape"
-            android:configChanges="orientation|screenSize|keyboard">
+            android:configChanges="orientation|screenSize|keyboard"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,37 +31,18 @@
             android:name=".activities.LoginAct"
             android:screenOrientation="landscape"></activity>
         <activity
-            android:name=".activities.DashboardPebbleHome"
-            android:screenOrientation="landscape">
-
-        </activity>
-        <activity
-            android:name=".activities.DontHaveDvc"
-            android:screenOrientation="landscape"></activity>
-        <activity
-            android:name=".activities.AvailableDevices"
-            android:screenOrientation="landscape"></activity>
-        <activity
-            android:name=".activities.ConnectedQRAct"
-            android:screenOrientation="landscape"></activity>
-        <activity
             android:name=".activities.AddAddressActivity"
             android:screenOrientation="landscape"></activity>
 
-        <activity
-            android:name=".activities.DeviceActivity"
-            android:screenOrientation="landscape"></activity>
-        <activity
-            android:name=".activities.DeviceDetails"
-            android:screenOrientation="landscape"></activity>
-        <activity
-            android:name=".activities.AddEditSessionPlan"
-            android:screenOrientation="landscape"></activity>
-
-        <!-- Place Autocomplete API KEY -->
+        <!-- &lt;!&ndash; Place Autocomplete API KEY &ndash;&gt;
+         <meta-data
+             android:name="com.google.android.geo.API_KEY"
+             android:value="AIzaSyAT07iMTojOo07HN4A6UMnbjZ-rAqlqGkg" />-->
+        <!--API key for MAP-->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyB3dtRzIP11f8Jx63YyF89v7xxxvSSZomM" />
+            android:value="AIzaSyDfEdnQqqjJyF4shdLvmIiSRRVvEhICNTo" />
+
 
         <activity android:name=".BTClientActivity" />
         <activity
@@ -68,10 +50,9 @@
             android:screenOrientation="landscape" />
         <activity
             android:name=".activities.PlaceACTandMap"
-            android:screenOrientation="landscape" />
-        <activity
-            android:name=".activities.DeviceMapAct"
-            android:screenOrientation="landscape"></activity>
+            android:screenOrientation="landscape">
+
+        </activity>
         <activity android:name=".activities.PeripheralControlActivity" />
 
         <service

@@ -124,7 +124,7 @@
                     android:textSize="@dimen/_12sdp" />
 
                 <LinearLayout
-                    android:id="@+id/llQuantOfWater"
+                    android:id="@+id/llWaterQuantity"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -138,7 +138,7 @@
                         android:textSize="@dimen/_13sdp" />
 
                     <EditText
-                        android:id="@+id/etQuantityPlan"
+                        android:id="@+id/etWaterQuant"
                         android:layout_width="wrap_content"
                         android:layout_height="@dimen/_45sdp"
                         android:layout_marginTop="@dimen/_2sdp"

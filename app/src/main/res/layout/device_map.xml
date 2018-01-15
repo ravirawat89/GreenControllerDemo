@@ -84,7 +84,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/ll_add_new"
+                    android:id="@+id/llMapNewAddress"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_35sdp"
                     android:layout_marginTop="@dimen/_3sdp"
@@ -110,7 +110,7 @@
             android:background="@drawable/shadow_round_big_bg">
 
             <LinearLayout
-                android:id="@+id/ll_add_device"
+                android:id="@+id/ivMapNewDevice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
@@ -139,7 +139,7 @@
                     android:background="@drawable/home_icon" />
 
                 <RelativeLayout
-                    android:id="@+id/rl_1st"
+                    android:id="@+id/rlBubbleLeftTop"
                     android:layout_width="@dimen/_130sdp"
                     android:layout_height="@dimen/_50sdp"
                     android:layout_marginLeft="@dimen/_10sdp"
@@ -148,7 +148,7 @@
 
 
                     <LinearLayout
-                        android:id="@+id/llPebbleRoundBack"
+                        android:id="@+id/llBubbleLeftTopBG"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginTop="@dimen/_8sdp"
@@ -157,7 +157,7 @@
                         android:padding="@dimen/_8sdp">
 
                         <TextView
-                            android:id="@+id/tvDeviceNameDyn"
+                            android:id="@+id/tvDeviceName"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
@@ -185,7 +185,7 @@
 
 
                 <RelativeLayout
-                    android:id="@+id/rl_3st"
+                    android:id="@+id/rlBubbleRightTop"
                     android:layout_width="@dimen/_130sdp"
                     android:layout_height="@dimen/_50sdp"
                     android:layout_centerInParent="true"
@@ -236,7 +236,7 @@
                     android:visibility="gone">
 
                     <LinearLayout
-                        android:id="@+id/ll_2st"
+                        android:id="@+id/rlBubbleMiddle"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginTop="@dimen/_8sdp"
@@ -273,7 +273,7 @@
 
 
             <RelativeLayout
-                android:id="@+id/rl_4st"
+                android:id="@+id/rlBubbleLeftBottom"
                 android:layout_width="@dimen/_130sdp"
                 android:layout_height="@dimen/_50sdp"
                 android:layout_above="@+id/ll_footer"
@@ -316,7 +316,7 @@
 
 
             <RelativeLayout
-                android:id="@+id/rl_5st"
+                android:id="@+id/rlBubbleRightBottom"
                 android:layout_width="@dimen/_130sdp"
                 android:layout_height="@dimen/_50sdp"
                 android:layout_above="@+id/ll_footer"
@@ -370,14 +370,14 @@
                 android:padding="@dimen/_5sdp">
 
                 <ImageView
-                    android:id="@+id/iv_prev"
+                    android:id="@+id/ivPrev"
                     android:layout_width="@dimen/_25sdp"
                     android:layout_height="@dimen/_25sdp"
                     android:layout_marginRight="@dimen/_5sdp"
                     android:background="@drawable/pre" />
 
                 <ImageView
-                    android:id="@+id/iv_next"
+                    android:id="@+id/ivNext"
                     android:layout_width="@dimen/_25sdp"
                     android:layout_height="@dimen/_25sdp"
                     android:background="@drawable/next" />

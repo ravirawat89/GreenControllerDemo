@@ -54,7 +54,7 @@ public class FragDashboardPebbleHome extends Fragment {
 
     private void initBase(View view) {
         /*DatabaseHandler databaseHandler = new DatabaseHandler(mContext);
-        List<ModalBLEDevice> listBLEDvcFromDB = databaseHandler.getAllBLEDvcs();
+        List<ModalBLEDevice> listBLEDvcFromDB = databaseHandler.getAllAddressNdDeviceMapping();
         if (listBLEDvcFromDB != null && listBLEDvcFromDB.size() > 0) {
 
             progressDialog = new ProgressDialog(mContext);
@@ -80,11 +80,11 @@ public class FragDashboardPebbleHome extends Fragment {
             @Override
             public void onClick(View v) {
                 DatabaseHandler databaseHandler = new DatabaseHandler(mContext);
-                List<ModalBLEDevice> listBLEDvcFromDB = databaseHandler.getAllBLEDvcs();
+                List<ModalBLEDevice> listBLEDvcFromDB = databaseHandler.getAllAddressNdDeviceMapping();
 
                 if (listBLEDvcFromDB != null && listBLEDvcFromDB.size() > 0) {
-                    //Adding Fragment(FragMyDevices)
-                    MyFragmentTransactions.replaceFragment(mContext, new FragMyDevices(), Constant.DEVICE_MAP, mContext.frm_lyt_container_int, true);
+                    //Adding Fragment(FragDeviceMAP)
+                    MyFragmentTransactions.replaceFragment(mContext, new FragDeviceMAP(), Constant.DEVICE_MAP, mContext.frm_lyt_container_int, true);
                 } else {
                     //Adding Fragment(FragDontHvDevice)
                     MyFragmentTransactions.replaceFragment(mContext, new FragDontHvDevice(), Constant.DO_NOT_HAVE_DEVICE, mContext.frm_lyt_container_int, true);
@@ -101,10 +101,4 @@ public class FragDashboardPebbleHome extends Fragment {
             }
         });
     }
-
-    /*public void dvcHasExptdServcsDashboard() {
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-        }
-    }*/
 }

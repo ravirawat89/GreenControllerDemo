@@ -1,59 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/llMainContainerOfApp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.netcommlabs.greencontroller.activities.DashboardPebbleHome">
+    tools:context="com.netcommlabs.greencontroller.activities.MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:orientation="horizontal">
 
-        <LinearLayout
-            android:id="@+id/llHamburgerIcon"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/_30sdp"
-            android:layout_weight="0.10">
+        <RelativeLayout
+            android:id="@+id/rlHamburgerNdFamily"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-            <ImageView
-                android:layout_width="@dimen/icon_size"
-                android:layout_height="@dimen/icon_size"
-                android:layout_marginLeft="@dimen/_10sdp"
-                android:layout_marginTop="@dimen/_10sdp"
-                android:src="@drawable/hemburg_icon" />
+            <LinearLayout
+                android:id="@+id/llHamburgerIconOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/_3sdp"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/icon_size"
+                    android:padding="@dimen/_3sdp"
+                    android:src="@drawable/hemburg_icon" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_toEndOf="@+id/llHamburgerIconOnly"
+                android:gravity="center_vertical"
+                android:text="V 1.4"
+                android:textSize="@dimen/_14sdp" />
+
+            <TextView
+                android:id="@+id/desc_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_toEndOf="@+id/toolbar_title"
+                android:gravity="center_vertical"
+                android:paddingStart="@dimen/_15sdp"
+                android:text="Description"
+                android:textColor="#fefadc"
+                android:textSize="@dimen/_13sdp" />
+
+            <TextView
+                android:id="@+id/tvClearEditData"
+                android:layout_width="@dimen/_85sdp"
+                android:layout_height="@dimen/_33sdp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_5sdp"
+                android:background="@drawable/round_back_shadow_small"
+                android:gravity="center"
+                android:text="CLEAR" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/llSearchMapOKTop"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/_2sdp"
+            android:layout_marginLeft="@dimen/_2sdp"
+            android:layout_marginRight="@dimen/_2sdp"
+            android:layout_marginTop="@dimen/_4sdp"
+            android:layout_weight="10"
+            android:visibility="gone">
+
+            <EditText
+                android:id="@+id/etSearchMapTop"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="7"
+                android:background="@drawable/rect_round_light_high_width"
+                android:cursorVisible="false"
+                android:focusable="false"
+                android:hint="Search Tower/ Locality/ Landmark"
+                android:padding="@dimen/_10sdp"
+                android:singleLine="true"
+                android:textSize="@dimen/_12sdp" />
+
+            <Button
+                android:id="@+id/btnAddressDone"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/_5sdp"
+                android:layout_weight="1.5"
+                android:background="@drawable/round_back_shadow_small"
+                android:text="DONE" />
+
+            <Button
+                android:id="@+id/btnAddressCancel"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.5"
+                android:background="@drawable/round_back_shadow_small"
+                android:text="BACK" />
 
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/toolbar_title"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.40"
-            android:gravity="center_vertical"
-            android:text="V 1.2"
-            android:textSize="@dimen/_14sdp" />
-
-        <TextView
-            android:id="@+id/desc_txt"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.60"
-            android:gravity="center"
-            android:text=""
-            android:textSize="@dimen/_14sdp" />
-
-        <TextView
-            android:id="@+id/tvClearEditData"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/_30sdp"
-            android:layout_marginRight="@dimen/_10sdp"
-            android:layout_weight=".20"
-            android:background="@drawable/round_back_shadow_small"
-            android:gravity="center"
-            android:text="CLEAR"
-            android:visibility="gone" />
 
     </LinearLayout>
 

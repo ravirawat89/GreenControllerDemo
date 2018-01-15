@@ -12,7 +12,7 @@
         android:orientation="horizontal">
 
         <LinearLayout
-            android:id="@+id/llHamburgerIcon"
+            android:id="@+id/rlHamburgerNdFamily"
             android:layout_width="0dp"
             android:layout_height="@dimen/_30sdp"
             android:layout_weight="0.10">

@@ -15,7 +15,7 @@ import com.netcommlabs.greencontroller.Fragments.FragDontHvDevice;
 import com.netcommlabs.greencontroller.Fragments.FragFAQHelp;
 import com.netcommlabs.greencontroller.Fragments.FragFeedback;
 import com.netcommlabs.greencontroller.Fragments.FragMeterDevice;
-import com.netcommlabs.greencontroller.Fragments.FragMyDevices;
+import com.netcommlabs.greencontroller.Fragments.FragDeviceMAP;
 import com.netcommlabs.greencontroller.Fragments.FragMyProfile;
 import com.netcommlabs.greencontroller.Fragments.FragRecomm;
 import com.netcommlabs.greencontroller.Fragments.FragSavedAddress;
@@ -72,10 +72,10 @@ public class NavListAdapter extends RecyclerView.Adapter<NavListAdapter.MyViewHo
                             break;
                         case "My Devices":
                             DatabaseHandler databaseHandler = new DatabaseHandler(mContext);
-                            List<ModalBLEDevice> listBLEDvcFromDB = databaseHandler.getAllBLEDvcs();
+                            List<ModalBLEDevice> listBLEDvcFromDB = databaseHandler.getAllAddressNdDeviceMapping();
                             if (listBLEDvcFromDB != null && listBLEDvcFromDB.size() > 0) {
-                                //Adding Fragment(FragMyDevices)
-                                MyFragmentTransactions.replaceFragment(mContext, new FragMyDevices(), Constant.DEVICE_MAP, mContext.frm_lyt_container_int, false);
+                                //Adding Fragment(FragDeviceMAP)
+                                MyFragmentTransactions.replaceFragment(mContext, new FragDeviceMAP(), Constant.DEVICE_MAP, mContext.frm_lyt_container_int, false);
                             } else {
                                 //Adding Fragment(FragDontHvDevice)
                                 MyFragmentTransactions.replaceFragment(mContext, new FragDontHvDevice(), Constant.DO_NOT_HAVE_DEVICE, mContext.frm_lyt_container_int, false);

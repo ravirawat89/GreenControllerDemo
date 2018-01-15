@@ -15,7 +15,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.netcommlabs.greencontroller.R;
-import com.netcommlabs.greencontroller.model.MdlLocationAddress;
 
 public class AddAddressActivity extends AppCompatActivity {
 
@@ -35,7 +34,7 @@ public class AddAddressActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.add_address_activity);
+        setContentView(R.layout.frag_add_address);
 
         initBase();
 
@@ -65,7 +64,7 @@ public class AddAddressActivity extends AppCompatActivity {
         raGrAddressType = (RadioGroup) findViewById(R.id.raGrAddressType);
         etOtherAddName = (EditText) findViewById(R.id.etOtherAddName);
         llAddAddressName = (LinearLayout) findViewById(R.id.llAddAddressName);
-        tvSaveEvent = (TextView) findViewById(R.id.tvSaveEvent);
+        tvSaveEvent = (TextView) findViewById(R.id.tvNextEvent);
 
 
     }
@@ -187,10 +186,10 @@ public class AddAddressActivity extends AppCompatActivity {
 
                 }*/
 
-                MdlLocationAddress mdlLocationAddress = new MdlLocationAddress(et_flat_num_input, et_localty_land_input, et_street_area_input, et_pincode_input, et_city_input, et_state_input, radio_address_name);
+                /*MdlAddressNdLocation mdlLocationAddress = new MdlAddressNdLocation(et_flat_num_input, et_localty_land_input, et_street_area_input, et_pincode_input, et_city_input, et_state_input, radio_address_name);
                 intent.putExtra("Data", mdlLocationAddress);
                 setResult(RESULT_CODE_ADDRESS, intent);
-                mContext.finish();
+                mContext.finish();*/
 
               /*  if (etOtherAddName.getVisibility() == View.VISIBLE) {
                     if (etOtherAddName.getText().toString().trim().length() > 0) {

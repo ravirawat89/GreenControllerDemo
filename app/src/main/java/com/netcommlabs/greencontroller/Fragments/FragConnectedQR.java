@@ -20,7 +20,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.netcommlabs.greencontroller.R;
 import com.netcommlabs.greencontroller.activities.MainActivity;
-import com.netcommlabs.greencontroller.model.MdlLocationAddress;
+import com.netcommlabs.greencontroller.model.MdlAddressNdLocation;
 import com.netcommlabs.greencontroller.model.ModalBLEDevice;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
 import com.netcommlabs.greencontroller.utilities.Constant;
@@ -50,7 +50,7 @@ public class FragConnectedQR extends Fragment {
     private String device_name;
     private String dvc_mac_address;
     int valveNum;
-    private MdlLocationAddress mdlLocationAddress;
+    private MdlAddressNdLocation mdlLocationAddress;
 
     @Override
     public void onAttach(Context context) {
@@ -145,6 +145,11 @@ public class FragConnectedQR extends Fragment {
             @Override
             public void onClick(View v) {
                 FragAddAddress fragAddAddress = new FragAddAddress();
+                if (mdlLocationAddress != null) {
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable(FragAddAddress.KEY_ADDRESS_TRANSFER, mdlLocationAddress);
+                    fragAddAddress.setArguments(bundle);
+                }
                 //First child---then parent
                 fragAddAddress.setTargetFragment(FragConnectedQR.this, 101);
                 //Adding Fragment(FragAddAddress)
@@ -174,46 +179,30 @@ public class FragConnectedQR extends Fragment {
                 String etQRManuallyInput = etQRManually.getText().toString();
 
                 if (mdlLocationAddress == null) {
-                    Toast.makeText(mContext, "Please provide at least ADDRESS NAME from address", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "Please provide Device Installation Address", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if (etQRManuallyInput.isEmpty()) {
                     Toast.makeText(mContext, "Please provide QR information", Toast.LENGTH_SHORT).show();
                     return;
-                } /*else if (!valveNum.isEmpty()) {
-                    valveNum = "8";
-                }*/ else if (!etQRManuallyInput.isEmpty() && etQRManuallyInput.equalsIgnoreCase("QR8")) {
+                }else if (!etQRManuallyInput.isEmpty() && etQRManuallyInput.equalsIgnoreCase("QR8")) {
                     valveNum = 8;
-                    /*for (int i=1;i<=8;i++){
-                        listValves.add("Valve "+i);
-                    }*/
                 } else {
                     Toast.makeText(mContext, "Please enter a valid input", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
                 databaseHandler = new DatabaseHandler(mContext);
-                //databaseHandler.deleteAllFromTableBLEDvc();
-                //Toast.makeText(mContext, "Count " + databaseHandler.getBLEDvcCount(), Toast.LENGTH_SHORT).show();
-
-                List<ModalBLEDevice> listBLEDvcFromDB = databaseHandler.getAllBLEDvcs();
+                List<ModalBLEDevice> listBLEDvcFromDB = databaseHandler.getAllAddressNdDeviceMapping();
                 for (int i = 0; i < listBLEDvcFromDB.size(); i++) {
                     if (listBLEDvcFromDB.get(i).getDvcMacAddrs().equalsIgnoreCase(dvc_mac_address)) {
-                        Toast.makeText(mContext, "This device is already added", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, "This device is already added with app", Toast.LENGTH_SHORT).show();
                         return;
                     }
                 }
                 ModalBLEDevice modalBleDevice = new ModalBLEDevice(device_name, dvc_mac_address, mdlLocationAddress, valveNum);
                 databaseHandler.addBLEDevice(modalBleDevice);
-
                 //Adding Fragment(FragAvailableDevices)
-                MyFragmentTransactions.replaceFragment(mContext, new FragMyDevices(), Constant.DEVICE_MAP, mContext.frm_lyt_container_int, false);
-
-                //Toast.makeText(mContext, "Count " + databaseHandler.getBLEDvcCount(), Toast.LENGTH_SHORT).show();
-               /* Intent intentAddWtrngProfile = new Intent(mContext, DeviceActivity.class);
-                mContext.startActivity(intentAddWtrngProfile);
-                mContext.finish();*/
-
+                MyFragmentTransactions.replaceFragment(mContext, new FragDeviceMAP(), Constant.DEVICE_MAP, mContext.frm_lyt_container_int, false);
             }
 
         });
@@ -223,7 +212,7 @@ public class FragConnectedQR extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 101 && resultCode == Activity.RESULT_OK) {
             if (data.getSerializableExtra("mdlAddressLocation") != null) {
-                mdlLocationAddress = (MdlLocationAddress) data.getSerializableExtra("mdlAddressLocation");
+                mdlLocationAddress = (MdlAddressNdLocation) data.getSerializableExtra("mdlAddressLocation");
                 Toast.makeText(mContext, "Address Saved", Toast.LENGTH_SHORT).show();
 
             } else {

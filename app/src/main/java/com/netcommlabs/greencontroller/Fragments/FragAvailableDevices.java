@@ -27,6 +27,7 @@ import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.adapters.AdptrAvailableDVCs;
 import com.netcommlabs.greencontroller.model.DataTransferModel;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
+import com.netcommlabs.greencontroller.utilities.AppAlertDialog;
 import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.Constant;
 
@@ -80,12 +81,12 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
         progrsBarIndetmnt = view.findViewById(R.id.progrsBarIndetmnt);
         reViListAvailDvc = view.findViewById(R.id.reViListAvailDvc);
         //if (NetworkUtils.isConnected(mContext)) {
-            //Location work starts
-            mContext.getLocation();
-            //Bluetooth work starts
-            startBTWork();
+        //Location work starts
+        mContext.getLocation();
+        //Bluetooth work starts
+        startBTWork();
         /*} else {
-            AppAlertDialog.showDialogFinishWithActivity(mContext, "Internet", "You are not Connected to internet");
+            AppAlertDialog.showDialogAndExitApp(mContext, "Internet", "You are not Connected to internet");
         }*/
 
         LinearLayoutManager llManagerAailDvcs = new LinearLayoutManager(mContext);
@@ -99,7 +100,7 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
     private void startBTWork() {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
-            Toast.makeText(mContext, "Device don't support Bluetooth", Toast.LENGTH_SHORT).show();
+            AppAlertDialog.showDialogAndExitApp(mContext, "Bluetooth Issue", "Device does not support Bluetooth");
         } else {
             if (mBluetoothAdapter.isEnabled()) {
                 startDvcDiscovery();
@@ -191,10 +192,6 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
         }
     }*/
 
-    @Override
-    public void clickPassDataToAct(ArrayList<DataTransferModel> listValveDataSingle, String clickedValveName, int pos) {
-
-    }
 
     @Override
     public void onRecyclerItemClickedNameAdress(String name, String address) {
@@ -215,7 +212,7 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
     }
 
     @Override
-    public void dvcHasExptdServices() {
+    public void dvcIsReadyNowNextScreen() {
         if (progressDialog != null) {
             progressDialog.dismiss();
         }
@@ -236,7 +233,7 @@ public class FragAvailableDevices extends Fragment implements InterfaceValveAdap
         MyFragmentTransactions.replaceFragment(mContext, fragConnectedQR, Constant.CONNECTED_QR, mContext.frm_lyt_container_int, true);
     }
 
-    public void dvcDoesNotHasExptdServices() {
+    public void dvcIsStrangeStopEfforts() {
         if (progressDialog != null) {
             progressDialog.dismiss();
         }

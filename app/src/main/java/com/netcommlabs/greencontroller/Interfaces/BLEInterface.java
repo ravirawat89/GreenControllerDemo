@@ -5,5 +5,5 @@ package com.netcommlabs.greencontroller.Interfaces;
  */
 
 public interface BLEInterface {
-    public void dvcHasExptdServices();
+    public void dvcIsReadyNowNextScreen();
 }

@@ -1,7 +1,5 @@
 package com.netcommlabs.greencontroller.model;
 
-import java.util.List;
-
 /**
  * Created by Android on 11/22/2017.
  */
@@ -13,7 +11,7 @@ public class ModalBLEDevice {
     String dvcName;
     String dvcMacAddrs;
     int valveNum;
-    MdlLocationAddress mdlLocationAddress;
+    MdlAddressNdLocation mdlAddressNdLocation;
 
     // Empty constructor
     public ModalBLEDevice() {
@@ -21,19 +19,19 @@ public class ModalBLEDevice {
     }
 
     // constructor
-    public ModalBLEDevice(int id, String dvcName, String dvcMacAddrs, MdlLocationAddress mdlLocationAddress, int valveNum) {
+    public ModalBLEDevice(int id, String dvcName, String dvcMacAddrs, MdlAddressNdLocation mdlAddressNdLocation, int valveNum) {
         this.id = id;
         this.dvcName = dvcName;
         this.dvcMacAddrs = dvcMacAddrs;
-        this.mdlLocationAddress = mdlLocationAddress;
+        this.mdlAddressNdLocation = mdlAddressNdLocation;
         this.valveNum = valveNum;
     }
 
     // constructor
-    public ModalBLEDevice(String dvcName, String dvcMacAddrs, MdlLocationAddress mdlLocationAddress, int valveNum) {
+    public ModalBLEDevice(String dvcName, String dvcMacAddrs, MdlAddressNdLocation mdlAddressNdLocation, int valveNum) {
         this.dvcName = dvcName;
         this.dvcMacAddrs = dvcMacAddrs;
-        this.mdlLocationAddress = mdlLocationAddress;
+        this.mdlAddressNdLocation = mdlAddressNdLocation;
         this.valveNum = valveNum;
     }
 
@@ -67,12 +65,12 @@ public class ModalBLEDevice {
         this.dvcMacAddrs = dvcMacAddrs;
     }
 
-    public MdlLocationAddress getMdlLocationAddress() {
-        return mdlLocationAddress;
+    public MdlAddressNdLocation getMdlLocationAddress() {
+        return mdlAddressNdLocation;
     }
 
-    public void setMdlLocationAddress(MdlLocationAddress mdlLocationAddress) {
-        this.mdlLocationAddress = mdlLocationAddress;
+    public void setMdlLocationAddress(MdlAddressNdLocation mdlLocationAddress) {
+        this.mdlAddressNdLocation = mdlLocationAddress;
     }
 
     public int getValvesNum() {

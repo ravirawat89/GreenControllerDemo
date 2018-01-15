@@ -15,6 +15,8 @@ public class MySharedPreference {
     private Context mContext;
     private String keySetMacAd = "macAddkey";
 
+    private String keyConnectedTime = "connTime";
+
 
     public static MySharedPreference getInstance(Context mContext) {
         if (object == null) {
@@ -23,7 +25,7 @@ public class MySharedPreference {
         return object;
     }
 
-    public MySharedPreference(Context mContext) {
+    private MySharedPreference(Context mContext) {
         this.mContext = mContext;
         sharedpreferences = mContext.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
     }
@@ -53,11 +55,21 @@ public class MySharedPreference {
 
     public void setConnectedDvcMacAdd(String macAdd) {
         SharedPreferences.Editor editor = sharedpreferences.edit();
-        editor.putString(this.keySetMacAd, macAdd);
+        editor.putString(keySetMacAd, macAdd);
         editor.commit();
     }
 
     public String getConnectedDvcMacAdd() {
-        return sharedpreferences.getString(this.keySetMacAd, null);
+        return sharedpreferences.getString(keySetMacAd, null);
+    }
+
+    public String getLastConnectedTime() {
+        return sharedpreferences.getString(keyConnectedTime, null);
+    }
+
+    public void setLastConnectedTime(String lastConctdTime) {
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        editor.putString(keyConnectedTime, lastConctdTime);
+        editor.commit();
     }
 }

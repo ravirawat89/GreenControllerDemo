@@ -18,7 +18,7 @@
             android:padding="@dimen/_3sdp"
             android:text="Office Address is given"
             android:textColor="@color/text_color_white"
-            android:textSize="@dimen/_14sdp" />
+            android:textSize="@dimen/_13sdp" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -111,7 +111,7 @@
                 android:layout_width="@dimen/_150sdp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/_5sdp"
-                android:text="Add device installation address"
+                android:text="Device Installation Address"
                 android:textSize="@dimen/headings" />
 
         </LinearLayout>

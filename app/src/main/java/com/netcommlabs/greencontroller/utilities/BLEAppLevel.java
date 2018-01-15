@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothGattService;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -17,11 +16,11 @@ import com.netcommlabs.greencontroller.Constants;
 import com.netcommlabs.greencontroller.Fragments.FragAddEditSesnPlan;
 import com.netcommlabs.greencontroller.Fragments.FragAvailableDevices;
 import com.netcommlabs.greencontroller.Fragments.FragDeviceDetails;
-import com.netcommlabs.greencontroller.Fragments.FragMyDevices;
 import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.model.DataTransferModel;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,16 +45,18 @@ public class BLEAppLevel {
     private BleAdapterService bluetooth_le_adapter;
     private boolean back_requested = false;
     private Fragment myFragment;
+    //private static Fragment myFragmentDD;
     private boolean isBLEConnected = false;
     private int alert_level;
     private String cmdTypeName;
     private static int dataSendingIndex = 0;
     private static boolean oldTimePointsErased = FALSE;
     private ArrayList<DataTransferModel> listSingleValveData;
-    private int etInputDursnPlanInt = 0;
-    private int etQuantPlanInt = 0;
-    private int etInputDischrgPntsInt = 0;
+    private int etDisPntsInt = 0;
+    private int etDurationInt = 0;
+    private int etWaterQuantWithDPInt = 0;
     private boolean isServiceBound = false;
+    private static FragDeviceDetails fragDeviceDetails;
 
 
     public static BLEAppLevel getInstance(MainActivity mContext, Fragment myFragment, String macAddress) {
@@ -71,6 +72,14 @@ public class BLEAppLevel {
         }
         return null;
     }
+
+    /*public static BLEAppLevel getInstanceOnlyDDFragment(Fragment myFragment) {
+        if (bleAppLevel != null) {
+            myFragmentDD = myFragment;
+            return bleAppLevel;
+        }
+        return null;
+    }*/
 
     private BLEAppLevel(MainActivity mContext, Fragment myFragment, String macAddress) {
         this.mContext = mContext;
@@ -125,11 +134,9 @@ public class BLEAppLevel {
                 case BleAdapterService.GATT_DISCONNECT:
                     //we're disconnected
                     isBLEConnected = false;
-                    //bluetooth_le_adapter = null;
                     showMsg("DISCONNECTED_ACK");
-                    if (back_requested) {
-                        //finish();
-                    }
+                    mContext.MainActBLEgotDisconnected();
+                    disconnectBLECompletely();
                     break;
                 case BleAdapterService.GATT_SERVICES_DISCOVERED:
                     //validate services and if ok...
@@ -166,25 +173,25 @@ public class BLEAppLevel {
                     }
                     if (time_point_service_present && current_time_service_present && pots_service_present && battery_service_present) {
                         showMsg("Device has expected services");
-                        //Recent connected device saved in SP
-                        MySharedPreference.getInstance(mContext).setConnectedDvcMacAdd(macAddress);
                         isBLEConnected = true;
+                        //Recent connected device MAC save in SP
+                        MySharedPreference.getInstance(mContext).setConnectedDvcMacAdd(macAddress);
+                        //Calculating data, time and save in SP
+                        Calendar c = Calendar.getInstance();
+                        SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy, HH:mm:ss");
+                        String formattedDate = df.format(c.getTime());
+                        MySharedPreference.getInstance(mContext).setLastConnectedTime(formattedDate);
+                        mContext.MainActBLEgotConnected();
+                        //Setting current time to BLE
                         onSetTime();
                         if (myFragment instanceof FragAvailableDevices) {
-                            ((FragAvailableDevices) myFragment).dvcHasExptdServices();
+                            ((FragAvailableDevices) myFragment).dvcIsReadyNowNextScreen();
                         }
-                        if (myFragment instanceof FragMyDevices) {
-                            ((FragMyDevices) myFragment).connectedChangeBLEBackground();
-                        }
-                        /*mContext.unbindService(service_connection);
-                        bluetooth_le_adapter = null;
-                        mContext.finish();
-                        onSetTime();*/
                     } else {
                         bluetooth_le_adapter.disconnect();
                         showMsg("Device does not have expected GATT services");
                         bleAppLevel = null;
-                        ((FragAvailableDevices) myFragment).dvcDoesNotHasExptdServices();
+                        ((FragAvailableDevices) myFragment).dvcIsStrangeStopEfforts();
                     }
                     break;
                 case BleAdapterService.GATT_CHARACTERISTIC_READ:
@@ -222,7 +229,7 @@ public class BLEAppLevel {
                     }
                     //ACK for writing Time Points
                     if (bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase().equals(BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID)) {
-                        Log.e("@@@@@@@@@@@@", "Ack Received For" + dataSendingIndex);
+                        Log.e("@@@ACK RECEIVED FOR ", "" + dataSendingIndex);
                         if (oldTimePointsErased == FALSE) {
                             oldTimePointsErased = TRUE;
                             if (dataSendingIndex < listSingleValveData.size()) {
@@ -276,8 +283,14 @@ public class BLEAppLevel {
     }
 
     public void onSetTime() {
-        String[] ids = TimeZone.getAvailableIDs(+5 * 60 * 60 * 1000);
-        SimpleTimeZone pdt = new SimpleTimeZone(+5 * 60 * 60 * 1000, ids[0]);
+        //Getting +5:30 time zone
+        int plusFiveThirtyZone = (5 * 60 * 60 * 1000) + (30 * 60 * 1000);
+
+        /*String[] ids = TimeZone.getAvailableIDs(+5 * 60 * 60 * 1000);
+        SimpleTimeZone pdt = new SimpleTimeZone(+5 * 60 * 60 * 1000, ids[0]);*/
+
+        String[] ids = TimeZone.getAvailableIDs(+plusFiveThirtyZone);
+        SimpleTimeZone pdt = new SimpleTimeZone(+plusFiveThirtyZone, ids[0]);
 
         Calendar calendar = new GregorianCalendar(pdt);
         Date trialTime = new Date();
@@ -318,11 +331,12 @@ public class BLEAppLevel {
         }
     }
 
-    public void eraseOldTimePoints(FragAddEditSesnPlan fragAddEditSesnPlan, int etQuantPlanInt, int etInputDursnPlanInt, int etInputDischrgPntsInt, ArrayList<DataTransferModel> listSingleValveData) {
+    public void eraseOldTimePoints(FragAddEditSesnPlan fragAddEditSesnPlan, int etDisPntsInt, int etDurationInt, int etWaterQuantWithDPInt, ArrayList<DataTransferModel> listSingleValveData) {
         myFragment = fragAddEditSesnPlan;
-        this.etQuantPlanInt = etQuantPlanInt;
-        this.etInputDursnPlanInt = etInputDursnPlanInt;
-        this.etInputDischrgPntsInt = etInputDischrgPntsInt;
+
+        this.etDisPntsInt = etDisPntsInt;
+        this.etDurationInt = etDurationInt;
+        this.etWaterQuantWithDPInt = etWaterQuantWithDPInt;
         this.listSingleValveData = listSingleValveData;
 
         byte[] timePoint = {0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -333,13 +347,15 @@ public class BLEAppLevel {
     public void disconnectBLECompletely() {
         if (bluetooth_le_adapter != null) {
             try {
-                bleAppLevel = null;
-                if (isServiceBound) {
-                    mContext.unbindService(service_connection);
-                    isServiceBound = false;
-                }
-                if (getBLEConnectedOrNot()) {
-                    bluetooth_le_adapter.disconnect();
+                if (bleAppLevel != null) {
+                    bleAppLevel = null;
+                    if (isServiceBound) {
+                        mContext.unbindService(service_connection);
+                        isServiceBound = false;
+                    }
+                    if (getBLEConnectedOrNot()) {
+                        bluetooth_le_adapter.disconnect();
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -383,23 +399,25 @@ public class BLEAppLevel {
         }
     }
 
-
     void startSendData() {
-        Log.e("@@@@@@@@@@@", "" + dataSendingIndex);
+        //Log.e("@@@ INDEX", "" + dataSendingIndex);
         //byte index = (byte) (listSingleValveData.get(dataSendingIndex).getIndex() + 1);
         byte index = (byte) (dataSendingIndex + 1);
         byte hours = (byte) listSingleValveData.get(dataSendingIndex).getHours();
         byte dayOfTheWeek = (byte) listSingleValveData.get(dataSendingIndex).getDayOfTheWeek();
 
-        int iDurationMSB = (etInputDursnPlanInt / 256);
-        int iDurationLSB = (etInputDursnPlanInt % 256);
+        int iDurationMSB = (etDurationInt / 256);
+        int iDurationLSB = (etDurationInt % 256);
         byte bDurationMSB = (byte) iDurationMSB;
         byte bDurationLSB = (byte) iDurationLSB;
 
-        int iVolumeMSB = (etQuantPlanInt / 256);
-        int iVolumeLSB = (etQuantPlanInt % 256);
+        int iVolumeMSB = (etWaterQuantWithDPInt / 256);
+        int iVolumeLSB = (etWaterQuantWithDPInt % 256);
         byte bVolumeMSB = (byte) iVolumeMSB;
         byte bVolumeLSB = (byte) iVolumeLSB;
+
+        Log.e("@@@ ADD/EDIT VOLUME ", "INPUT: " + etWaterQuantWithDPInt + "\n Int /256: " + iVolumeMSB + "\n Int %256: " + iVolumeLSB + "\n bVolumeMSB: " + bVolumeMSB + "\n bVolumeLSB: " + bVolumeLSB);
+
         listSingleValveData.get(dataSendingIndex).setIndex(index);
         listSingleValveData.get(dataSendingIndex).setbDurationLSB(bDurationLSB);
         listSingleValveData.get(dataSendingIndex).setbDurationMSB(bDurationMSB);
@@ -407,11 +425,13 @@ public class BLEAppLevel {
         listSingleValveData.get(dataSendingIndex).setbVolumeMSB(bVolumeMSB);
         listSingleValveData.get(dataSendingIndex).setMinutes(0);
         listSingleValveData.get(dataSendingIndex).setSeconds(0);
-        listSingleValveData.get(dataSendingIndex).setQty(etQuantPlanInt);
-        listSingleValveData.get(dataSendingIndex).setDuration(etInputDursnPlanInt);
-        listSingleValveData.get(dataSendingIndex).setDischarge(etInputDischrgPntsInt);
+        listSingleValveData.get(dataSendingIndex).setQty(etWaterQuantWithDPInt);
+        listSingleValveData.get(dataSendingIndex).setDuration(etDurationInt);
+        listSingleValveData.get(dataSendingIndex).setDischarge(etDisPntsInt);
 
-        Log.e("@@", "" + index + "-" + dayOfTheWeek + "-" + hours + "-" + 0 + "-" + 0 + "-" + bDurationMSB + "-" + bDurationLSB + "-" + bVolumeMSB + "-" + bVolumeLSB);
+        Log.e("GGG", "INDEX: " + index + "\n DOW: " + dayOfTheWeek + "\n HRS: " + hours + "\n MIN: " + 0 + "\n SEC: " + 0 + "\n DMSB: " + bDurationMSB + "\n DLSB: " + bDurationLSB + "\n VMSB: " + bVolumeMSB + "\n VLSB: " + bVolumeLSB);
+
+        //Log.e("@@", "" + index + "-" + dayOfTheWeek + "-" + hours + "-" + 0 + "-" + 0 + "-" + bDurationMSB + "-" + bDurationLSB + "-" + bVolumeMSB + "-" + bVolumeLSB);
         byte[] timePoint = {index, dayOfTheWeek, hours, 0, 0, bDurationMSB, bDurationLSB, bVolumeMSB, bVolumeLSB};
         bluetooth_le_adapter.writeCharacteristic(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
                 BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint);

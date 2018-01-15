@@ -1,22 +1,15 @@
 package com.netcommlabs.greencontroller.Fragments;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothGattService;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,15 +17,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.netcommlabs.greencontroller.Constants;
 import com.netcommlabs.greencontroller.InterfaceValveAdapter;
 import com.netcommlabs.greencontroller.R;
-import com.netcommlabs.greencontroller.activities.AddEditSessionPlan;
 import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.adapters.ValvesListAdapter;
 import com.netcommlabs.greencontroller.model.DataTransferModel;
-import com.netcommlabs.greencontroller.model.ModalBLEValve;
-import com.netcommlabs.greencontroller.model.ModalVlNameSelect;
+import com.netcommlabs.greencontroller.model.MdlValveNameStateNdSelect;
+import com.netcommlabs.greencontroller.model.ModalValveBirth;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
 import com.netcommlabs.greencontroller.utilities.AppAlertDialog;
@@ -40,14 +31,7 @@ import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 import com.netcommlabs.greencontroller.utilities.MySharedPreference;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.SimpleTimeZone;
-import java.util.TimeZone;
-
-import static com.netcommlabs.greencontroller.utilities.SharedPrefsConstants.lAST_CONNECTED;
 
 /**
  * Created by Android on 12/6/2017.
@@ -60,20 +44,20 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
     private static final int REQUEST_CODE_SESN_PLAN = 201;
     public static final int RESULT_CODE_VALVE_INDB = 202;
     private RecyclerView reviValvesList;
-    private ArrayList<String> listValvesNameOnly;
-    public static ArrayList<ModalVlNameSelect> listModalValveNameSelect = new ArrayList<>();
+    private ArrayList<MdlValveNameStateNdSelect> listMdlValveNameStateNdSelect;
+    //public static ArrayList<MdlValveNameStateNdSelect> listModalValveProperties = new ArrayList<>();
     private LinearLayout /*llScrnHeader,*/ llNoSesnPlan, llSesnPlanDetails, llControllerNameEdit, llControllerNameSave;
     private LinearLayout llEditValve, llStopValve, llPausePlayValve, llFlushValve, llHelpValve;
     private TextView tvDeviceName, tvDesc_txt, tvAddNewSesnPlan;
     private DatabaseHandler databaseHandler;
-    private ArrayList<DataTransferModel> listValveDataSingle;
+    private ArrayList<DataTransferModel> listAddEditValveData;
     public static final String EXTRA_DVC_NAME = "dvc_name";
     public static final String EXTRA_DVC_MAC = "dvc_mac";
     public static final String EXTRA_DVC_VALVE_COUNT = "dvc_count";
     private String dvcName;
     private String dvcMacAdd;
     private int dvcValveCount;
-    private String valveConctName, clickedValveName = "Valve 1";
+    private String valveConctName, clickedValveName;
     private TextView tvSunFirst, tvSunSecond, tvSunThird, tvSunFourth, tvMonFirst, tvMonSecond, tvMonThird, tvMonFourth, tvTueFirst, tvTueSecond, tvTueThird, tvTueFourth, tvWedFirst, tvWedSecond, tvWedThird, tvWedFourth, tvThuFirst, tvThuSecond, tvThuThird, tvThuFourth, tvFriFirst, tvFriSecond, tvFriThird, tvFriFourth, tvSatFirst, tvSatSecond, tvSatThird, tvSatFourth;
     private TextView tvDischargePnts, tvDuration, tvQuantity, tvPauseText;
     private ArrayList<Integer> listTimePntsSun, listTimePntsMon, listTimePntsTue, listTimePntsWed, listTimePntsThu, listTimePntsFri, listTimePntsSat;
@@ -86,6 +70,7 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
     private boolean isValveSelected = true;
     BLEAppLevel bleAppLevel;
     private Fragment myRequestedFrag;
+    private ModalValveBirth modalBLEValve;
 
     @Override
     public void onAttach(Context context) {
@@ -97,81 +82,136 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.device_details, null);
 
-        initBase(view);
+        initView(view);
+        initBase();
         initListeners();
 
         return view;
     }
 
-    private void initBase(View view) {
+    private void initView(View view) {
+        llNoSesnPlan = view.findViewById(R.id.llNoSesnPlan);
+        llSesnPlanDetails = view.findViewById(R.id.llSesnPlanDetails);
+        llEditValve = view.findViewById(R.id.llEditValve);
+        llStopValve = view.findViewById(R.id.llStopValve);
+        llPausePlayValve = view.findViewById(R.id.llPauseValve);
+        llFlushValve = view.findViewById(R.id.llFlushValve);
+        llHelpValve = view.findViewById(R.id.llHelpValve);
+//        tvDeviceName = view.findViewById(R.id.tvDeviceName);
+        reviValvesList = view.findViewById(R.id.reviValvesList);
+        tvAddNewSesnPlan = view.findViewById(R.id.tvAddNewSesnPlan);
+        tvPauseText = view.findViewById(R.id.tvPauseText);
+
+        tvDischargePnts = view.findViewById(R.id.tvDischargePnts);
+        tvDuration = view.findViewById(R.id.tvDuration);
+        tvQuantity = view.findViewById(R.id.tvQuantity);
+
+        tvSunFirst = view.findViewById(R.id.tvSunFirst);
+        tvSunSecond = view.findViewById(R.id.tvSunSecond);
+        tvSunThird = view.findViewById(R.id.tvSunThird);
+        tvSunFourth = view.findViewById(R.id.tvSunFourth);
+
+        tvMonFirst = view.findViewById(R.id.tvMonFirst);
+        tvMonSecond = view.findViewById(R.id.tvMonSecond);
+        tvMonThird = view.findViewById(R.id.tvMonThird);
+        tvMonFourth = view.findViewById(R.id.tvMonFourth);
+
+        tvTueFirst = view.findViewById(R.id.tvTueFirst);
+        tvTueSecond = view.findViewById(R.id.tvTueSecond);
+        tvTueThird = view.findViewById(R.id.tvTueThird);
+        tvTueFourth = view.findViewById(R.id.tvTueFourth);
+
+        tvWedFirst = view.findViewById(R.id.tvWedFirst);
+        tvWedSecond = view.findViewById(R.id.tvWedSecond);
+        tvWedThird = view.findViewById(R.id.tvWedThird);
+        tvWedFourth = view.findViewById(R.id.tvWedFourth);
+
+        tvThuFirst = view.findViewById(R.id.tvThuFirst);
+        tvThuSecond = view.findViewById(R.id.tvThuSecond);
+        tvThuThird = view.findViewById(R.id.tvThuThird);
+        tvThuFourth = view.findViewById(R.id.tvThuFourth);
+
+        tvFriFirst = view.findViewById(R.id.tvFriFirst);
+        tvFriSecond = view.findViewById(R.id.tvFriSecond);
+        tvFriThird = view.findViewById(R.id.tvFriThird);
+        tvFriFourth = view.findViewById(R.id.tvFriFourth);
+
+        tvSatFirst = view.findViewById(R.id.tvSatFirst);
+        tvSatSecond = view.findViewById(R.id.tvSatSecond);
+        tvSatThird = view.findViewById(R.id.tvSatThird);
+        tvSatFourth = view.findViewById(R.id.tvSatFourth);
+    }
+
+    private void initBase() {
         //Getting sent intent
-        Bundle bundle = this.getArguments();
+        Bundle bundle = getArguments();
         dvcName = bundle.getString(EXTRA_DVC_NAME);
         dvcMacAdd = bundle.getString(EXTRA_DVC_MAC);
         dvcValveCount = bundle.getInt(EXTRA_DVC_VALVE_COUNT);
-        //Check BLE Connection
-        myRequestedFrag=FragDeviceDetails.this;
+        myRequestedFrag = FragDeviceDetails.this;
+        tvDeviceName = mContext.tvToolbar_title;
+        tvDesc_txt = mContext.tvDesc_txt;
         bleAppLevel = BLEAppLevel.getInstanceOnly();
         if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
-            //setConnectionIsDone();
-            //Toast.makeText(mContext, "BLE connected", Toast.LENGTH_SHORT).show();
+            tvDesc_txt.setText("This device is Connected");
         } else {
-            AppAlertDialog.dialogBLENotConnected(mContext,myRequestedFrag,bleAppLevel);
-            //Toast.makeText(mContext, "BLE not connected", Toast.LENGTH_SHORT).show();
+            tvDesc_txt.setText("Last Connected  " + MySharedPreference.getInstance(mContext).getLastConnectedTime());
         }
-
         /*dvcName = "PEBBLE";
         dvcMacAdd = "98:4F:EE:10:87:66";
         dvcValveCount = 8;*/
-        //listModalValveNameSelect = new ArrayList<>();
-        initView(view);
-        initListeners();
         tvDeviceName.setText(dvcName);
+
         //Adding valve name,MAC, and valve data to DB
         databaseHandler = new DatabaseHandler(mContext);
-        List<ModalBLEValve> listGotModalBLEValvesNdData = databaseHandler.getAllValvesNdData();
+        List<ModalValveBirth> listGotModalBLEValvesNdData = databaseHandler.getAllValvesNdData();
+
         if (listGotModalBLEValvesNdData.size() == 0) {
             for (int i = 1; i <= dvcValveCount; i++) {
                 valveConctName = "Valve " + i;
-                //List for adding data to DB
-                databaseHandler.addValveNdData(new ModalBLEValve(dvcMacAdd, valveConctName, listValveDataSingle));
+                //Birth of valves one after one
+                if (valveConctName.equals("Valve 1")) {
+                    //On birth first valve would be selected
+                    databaseHandler.setValveDataNdPropertiesBirth(new ModalValveBirth(dvcMacAdd, valveConctName, listAddEditValveData, "TRUE", "STOP", "FALSE"));
+                } else {
+                    databaseHandler.setValveDataNdPropertiesBirth(new ModalValveBirth(dvcMacAdd, valveConctName, listAddEditValveData, "FALSE", "STOP", "FALSE"));
+                }
             }
-            listValvesNameOnly = databaseHandler.getAllValvesNameWithMAC(dvcMacAdd);
+            initValveListAdapter();
+            //listMdlValveNameStateNdSelect = databaseHandler.getValveNameAndLastTwoProp(dvcMacAdd);
         } else {
-            for (ModalBLEValve modalBLEValve : listGotModalBLEValvesNdData) {
+            for (ModalValveBirth modalBLEValve : listGotModalBLEValvesNdData) {
                 if (modalBLEValve.getDvcMacAddrs().equalsIgnoreCase(dvcMacAdd)) {
                     //List for Valve RecyclerView to show valves
-                    listValvesNameOnly = databaseHandler.getAllValvesNameWithMAC(dvcMacAdd);
+                    initValveListAdapter();
+                    //listMdlValveNameStateNdSelect = databaseHandler.getValveNameAndLastTwoProp(dvcMacAdd);
                     break;
                 } else {
                     for (int i = 1; i <= dvcValveCount; i++) {
                         valveConctName = "Valve " + i;
-                        //List for adding data to DB
-                        databaseHandler.addValveNdData(new ModalBLEValve(valveConctName, dvcMacAdd, listValveDataSingle));
+                        //Birth of valves one after one
+                        if (valveConctName.equals("Valve 1")) {
+                            //On birth first valve would be selected
+                            databaseHandler.setValveDataNdPropertiesBirth(new ModalValveBirth(dvcMacAdd, valveConctName, listAddEditValveData, "TRUE", "STOP", "FALSE"));
+                        } else {
+                            databaseHandler.setValveDataNdPropertiesBirth(new ModalValveBirth(dvcMacAdd, valveConctName, listAddEditValveData, "FALSE", "STOP", "FALSE"));
+                        }
                     }
+                    initValveListAdapter();
+                    //listMdlValveNameStateNdSelect = databaseHandler.getValveNameAndLastTwoProp(dvcMacAdd);
                     break;
                 }
             }
         }
 
-        if (FragDeviceDetails.listModalValveNameSelect != null && FragDeviceDetails.listModalValveNameSelect.size() > 0) {
+       /* if (FragDeviceDetails.listModalValveProperties != null && FragDeviceDetails.listModalValveProperties.size() > 0) {
             LinearLayoutManager gridLayoutManager = new LinearLayoutManager(mContext);
             reviValvesList.setLayoutManager(gridLayoutManager);
             valveListAdp = new ValvesListAdapter(mContext, FragDeviceDetails.this, dvcMacAdd, position);
             reviValvesList.setAdapter(valveListAdp);
-        } else {
-            if (listValvesNameOnly != null && listValvesNameOnly.size() > 0) {
-                listModalValveNameSelect = new ArrayList<>();
-                for (String valveName : listValvesNameOnly) {
-                    listModalValveNameSelect.add(new ModalVlNameSelect(valveName, isValveSelected));
-                    isValveSelected = false;
-                }
-                LinearLayoutManager gridLayoutManager = new LinearLayoutManager(mContext);
-                reviValvesList.setLayoutManager(gridLayoutManager);
-                valveListAdp = new ValvesListAdapter(mContext, FragDeviceDetails.this, dvcMacAdd, position);
-                reviValvesList.setAdapter(valveListAdp);
-            }
-        }
+        } else {*/
+        initValveListAdapter();
+        //}
 
 
         //databasHandler.deleteAllRecordFromTable();
@@ -184,14 +224,145 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
             llNoSesnPlan.setVisibility(View.VISIBLE);
             llSesnPlanDetails.setVisibility(View.GONE);
         }*/
-        listValveDataSingle = databaseHandler.getValveDataWithMACValveName(dvcMacAdd, clickedValveName);
+        modalBLEValve = databaseHandler.getValveDataAndProperties(dvcMacAdd, clickedValveName);
+        //if (modalBLEValve != null) {
         checkValveDataUpdtUIFrmDB();
+        //}
 
         //initController();
     }
 
+    private void initListeners() {
+        llEditValve.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragAddEditSesnPlan fragAddEditSesnPlan = new FragAddEditSesnPlan();
+                Bundle bundle = new Bundle();
+                bundle.putString(FragAddEditSesnPlan.EXTRA_NAME, dvcName);
+                bundle.putString(FragAddEditSesnPlan.EXTRA_ID, dvcMacAdd);
+                bundle.putString(FragAddEditSesnPlan.EXTRA_VALVE_NAME_DB, clickedValveName);
+                bundle.putSerializable(FragAddEditSesnPlan.EXTRA_VALVE_EDITABLE_DATA, listAddEditValveData);
+                bundle.putString(FragAddEditSesnPlan.EXTRA_OPERATION_TYPE, "Edit");
+                //bundle.putString(AddEditSessionPlan.EXTRA_NAME, dvcName);
+                fragAddEditSesnPlan.setArguments(bundle);
+                fragAddEditSesnPlan.setTargetFragment(FragDeviceDetails.this, 101);
+                //Adding Fragment(FragAddEditSesnPlan)
+                titleDynamicAddEdit = "Edit ".concat("Plane (").concat(clickedValveName).concat(")");
+                MyFragmentTransactions.replaceFragment(mContext, fragAddEditSesnPlan, titleDynamicAddEdit, mContext.frm_lyt_container_int, true);
+
+                /*Intent intentAddNewSesnPln = new Intent(mContext, AddEditSessionPlan.class);
+                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_NAME, dvcName);
+                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_ID, dvcMacAdd);
+                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_VALVE_NAME_DB, clickedValveName);
+                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_VALVE_EDITABLE_DATA, listAddEditValveData);
+                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_OPERATION_TYPE, "Edit");
+                startActivityForResult(intentAddNewSesnPln, REQUEST_CODE_SESN_PLAN);*/
+            }
+        });
+
+        tvAddNewSesnPlan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragAddEditSesnPlan fragAddEditSesnPlan = new FragAddEditSesnPlan();
+                Bundle bundle = new Bundle();
+                bundle.putString(FragAddEditSesnPlan.EXTRA_NAME, dvcName);
+                bundle.putString(FragAddEditSesnPlan.EXTRA_ID, dvcMacAdd);
+                bundle.putString(FragAddEditSesnPlan.EXTRA_VALVE_NAME_DB, clickedValveName);
+                //bundle.putSerializable(AddEditSessionPlan.EXTRA_VALVE_EDITABLE_DATA, listAddEditValveData);
+                bundle.putString(FragAddEditSesnPlan.EXTRA_OPERATION_TYPE, "Add");
+                //bundle.putString(AddEditSessionPlan.EXTRA_NAME, dvcName);
+                fragAddEditSesnPlan.setArguments(bundle);
+                fragAddEditSesnPlan.setTargetFragment(FragDeviceDetails.this, 101);
+                titleDynamicAddEdit = "Add ".concat("Plane (").concat(clickedValveName).concat(")");
+                //Adding Fragment(FragAvailableDevices)
+                MyFragmentTransactions.replaceFragment(mContext, fragAddEditSesnPlan, titleDynamicAddEdit, mContext.frm_lyt_container_int, true);
+
+              /*  Intent intentAddNewSesnPln = new Intent(mContext, AddEditSessionPlan.class);
+                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_NAME, dvcName);
+                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_ID, dvcMacAdd);
+                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_VALVE_NAME_DB, clickedValveName);
+                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_OPERATION_TYPE, "Add");
+                startActivityForResult(intentAddNewSesnPln, REQUEST_CODE_SESN_PLAN);*/
+
+               /* if (bluetooth_le_adapter.isConnected()) {
+                    try {
+                        bluetooth_le_adapter.disconnect();
+                    } catch (Exception e) {
+                    }
+                }
+                unbindService(service_connection);
+                bluetooth_le_adapter = null;*/
+                //super.onDestroy();
+                //startActivity(intentAddNewSesnPln);
+                //finish();
+            }
+        });
+
+        llStopValve.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bleAppLevel = BLEAppLevel.getInstanceOnly();
+                if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+                    dialogSTOPConfirm();
+                } else {
+                    AppAlertDialog.dialogBLENotConnected(mContext, myRequestedFrag, bleAppLevel);
+                }
+            }
+        });
+
+        llPausePlayValve.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bleAppLevel = BLEAppLevel.getInstanceOnly();
+                if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+                    if (cmdName.equals("PAUSE")) {
+                        dialogPAUSEConfirm();
+                    } else if (cmdName.equals("PLAY")) {
+                        dialogPLAYConfirm();
+                    }
+                } else {
+                    AppAlertDialog.dialogBLENotConnected(mContext, myRequestedFrag, bleAppLevel);
+                }
+            }
+        });
+
+        llFlushValve.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bleAppLevel = BLEAppLevel.getInstanceOnly();
+                if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
+                    dialogFlushStart();
+                } else {
+                    AppAlertDialog.dialogBLENotConnected(mContext, myRequestedFrag, bleAppLevel);
+                }
+            }
+        });
+    }
+
+    private void initValveListAdapter() {
+        int scrlToSelectedPosi = 0;
+        listMdlValveNameStateNdSelect = databaseHandler.getValveNameAndLastTwoProp(dvcMacAdd);
+        //Getting selected valve on page load
+        for (int i = 0; i < listMdlValveNameStateNdSelect.size(); i++) {
+            if (listMdlValveNameStateNdSelect.get(i).getValveSelected().equals("TRUE")) {
+                clickedValveName = listMdlValveNameStateNdSelect.get(i).getValveName();
+                scrlToSelectedPosi = i;
+                break;
+            }
+        }
+
+        if (listMdlValveNameStateNdSelect != null && listMdlValveNameStateNdSelect.size() > 0) {
+            LinearLayoutManager gridLayoutManager = new LinearLayoutManager(mContext);
+            reviValvesList.setLayoutManager(gridLayoutManager);
+            valveListAdp = new ValvesListAdapter(mContext, FragDeviceDetails.this, dvcMacAdd, listMdlValveNameStateNdSelect);
+            reviValvesList.setAdapter(valveListAdp);
+        }
+        //Scroll to selected position
+        reviValvesList.smoothScrollToPosition(scrlToSelectedPosi);
+    }
+
     private void checkValveDataUpdtUIFrmDB() {
-        if (listValveDataSingle != null && listValveDataSingle.size() > 0) {
+        if (modalBLEValve != null && modalBLEValve.getListValveData() != null && modalBLEValve.getListValveData().size() > 0) {
             llNoSesnPlan.setVisibility(View.GONE);
             setValveDataToUI();
         } else {
@@ -204,23 +375,47 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
         setTimePntsVisibilityGONE();
         llSesnPlanDetails.setVisibility(View.VISIBLE);
         //initListeners();
+        String valveState = modalBLEValve.getValveState();
+        String flushStatus = modalBLEValve.getFlushStatus();
+        //PLAY-PAUSE & FLUSH effect for valve load on UI
+        if (valveState.equals("PLAY")) {
+            tvPauseText.setText("Pause");
+            llEditValve.setEnabled(true);
+            this.cmdName = "PAUSE";
+        } else if (valveState.equals("PAUSE")) {
+            tvPauseText.setText("Play");
+            llEditValve.setEnabled(false);
+            this.cmdName = "PLAY";
+        }
+        if (flushStatus.equals("TRUE")) {
+            Toast.makeText(mContext, "This valve FLUSH is activated", Toast.LENGTH_SHORT).show();
+        }
 
         DataTransferModel dataTransferModel;
-        listTimePntsSun = new ArrayList<Integer>();
-        listTimePntsMon = new ArrayList<Integer>();
-        listTimePntsTue = new ArrayList<Integer>();
-        listTimePntsWed = new ArrayList<Integer>();
-        listTimePntsThu = new ArrayList<Integer>();
-        listTimePntsFri = new ArrayList<Integer>();
-        listTimePntsSat = new ArrayList<Integer>();
+        listTimePntsSun = new ArrayList<>();
+        listTimePntsMon = new ArrayList<>();
+        listTimePntsTue = new ArrayList<>();
+        listTimePntsWed = new ArrayList<>();
+        listTimePntsThu = new ArrayList<>();
+        listTimePntsFri = new ArrayList<>();
+        listTimePntsSat = new ArrayList<>();
         int dischargePnts = 0, duration = 0, quantity = 0;
 
-        for (int i = 0; i < listValveDataSingle.size(); i++) {
-            dataTransferModel = listValveDataSingle.get(i);
+        listAddEditValveData = modalBLEValve.getListValveData();
+        if (listAddEditValveData == null || listAddEditValveData.size() == 0) {
+            return;
+        }
+
+        for (int i = 0; i < listAddEditValveData.size(); i++) {
+            dataTransferModel = listAddEditValveData.get(i);
 
             dischargePnts = dataTransferModel.getDischarge();
             duration = dataTransferModel.getDuration();
-            quantity = dataTransferModel.getQty();
+            if (dischargePnts!=0){
+                quantity = dataTransferModel.getQty()/dischargePnts;
+            }else {
+                quantity = dataTransferModel.getQty();
+            }
 
             //For Sunday
             if (dataTransferModel.getDayOfTheWeek() == 1) {
@@ -643,113 +838,6 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
         tvSatFourth.setVisibility(View.GONE);
     }
 
-    private void initListeners() {
-        llEditValve.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragAddEditSesnPlan fragAddEditSesnPlan = new FragAddEditSesnPlan();
-                Bundle bundle = new Bundle();
-                bundle.putString(AddEditSessionPlan.EXTRA_NAME, dvcName);
-                bundle.putString(AddEditSessionPlan.EXTRA_ID, dvcMacAdd);
-                bundle.putString(AddEditSessionPlan.EXTRA_VALVE_NAME_DB, clickedValveName);
-                bundle.putSerializable(AddEditSessionPlan.EXTRA_VALVE_EDITABLE_DATA, listValveDataSingle);
-                bundle.putString(AddEditSessionPlan.EXTRA_OPERATION_TYPE, "Edit");
-                //bundle.putString(AddEditSessionPlan.EXTRA_NAME, dvcName);
-                fragAddEditSesnPlan.setArguments(bundle);
-                fragAddEditSesnPlan.setTargetFragment(FragDeviceDetails.this, 101);
-                //Adding Fragment(FragAddEditSesnPlan)
-                titleDynamicAddEdit = "Edit ".concat("Plane (").concat(clickedValveName).concat(")");
-                MyFragmentTransactions.replaceFragment(mContext, fragAddEditSesnPlan, titleDynamicAddEdit, mContext.frm_lyt_container_int, true);
-
-                /*Intent intentAddNewSesnPln = new Intent(mContext, AddEditSessionPlan.class);
-                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_NAME, dvcName);
-                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_ID, dvcMacAdd);
-                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_VALVE_NAME_DB, clickedValveName);
-                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_VALVE_EDITABLE_DATA, listValveDataSingle);
-                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_OPERATION_TYPE, "Edit");
-                startActivityForResult(intentAddNewSesnPln, REQUEST_CODE_SESN_PLAN);*/
-            }
-        });
-
-        tvAddNewSesnPlan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragAddEditSesnPlan fragAddEditSesnPlan = new FragAddEditSesnPlan();
-                Bundle bundle = new Bundle();
-                bundle.putString(AddEditSessionPlan.EXTRA_NAME, dvcName);
-                bundle.putString(AddEditSessionPlan.EXTRA_ID, dvcMacAdd);
-                bundle.putString(AddEditSessionPlan.EXTRA_VALVE_NAME_DB, clickedValveName);
-                //bundle.putSerializable(AddEditSessionPlan.EXTRA_VALVE_EDITABLE_DATA, listValveDataSingle);
-                bundle.putString(AddEditSessionPlan.EXTRA_OPERATION_TYPE, "Add");
-                //bundle.putString(AddEditSessionPlan.EXTRA_NAME, dvcName);
-                fragAddEditSesnPlan.setArguments(bundle);
-                fragAddEditSesnPlan.setTargetFragment(FragDeviceDetails.this, 101);
-                titleDynamicAddEdit = "Add ".concat("Plane (").concat(clickedValveName).concat(")");
-                //Adding Fragment(FragAvailableDevices)
-                MyFragmentTransactions.replaceFragment(mContext, fragAddEditSesnPlan, titleDynamicAddEdit, mContext.frm_lyt_container_int, true);
-
-              /*  Intent intentAddNewSesnPln = new Intent(mContext, AddEditSessionPlan.class);
-                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_NAME, dvcName);
-                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_ID, dvcMacAdd);
-                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_VALVE_NAME_DB, clickedValveName);
-                intentAddNewSesnPln.putExtra(AddEditSessionPlan.EXTRA_OPERATION_TYPE, "Add");
-                startActivityForResult(intentAddNewSesnPln, REQUEST_CODE_SESN_PLAN);*/
-
-               /* if (bluetooth_le_adapter.isConnected()) {
-                    try {
-                        bluetooth_le_adapter.disconnect();
-                    } catch (Exception e) {
-                    }
-                }
-                unbindService(service_connection);
-                bluetooth_le_adapter = null;*/
-                //super.onDestroy();
-                //startActivity(intentAddNewSesnPln);
-                //finish();
-            }
-        });
-
-        llStopValve.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bleAppLevel=BLEAppLevel.getInstanceOnly();
-                if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
-                    dialogSTOPConfirm();
-                } else {
-                    AppAlertDialog.dialogBLENotConnected(mContext,myRequestedFrag,bleAppLevel);
-                }
-            }
-        });
-
-        llPausePlayValve.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bleAppLevel=BLEAppLevel.getInstanceOnly();
-                if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
-                    if (cmdName.equals("PAUSE")) {
-                        dialogPAUSEConfirm();
-                    } else if (cmdName.equals("PLAY")) {
-                        dialogPLAYConfirm();
-                    }
-                } else {
-                    AppAlertDialog.dialogBLENotConnected(mContext,myRequestedFrag,bleAppLevel);
-                }
-            }
-        });
-
-        llFlushValve.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bleAppLevel=BLEAppLevel.getInstanceOnly();
-                if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
-                    dialogFlushStart();
-                } else {
-                    AppAlertDialog.dialogBLENotConnected(mContext,myRequestedFrag,bleAppLevel);
-                }
-            }
-        });
-    }
-
     private void dialogSTOPConfirm() {
         String title, msg;
         title = "Stop Valve";
@@ -878,109 +966,35 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
                 .show();
     }
 
-
-    public void cmdButtonACK(String cmdName) {
-        if (cmdName.equals("STOP")) {
-            Toast.makeText(mContext, cmdName, Toast.LENGTH_SHORT).show();
+    public void cmdButtonACK(String cmdNameLocalACK) {
+        if (cmdNameLocalACK.equals("STOP")) {
             initSTOPbtnEffectes();
-        } else if (cmdName.equals("PAUSE")) {
-            Toast.makeText(mContext, cmdName, Toast.LENGTH_SHORT).show();
+        } else if (cmdNameLocalACK.equals("PAUSE")) {
             tvPauseText.setText("Play");
             llEditValve.setEnabled(false);
             this.cmdName = "PLAY";
-        } else if (cmdName.equals("PLAY")) {
-            Toast.makeText(mContext, cmdName, Toast.LENGTH_SHORT).show();
+            if (databaseHandler.updateValveState(dvcMacAdd, clickedValveName, "PAUSE") == 1) {
+                Toast.makeText(mContext, clickedValveName + " session paused", Toast.LENGTH_LONG).show();
+                initValveListAdapter();
+            }
+        } else if(cmdNameLocalACK.equals("PLAY")) {
             tvPauseText.setText("Pause");
             llEditValve.setEnabled(true);
             this.cmdName = "PAUSE";
-        } else if (cmdName.equals("FLUSH")) {
-            Toast.makeText(mContext, cmdName + " Started", Toast.LENGTH_SHORT).show();
-           /* tvPauseText.setText("Pause");
-            llEditValve.setEnabled(true);
-            this.cmdName = "PAUSE";*/
+            if (databaseHandler.updateValveState(dvcMacAdd, clickedValveName, "PLAY") == 1) {
+                Toast.makeText(mContext, clickedValveName + " session activated", Toast.LENGTH_LONG).show();
+                initValveListAdapter();
+            }
+        } else if (cmdNameLocalACK.equals("FLUSH")) {
+            if (databaseHandler.updateFlushStatus(dvcMacAdd, clickedValveName, "TRUE") == 1) {
+                Toast.makeText(mContext, clickedValveName + " Flush started", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
-   /* private void cmdButtonMethod() {
-        byte[] valveCommand = {3};
-        if (bluetooth_le_adapter != null) {
-            bluetooth_le_adapter.writeCharacteristic(
-                    BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
-                    BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
-            );
-        } else {
-            Toast.makeText(mContext, "adapter connection lost", Toast.LENGTH_SHORT).show();
-        }
-    }*/
 
-    private void initView(View view) {
-//        llScrnHeader = view.findViewById(R.id.llScrnHeader);
-        llNoSesnPlan = view.findViewById(R.id.llNoSesnPlan);
-        llSesnPlanDetails = view.findViewById(R.id.llSesnPlanDetails);
-        llEditValve = view.findViewById(R.id.llEditValve);
-        llStopValve = view.findViewById(R.id.llStopValve);
-        llPausePlayValve = view.findViewById(R.id.llPauseValve);
-        llFlushValve = view.findViewById(R.id.llFlushValve);
-        llHelpValve = view.findViewById(R.id.llHelpValve);
-//        tvDeviceName = view.findViewById(R.id.tvDeviceName);
-        tvDeviceName = mContext.tvToolbar_title;
-        tvDesc_txt = mContext.tvDesc_txt;
-        tvDesc_txt.setText("Last Connected : 02-11-2017  11:00 am");
-        MySharedPreference.getInstance(getActivity()).setStringData(lAST_CONNECTED, "Last Connected : 02-11-2017  11:00 am");
-        reviValvesList = view.findViewById(R.id.reviValvesList);
-        tvAddNewSesnPlan = view.findViewById(R.id.tvAddNewSesnPlan);
-        tvPauseText = view.findViewById(R.id.tvPauseText);
-
-        tvDischargePnts = view.findViewById(R.id.tvDischargePnts);
-        tvDuration = view.findViewById(R.id.tvDuration);
-        tvQuantity = view.findViewById(R.id.tvQuantity);
-
-        tvSunFirst = view.findViewById(R.id.tvSunFirst);
-        tvSunSecond = view.findViewById(R.id.tvSunSecond);
-        tvSunThird = view.findViewById(R.id.tvSunThird);
-        tvSunFourth = view.findViewById(R.id.tvSunFourth);
-
-        tvMonFirst = view.findViewById(R.id.tvMonFirst);
-        tvMonSecond = view.findViewById(R.id.tvMonSecond);
-        tvMonThird = view.findViewById(R.id.tvMonThird);
-        tvMonFourth = view.findViewById(R.id.tvMonFourth);
-
-        tvTueFirst = view.findViewById(R.id.tvTueFirst);
-        tvTueSecond = view.findViewById(R.id.tvTueSecond);
-        tvTueThird = view.findViewById(R.id.tvTueThird);
-        tvTueFourth = view.findViewById(R.id.tvTueFourth);
-
-        tvWedFirst = view.findViewById(R.id.tvWedFirst);
-        tvWedSecond = view.findViewById(R.id.tvWedSecond);
-        tvWedThird = view.findViewById(R.id.tvWedThird);
-        tvWedFourth = view.findViewById(R.id.tvWedFourth);
-
-        tvThuFirst = view.findViewById(R.id.tvThuFirst);
-        tvThuSecond = view.findViewById(R.id.tvThuSecond);
-        tvThuThird = view.findViewById(R.id.tvThuThird);
-        tvThuFourth = view.findViewById(R.id.tvThuFourth);
-
-        tvFriFirst = view.findViewById(R.id.tvFriFirst);
-        tvFriSecond = view.findViewById(R.id.tvFriSecond);
-        tvFriThird = view.findViewById(R.id.tvFriThird);
-        tvFriFourth = view.findViewById(R.id.tvFriFourth);
-
-        tvSatFirst = view.findViewById(R.id.tvSatFirst);
-        tvSatSecond = view.findViewById(R.id.tvSatSecond);
-        tvSatThird = view.findViewById(R.id.tvSatThird);
-        tvSatFourth = view.findViewById(R.id.tvSatFourth);
-    }
-
-    @Override
-    public void clickPassDataToAct(ArrayList<DataTransferModel> listValveDataSingleLocal, String clickedValveName, int position) {
-        this.listValveDataSingle = listValveDataSingleLocal;
-        this.clickedValveName = clickedValveName;
-        //this.position = position;
-        checkValveDataUpdtUIFrmDB();
-    }
-
-    public void clickedPassDataToParent(ArrayList<DataTransferModel> listValveDataSingleLocal, String clickedValveName) {
-        this.listValveDataSingle = listValveDataSingleLocal;
+    public void clickedPassDataToParent(ModalValveBirth modalBLEValve, String clickedValveName) {
+        this.modalBLEValve = modalBLEValve;
         this.clickedValveName = clickedValveName;
         //this.position = position;
         checkValveDataUpdtUIFrmDB();
@@ -991,239 +1005,31 @@ public class FragDeviceDetails extends Fragment implements InterfaceValveAdapter
 
     }
 
-    //BLE CODE STARTS
-    /*void initController() {
-        device_name = "Pebble";
-        device_address = "98:4F:EE:10:87:66";
-        Intent gattServiceIntent = new Intent(mContext, BleAdapterService.class);
-        mContext.bindService(gattServiceIntent, service_connection, BIND_AUTO_CREATE);
-    }*/
-
-    private final ServiceConnection service_connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder service) {
-            bluetooth_le_adapter = ((BleAdapterService.LocalBinder) service).getService();
-            bluetooth_le_adapter.setActivityHandler(message_handler);
-            if (bluetooth_le_adapter != null) {
-                bluetooth_le_adapter.connect(dvcMacAdd);
-            } else {
-                showMsg("onConnect: bluetooth_le_adapter=null");
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            bluetooth_le_adapter = null;
-        }
-    };
-
-    private Handler message_handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            Bundle bundle;
-            String service_uuid = "";
-            String characteristic_uuid = "";
-            byte[] b = null;
-            //message handling logic
-            switch (msg.what) {
-                case BleAdapterService.MESSAGE:
-                    bundle = msg.getData();
-                    String text = bundle.getString(BleAdapterService.PARCEL_TEXT);
-                    showMsg(text);
-                    break;
-
-                case BleAdapterService.GATT_CONNECTED:
-
-                    //((Button) findViewById(R.id.connectButton)).setEnabled(false);
-                    //we're connected
-                    showMsg("GATT_CONNECTED");
-                    // enable the LOW/MID/HIGH alert level selection buttons
-                   /* ((Button)findViewById(R.id.lowButton)).setEnabled(true);
-                    ((Button) findViewById(R.id.midButton)).setEnabled(true);
-                    ((Button) findViewById(R.id.highButton)).setEnabled(true);*/
-                    bluetooth_le_adapter.discoverServices();
-
-                    break;
-
-                case BleAdapterService.GATT_DISCONNECT:
-                    //((Button) findViewById(R.id.connectButton)).setEnabled(true);
-                    //we're disconnected
-                    showMsg("GATT_DISCONNECT");
-                   /* // hide the rssi distance colored rectangle
-                    ((LinearLayout) findViewById(R.id.rectangle)).setVisibility(View.INVISIBLE);
-                    // disable the LOW/MID/HIGH alert level selection buttons
-                    ((Button) findViewById(R.id.lowButton)).setEnabled(false);
-                    ((Button) findViewById(R.id.midButton)).setEnabled(false);
-                    ((Button) findViewById(R.id.highButton)).setEnabled(false);*/
-                    if (back_requested) {
-                        //finish();
-                    }
-                    break;
-
-                case BleAdapterService.GATT_SERVICES_DISCOVERED:
-                    //validate services and if ok...
-                    List<BluetoothGattService> slist = bluetooth_le_adapter.getSupportedGattServices();
-                    boolean time_point_service_present = false;
-                    boolean current_time_service_present = false;
-                    boolean pots_service_present = false;
-                    boolean battery_service_present = false;
-                    boolean valve_controller_service_present = false;
-
-                    for (BluetoothGattService svc : slist) {
-                        Log.d(Constants.TAG, "UUID=" + svc.getUuid().toString().toUpperCase() + "INSTANCE=" + svc.getInstanceId());
-                        String serviceUuid = svc.getUuid().toString().toUpperCase();
-                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID)) {
-                            time_point_service_present = true;
-                            continue;
-                        }
-                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.CURRENT_TIME_SERVICE_SERVICE_UUID)) {
-                            current_time_service_present = true;
-                            continue;
-                        }
-                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.POTS_SERVICE_SERVICE_UUID)) {
-                            pots_service_present = true;
-                            continue;
-                        }
-                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.BATTERY_SERVICE_SERVICE_UUID)) {
-                            battery_service_present = true;
-                            continue;
-                        }
-                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID)) {
-                            valve_controller_service_present = true;
-                            continue;
-                        }
-                    }
-                    if (time_point_service_present && current_time_service_present && pots_service_present && battery_service_present) {
-                        showMsg("Device has expected services");
-                        // onSetTime();
-                        //setConnectionIsDone();
-
-
-                    } else {
-                        showMsg("Device does not have expected GATT services");
-                    }
-                    break;
-
-                case BleAdapterService.GATT_CHARACTERISTIC_READ:
-                    bundle = msg.getData();
-                    Log.d(Constants.TAG, "Service=" + bundle.get(BleAdapterService.PARCEL_SERVICE_UUID).toString().toUpperCase() + " Characteristic=" + bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase());
-                    if (bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString()
-                            .toUpperCase().equals(BleAdapterService.ALERT_LEVEL_CHARACTERISTIC)
-                            && bundle.get(BleAdapterService.PARCEL_SERVICE_UUID).toString().toUpperCase().equals(BleAdapterService.BATTERY_LEVEL_CHARACTERISTIC_UUID)) {
-                        b = bundle.getByteArray(BleAdapterService.PARCEL_VALUE);
-                        if (b.length > 0) {
-                            showMsg("Received " + b.toString() + "from Pebble.");
-                        }
-                    }
-                    break;
-
-                case BleAdapterService.GATT_CHARACTERISTIC_WRITTEN:
-                    bundle = msg.getData();
-
-                    if (bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase().equals(BleAdapterService.COMMAND_CHARACTERISTIC_UUID)) {
-                        //Toast.makeText(mContext, "ACK STOP", Toast.LENGTH_SHORT).show();
-                        initSTOPbtnEffectes();
-                    } else {
-                        Toast.makeText(mContext, "BLE device not reposding", Toast.LENGTH_SHORT).show();
-                    }
-
-                    if (bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString()
-                            .toUpperCase().equals(BleAdapterService.ALERT_LEVEL_CHARACTERISTIC)
-                            && bundle.get(BleAdapterService.PARCEL_SERVICE_UUID).toString().toUpperCase().equals(BleAdapterService.LINK_LOSS_SERVICE_UUID)) {
-                        b = bundle.getByteArray(BleAdapterService.PARCEL_VALUE);
-                        if (b.length > 0) {
-                            showMsg("Received " + b.toString() + "from Pebble.");
-                        }
-                    }
-                    break;
-            }
-        }
-    };
-
-    private void showMsg(final String msg) {
-        Log.d(Constants.TAG, msg);
-        mContext.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
     private void initSTOPbtnEffectes() {
-        listValveDataSingle = null;
-        if (databaseHandler.updateValveDataWithMAC_ValveName(dvcMacAdd, clickedValveName, listValveDataSingle) == 1) {
+        listAddEditValveData = null;
+        if (databaseHandler.updateValveDataAndState(dvcMacAdd, clickedValveName, listAddEditValveData, "STOP") == 1) {
             llNoSesnPlan.setVisibility(View.VISIBLE);
             llSesnPlanDetails.setVisibility(View.GONE);
+            databaseHandler.updateFlushStatus(dvcMacAdd,clickedValveName,"FALSE");
+            Toast.makeText(mContext, clickedValveName + " session stopped", Toast.LENGTH_LONG).show();
 
-            Toast.makeText(mContext, "Session Plan stopped successfully", Toast.LENGTH_LONG).show();
+            initValveListAdapter();
         }
+
     }
-
-    public void onSetTime() {
-        String[] ids = TimeZone.getAvailableIDs(+5 * 60 * 60 * 1000);
-        SimpleTimeZone pdt = new SimpleTimeZone(+5 * 60 * 60 * 1000, ids[0]);
-
-        Calendar calendar = new GregorianCalendar(pdt);
-        Date trialTime = new Date();
-        calendar.setTime(trialTime);
-
-        //Set present time as data packet
-        byte hours = (byte) calendar.get(Calendar.HOUR);
-        if (calendar.get(Calendar.AM_PM) == 1) {
-            hours = (byte) (calendar.get(Calendar.HOUR) + 12);
-        }
-        byte minutes = (byte) calendar.get(Calendar.MINUTE);
-        byte seconds = (byte) calendar.get(Calendar.SECOND);
-        byte DATE = (byte) calendar.get(Calendar.DAY_OF_MONTH);
-        byte MONTH = (byte) (calendar.get(Calendar.MONTH) + 1);
-        int iYEARMSB = (calendar.get(Calendar.YEAR) / 256);
-        int iYEARLSB = (calendar.get(Calendar.YEAR) % 256);
-        byte bYEARMSB = (byte) iYEARMSB;
-        byte bYEARLSB = (byte) iYEARLSB;
-        byte[] currentTime = {hours, minutes, seconds, DATE, MONTH, bYEARMSB, bYEARLSB};
-        bluetooth_le_adapter.writeCharacteristic(
-                BleAdapterService.CURRENT_TIME_SERVICE_SERVICE_UUID,
-                BleAdapterService.CURRENT_TIME_CHARACTERISTIC_UUID, currentTime
-        );
-    }
-
-
-   /* @Override
-    public void onBackPressed() {
-        back_requested = true;
-        if (bluetooth_le_adapter.isConnected()) {
-            try {
-                bluetooth_le_adapter.disconnect();
-            } catch (Exception e) {
-            }
-        } else {
-            finish();
-        }
-    }*/
-
-   /* @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unbindService(service_connection);
-        bluetooth_le_adapter = null;
-    }*/
-
-    //BLE CODE ENDS
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 101 && resultCode == Activity.RESULT_OK) {
             if (data.getExtras().getString("dataKey").equals("Success")) {
-                this.listValveDataSingle = databaseHandler.getValveDataWithMACValveName(dvcMacAdd, clickedValveName);
+                modalBLEValve = databaseHandler.getValveDataAndProperties(dvcMacAdd, clickedValveName);
                 checkValveDataUpdtUIFrmDB();
                /* reviValvesList = null;
                 valveListAdp = null;
-                listValvesNameOnly.clear();
-                listModalValveNameSelect.clear();*/
+                listMdlValveNameStateNdSelect.clear();
+                listModalValveProperties.clear();*/
             } else {
                 Toast.makeText(mContext, "Load data not succeeded", Toast.LENGTH_SHORT).show();
-
             }
         }
     }

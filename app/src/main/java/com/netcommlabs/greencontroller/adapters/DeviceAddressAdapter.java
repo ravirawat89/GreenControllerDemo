@@ -23,7 +23,7 @@ public class DeviceAddressAdapter extends RecyclerView.Adapter<DeviceAddressAdap
     List<String> listLocAddressType;
     //List<DeviceAddressModel> listLocAddressType;
 
-    public DeviceAddressAdapter(Context mContext, List<String> listLocAddressType /*List<DeviceAddressModel> listLocAddressType*/) {
+    public DeviceAddressAdapter(Context mContext, List<String> listLocAddressType) {
         this.mContext = mContext;
         this.listLocAddressType = listLocAddressType;
         listViews = new ArrayList<>();

@@ -39,15 +39,16 @@ public class MyFragmentTransactions {
         }
         ft.commit();
 
-        myFragmentManager.executePendingTransactions();
-        Log.e("$$$ FRAG COUNT", "" + myFragmentManager.getBackStackEntryCount() + ", TAG: " + tag);
-
         mContext.tvToolbar_title.setText(tag);
         mContext.tvDesc_txt.setText("");
         tvClearEditDataLocal = mContext.tvClearEditData;
         if (tvClearEditDataLocal.getVisibility() == View.VISIBLE) {
             tvClearEditDataLocal.setVisibility(View.GONE);
         }
+
+        myFragmentManager.executePendingTransactions();
+        Log.e("$$$ FRAG COUNT", "" + myFragmentManager.getBackStackEntryCount() + ", TAG: " + tag);
+
     }
 
 }

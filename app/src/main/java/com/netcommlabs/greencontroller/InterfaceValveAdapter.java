@@ -11,6 +11,6 @@ import java.util.List;
 
 public interface InterfaceValveAdapter {
 
-    void clickPassDataToAct(ArrayList<DataTransferModel> listValveDataSingle, String clickedValveName,int position);
+    //void clickPassDataToAct(ArrayList<DataTransferModel> listValveDataSingle, String clickedValveName,int position);
     void onRecyclerItemClickedNameAdress(String name,String address);
 }
