@@ -437,13 +437,13 @@ public class FragAddAddress extends Fragment implements OnMapReadyCallback, View
                 llSearchMAPok.setVisibility(View.GONE);*/
                 break;
             case R.id.tvNextEvent:
-                etFlatInput = et_flat_num.getText().toString();
-                etStreetInput = et_street_area.getText().toString();
-                etLocalityLandmarkInput = et_locality_landmark.getText().toString();
-                etPincodeInput = et_pincode.getText().toString();
-                etCityInput = et_city.getText().toString();
-                etStateInput = et_state.getText().toString();
-                if (etFlatInput.isEmpty() || etStreetInput.isEmpty() || etLocalityLandmarkInput.isEmpty() || etPincodeInput.isEmpty() || etStateInput.isEmpty()) {
+                etFlatInput = et_flat_num.getText().toString().trim();
+                etStreetInput = et_street_area.getText().toString().trim();
+                etLocalityLandmarkInput = et_locality_landmark.getText().toString().trim();
+                etPincodeInput = et_pincode.getText().toString().trim();
+                etCityInput = et_city.getText().toString().trim();
+                etStateInput = et_state.getText().toString().trim();
+                if (etFlatInput.isEmpty() || etStreetInput.isEmpty() || etLocalityLandmarkInput.isEmpty() || etPincodeInput.isEmpty() ||etCityInput.isEmpty() ||etStateInput.isEmpty()) {
                     Toast.makeText(mContext, "All Input fields are mandatory", Toast.LENGTH_SHORT).show();
                     return;
                 }

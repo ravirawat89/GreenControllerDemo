@@ -404,7 +404,7 @@ public class BLEAppLevel {
 =======*/
         Calendar calendar = Calendar.getInstance();
 
-        Log.e("@@@@@@@@@@@", "" + dataSendingIndex);
+        //Log.e("@@@@@@@@@@@", "" + dataSendingIndex);
         //byte index = (byte) (listSingleValveData.get(dataSendingIndex).getIndex() + 1);
         byte index = (byte) (dataSendingIndex + 1);
         byte hours = (byte) listSingleValveData.get(dataSendingIndex).getHours();
@@ -431,7 +431,7 @@ public class BLEAppLevel {
         byte bVolumeMSB = (byte) iVolumeMSB;
         byte bVolumeLSB = (byte) iVolumeLSB;
 
-        Log.e("@@@ ADD/EDIT VOLUME ", "INPUT: " + etWaterQuantWithDPInt + "\n Int /256: " + iVolumeMSB + "\n Int %256: " + iVolumeLSB + "\n bVolumeMSB: " + bVolumeMSB + "\n bVolumeLSB: " + bVolumeLSB);
+        //Log.e("@@@ ADD/EDIT VOLUME ", "INPUT: " + etWaterQuantWithDPInt + "\n Int /256: " + iVolumeMSB + "\n Int %256: " + iVolumeLSB + "\n bVolumeMSB: " + bVolumeMSB + "\n bVolumeLSB: " + bVolumeLSB);
 
         listSingleValveData.get(dataSendingIndex).setIndex(index);
         listSingleValveData.get(dataSendingIndex).setbDurationLSB(bDurationLSB);
@@ -444,7 +444,7 @@ public class BLEAppLevel {
         listSingleValveData.get(dataSendingIndex).setDuration(etDurationInt);
         listSingleValveData.get(dataSendingIndex).setDischarge(etDisPntsInt);
 
-        Log.e("GGG", "INDEX: " + index + "\n DOW: " + dayOfTheWeek + "\n HRS: " + hours + "\n MIN: " + 0 + "\n SEC: " + 0 + "\n DMSB: " + bDurationMSB + "\n DLSB: " + bDurationLSB + "\n VMSB: " + bVolumeMSB + "\n VLSB: " + bVolumeLSB);
+        Log.e("@@@ ADD/EDIT", "INDEX: " + index + "\n DOW: " + dayOfTheWeek + "\n HRS: " + hours + "\n MIN: " + 0 + "\n SEC: " + 0 + "\n DMSB: " + bDurationMSB + "\n DLSB: " + bDurationLSB + "\n VMSB: " + bVolumeMSB + "\n VLSB: " + bVolumeLSB);
 
         //Log.e("@@", "" + index + "-" + dayOfTheWeek + "-" + hours + "-" + 0 + "-" + 0 + "-" + bDurationMSB + "-" + bDurationLSB + "-" + bVolumeMSB + "-" + bVolumeLSB);
         byte[] timePoint = {index, dayOfTheWeek, hours, 0, 0, bDurationMSB, bDurationLSB, bVolumeMSB, bVolumeLSB};
