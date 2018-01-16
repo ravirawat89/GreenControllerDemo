@@ -2133,6 +2133,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
                 BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint);
     }
 
+
     DataTransferModel getObject(int dayOfTheWeek, int hours) {
         DataTransferModel data = new DataTransferModel();
         data.setDayOfTheWeek(dayOfTheWeek);
