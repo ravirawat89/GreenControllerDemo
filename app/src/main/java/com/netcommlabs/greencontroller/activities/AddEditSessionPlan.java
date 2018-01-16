@@ -1,56 +1,57 @@
-package com.netcommlabs.greencontroller.Fragments;
+package com.netcommlabs.greencontroller.activities;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
+import android.bluetooth.BluetoothGattService;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.netcommlabs.greencontroller.Constants;
 import com.netcommlabs.greencontroller.R;
-import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.model.DataTransferModel;
 import com.netcommlabs.greencontroller.services.BleAdapterService;
 import com.netcommlabs.greencontroller.sqlite_db.DatabaseHandler;
-import com.netcommlabs.greencontroller.utilities.AppAlertDialog;
-import com.netcommlabs.greencontroller.utilities.BLEAppLevel;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.SimpleTimeZone;
+import java.util.TimeZone;
 
 import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
-/**
- * Created by Android on 12/6/2017.
- */
+public class AddEditSessionPlan extends AppCompatActivity implements View.OnClickListener {
 
-public class FragAddEditSesnPlan extends Fragment implements View.OnClickListener {
-
-    private MainActivity mContext;
-    private View view;
-    private TextView tvAddNewDvc;
-    private LinearLayout llDuration, llWaterQuantity;
+    private AddEditSessionPlan mContext;
+    private LinearLayout llScrnHeader, llQuantOfWater;
     private Calendar calendar;
-    private EditText etDischargePoints, etDurationPlan, etWaterQuant;
+    private EditText etDischargePoints, etDurationPlan, etQuantityPlan;
     private TextView tvSunEvent, tvMonEvent, tvTueEvent, tvWedEvent, tvThuEvent, tvFriEvent, tvSatEvent, tvSunFirst, tvSunSecond, tvSunThird, tvSunFourth, tvMonFirst, tvMonSecond, tvMonThird, tvMonFourth, tvTueFirst, tvTueSecond, tvTueThird, tvTueFourth, tvWedFirst, tvWedSecond, tvWedThird, tvWedFourth, tvThuFirst, tvThuSecond, tvThuThird, tvThuFourth, tvFriFirst, tvFriSecond, tvFriThird, tvFriFourth, tvSatFirst, tvSatSecond, tvSatThird, tvSatFourth, tvLoadSesnPlan;
     private ImageView ivSunAdd, ivMonAdd, ivTueAdd, ivWedAdd, ivThuAdd, ivFriAdd, ivSatAdd;
     private int timePointsCounter, sunTimePointsCount, monTimePointsCount, tueTimePointsCount, wedTimePointsCount, thuTimePointsCount, friTimePointsCount, satTimePointsCount, etDurWtrInputInt, etQuantWtrInputInt, etPotsInputInt, inputSunInt, inputMonInt, inputTueInt, inputWedInt, inputThuInt, inputFriInt, inputSatInt;
@@ -60,14 +61,14 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
     String etInputTimePointStrn = "00:00";
     private ArrayList<Integer> listTimePntsSun, listTimePntsMon, listTimePntsTue, listTimePntsWed, listTimePntsThu, listTimePntsFri, listTimePntsSat;
     private int etInputTimePointInt;
-    private String etDisPntsInput = "", etDurationInput = "", etWaterQuantInput = "";
+    private String etInputDischrgPnts, etInputDursnPlan, etQuantPlan = "";
     private Dialog dialogChooseTmPnt;
     private EditText etInputTimePoint;
-    private int etDurationInt = 0;
-    private int etWaterQuantInt = 0, etWaterQuantWithDPInt = 0;
-    private int etDisPntsInt = 0;
-    private TextView tvORText/*, tvTitleTop, tvClearEditData*/, tvClearEditData;
-    private Fragment myRequestedFrag;
+    private int etInputDursnPlanInt = 0;
+    private int etQuantPlanInt = 0;
+    private int etInputDischrgPntsInt = 0;
+    private TextView tvORText/*, tvTitleTop, tvClearEditData*/;
+
 
     //Mr. Vijay
     public static final String EXTRA_NAME = "name";
@@ -78,135 +79,133 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
     private BleAdapterService bluetooth_le_adapter;
 
     private String device_name;
-    private String macAdd, clkdVlvName, operationType;
+    private String device_address, clickedValveName, operationType;
     private boolean back_requested = false;
     private int alert_level;
     private static int dataSendingIndex = 0;
     private static boolean oldTimePointsErased = FALSE;
     private int plusVisibleOf;
-    private BLEAppLevel bleAppLevel;
-    //TextView header;
+
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mContext = (MainActivity) context;
-    }
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.edit_session_plan);
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.edit_session_plan, null);
-
-
-        findViews(view);
         initBase();
+
         initListeners();
-
-        return view;
-    }
-
-    private void findViews(View view) {
-        etDischargePoints = view.findViewById(R.id.etDischargePoints);
-        etDurationPlan = view.findViewById(R.id.etDurationPlan);
-        etWaterQuant = view.findViewById(R.id.etWaterQuant);
-
-        tvSunEvent = view.findViewById(R.id.tvSunEvent);
-        tvMonEvent = view.findViewById(R.id.tvMonEvent);
-        tvTueEvent = view.findViewById(R.id.tvTueEvent);
-        tvWedEvent = view.findViewById(R.id.tvWedEvent);
-        tvThuEvent = view.findViewById(R.id.tvThuEvent);
-        tvFriEvent = view.findViewById(R.id.tvFriEvent);
-        tvSatEvent = view.findViewById(R.id.tvSatEvent);
-//        tvClearEditData = view.findViewById(R.id.tvClearEditData);
-
-        tvSunFirst = view.findViewById(R.id.tvSunFirst);
-        tvSunSecond = view.findViewById(R.id.tvSunSecond);
-        tvSunThird = view.findViewById(R.id.tvSunThird);
-        tvSunFourth = view.findViewById(R.id.tvSunFourth);
-        ivSunAdd = view.findViewById(R.id.ivSunAdd);
-
-        tvMonFirst = view.findViewById(R.id.tvMonFirst);
-        tvMonSecond = view.findViewById(R.id.tvMonSecond);
-        tvMonThird = view.findViewById(R.id.tvMonThird);
-        tvMonFourth = view.findViewById(R.id.tvMonFourth);
-        ivMonAdd = view.findViewById(R.id.ivMonAdd);
-
-        tvTueFirst = view.findViewById(R.id.tvTueFirst);
-        tvTueSecond = view.findViewById(R.id.tvTueSecond);
-        tvTueThird = view.findViewById(R.id.tvTueThird);
-        tvTueFourth = view.findViewById(R.id.tvTueFourth);
-        ivTueAdd = view.findViewById(R.id.ivTueAdd);
-
-        tvWedFirst = view.findViewById(R.id.tvWedFirst);
-        tvWedSecond = view.findViewById(R.id.tvWedSecond);
-        tvWedThird = view.findViewById(R.id.tvWedThird);
-        tvWedFourth = view.findViewById(R.id.tvWedFourth);
-        ivWedAdd = view.findViewById(R.id.ivWedAdd);
-
-        tvThuFirst = view.findViewById(R.id.tvThuFirst);
-        tvThuSecond = view.findViewById(R.id.tvThuSecond);
-        tvThuThird = view.findViewById(R.id.tvThuThird);
-        tvThuFourth = view.findViewById(R.id.tvThuFourth);
-        ivThuAdd = view.findViewById(R.id.ivThuAdd);
-
-        tvFriFirst = view.findViewById(R.id.tvFriFirst);
-        tvFriSecond = view.findViewById(R.id.tvFriSecond);
-        tvFriThird = view.findViewById(R.id.tvFriThird);
-        tvFriFourth = view.findViewById(R.id.tvFriFourth);
-        ivFriAdd = view.findViewById(R.id.ivFriAdd);
-
-        tvSatFirst = view.findViewById(R.id.tvSatFirst);
-        tvSatSecond = view.findViewById(R.id.tvSatSecond);
-        tvSatThird = view.findViewById(R.id.tvSatThird);
-        tvSatFourth = view.findViewById(R.id.tvSatFourth);
-        ivSatAdd = view.findViewById(R.id.ivSatAdd);
-
-        tvLoadSesnPlan = view.findViewById(R.id.tvLoadSesnPlan);
-//        tvTitleTop = view.findViewById(R.id.tvTitleTop);
-        llDuration = view.findViewById(R.id.llDuration);
-        tvORText = view.findViewById(R.id.tvORText);
-        llWaterQuantity = view.findViewById(R.id.llWaterQuantity);
     }
 
     private void initBase() {
-        myRequestedFrag = FragAddEditSesnPlan.this;
+        mContext = this;
+        findViews();
+
         mapDayTimings = new HashMap<>();
         listSingleValveData = new ArrayList<>();
-        listTimePntsSun = new ArrayList<>();
-        listTimePntsMon = new ArrayList<>();
-        listTimePntsTue = new ArrayList<>();
-        listTimePntsWed = new ArrayList<>();
-        listTimePntsThu = new ArrayList<>();
-        listTimePntsFri = new ArrayList<>();
-        listTimePntsSat = new ArrayList<>();
+        listTimePntsSun = new ArrayList<Integer>();
+        listTimePntsMon = new ArrayList<Integer>();
+        listTimePntsTue = new ArrayList<Integer>();
+        listTimePntsWed = new ArrayList<Integer>();
+        listTimePntsThu = new ArrayList<Integer>();
+        listTimePntsFri = new ArrayList<Integer>();
+        listTimePntsSat = new ArrayList<Integer>();
 
-        Bundle bundle = this.getArguments();
-        device_name = bundle.getString(EXTRA_NAME);
-        macAdd = bundle.getString(EXTRA_ID);
-        clkdVlvName = bundle.getString(EXTRA_VALVE_NAME_DB);
-        operationType = bundle.getString(FragAddEditSesnPlan.EXTRA_OPERATION_TYPE);
+        final Intent intent = getIntent();
+        device_name = intent.getStringExtra(EXTRA_NAME);
+        device_address = intent.getStringExtra(EXTRA_ID);
+        clickedValveName = intent.getStringExtra(EXTRA_VALVE_NAME_DB);
+        operationType = intent.getStringExtra(AddEditSessionPlan.EXTRA_OPERATION_TYPE);
         if (operationType.equals("Edit")) {
-            tvClearEditData = mContext.tvClearEditData;
-            listSingleValveData = (ArrayList<DataTransferModel>) bundle.getSerializable(FragAddEditSesnPlan.EXTRA_VALVE_EDITABLE_DATA);
+            listSingleValveData = (ArrayList<DataTransferModel>) intent.getSerializableExtra(AddEditSessionPlan.EXTRA_VALVE_EDITABLE_DATA);
             setEditableValveDataToUI();
         }
+//        tvTitleTop.setText(operationType + " Session Plan" + "(" + clickedValveName + ")");
 
-        /*llDuration.setVisibility(View.GONE);
-        tvORText.setVisibility(View.GONE);
-        llWaterQuantity.setVisibility(View.GONE);*/
-//        tvTitleTop.setText(operationType + " Session Plan" + "(" + clkdVlvName + ")");
+        Intent gattServiceIntent = new Intent(getApplicationContext(), BleAdapterService.class);
+        bindService(gattServiceIntent, service_connection, BIND_AUTO_CREATE);
 
-       /* Intent gattServiceIntent = new Intent(mContext, BleAdapterService.class);
-        mContext.bindService(gattServiceIntent, service_connection, BIND_AUTO_CREATE);*/
 
        /* //Getting sent intent
         dvcName = getIntent().getExtras().getString(EXTRA_NAME);
         dvcMacAdd = getIntent().getExtras().getString(EXTRA_DVC_MAC);
-        clkdVlvName = getIntent().getExtras().getString(EXTRA_DVC_MAC);
+        clickedValveName = getIntent().getExtras().getString(EXTRA_DVC_MAC);
         //dvcValveCount = getIntent().getExtras().getInt(EXTRA_DVC_VALVE_COUNT);*/
     }
 
+    private void findViews() {
+        llScrnHeader = findViewById(R.id.llScrnHeader);
+
+        etDischargePoints = (EditText) findViewById(R.id.etDischargePoints);
+        etDurationPlan = (EditText) findViewById(R.id.etDurationPlan);
+        etQuantityPlan = (EditText) findViewById(R.id.etQuantityPlan);
+
+        tvSunEvent = (TextView) findViewById(R.id.tvSunEvent);
+        tvMonEvent = (TextView) findViewById(R.id.tvMonEvent);
+        tvTueEvent = (TextView) findViewById(R.id.tvTueEvent);
+        tvWedEvent = (TextView) findViewById(R.id.tvWedEvent);
+        tvThuEvent = (TextView) findViewById(R.id.tvThuEvent);
+        tvFriEvent = (TextView) findViewById(R.id.tvFriEvent);
+        tvSatEvent = (TextView) findViewById(R.id.tvSatEvent);
+//        tvClearEditData = findViewById(R.id.tvClearEditData);
+
+        tvSunFirst = (TextView) findViewById(R.id.tvSunFirst);
+        tvSunSecond = (TextView) findViewById(R.id.tvSunSecond);
+        tvSunThird = (TextView) findViewById(R.id.tvSunThird);
+        tvSunFourth = (TextView) findViewById(R.id.tvSunFourth);
+        ivSunAdd = (ImageView) findViewById(R.id.ivSunAdd);
+
+        tvMonFirst = (TextView) findViewById(R.id.tvMonFirst);
+        tvMonSecond = (TextView) findViewById(R.id.tvMonSecond);
+        tvMonThird = (TextView) findViewById(R.id.tvMonThird);
+        tvMonFourth = (TextView) findViewById(R.id.tvMonFourth);
+        ivMonAdd = (ImageView) findViewById(R.id.ivMonAdd);
+
+        tvTueFirst = (TextView) findViewById(R.id.tvTueFirst);
+        tvTueSecond = (TextView) findViewById(R.id.tvTueSecond);
+        tvTueThird = (TextView) findViewById(R.id.tvTueThird);
+        tvTueFourth = (TextView) findViewById(R.id.tvTueFourth);
+        ivTueAdd = (ImageView) findViewById(R.id.ivTueAdd);
+
+        tvWedFirst = (TextView) findViewById(R.id.tvWedFirst);
+        tvWedSecond = (TextView) findViewById(R.id.tvWedSecond);
+        tvWedThird = (TextView) findViewById(R.id.tvWedThird);
+        tvWedFourth = (TextView) findViewById(R.id.tvWedFourth);
+        ivWedAdd = (ImageView) findViewById(R.id.ivWedAdd);
+
+        tvThuFirst = (TextView) findViewById(R.id.tvThuFirst);
+        tvThuSecond = (TextView) findViewById(R.id.tvThuSecond);
+        tvThuThird = (TextView) findViewById(R.id.tvThuThird);
+        tvThuFourth = (TextView) findViewById(R.id.tvThuFourth);
+        ivThuAdd = (ImageView) findViewById(R.id.ivThuAdd);
+
+        tvFriFirst = (TextView) findViewById(R.id.tvFriFirst);
+        tvFriSecond = (TextView) findViewById(R.id.tvFriSecond);
+        tvFriThird = (TextView) findViewById(R.id.tvFriThird);
+        tvFriFourth = (TextView) findViewById(R.id.tvFriFourth);
+        ivFriAdd = (ImageView) findViewById(R.id.ivFriAdd);
+
+        tvSatFirst = (TextView) findViewById(R.id.tvSatFirst);
+        tvSatSecond = (TextView) findViewById(R.id.tvSatSecond);
+        tvSatThird = (TextView) findViewById(R.id.tvSatThird);
+        tvSatFourth = (TextView) findViewById(R.id.tvSatFourth);
+        ivSatAdd = (ImageView) findViewById(R.id.ivSatAdd);
+
+        tvLoadSesnPlan = findViewById(R.id.tvLoadSesnPlan);
+//        tvTitleTop = findViewById(R.id.tvTitleTop);
+        tvORText = findViewById(R.id.tvORText);
+        llQuantOfWater = findViewById(R.id.llQuantOfWater);
+    }
+
     private void initListeners() {
+
+        llScrnHeader.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
         etDischargePoints.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -223,22 +222,12 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.toString().equals("")) {
-                    llDuration.setVisibility(View.GONE);
-                    tvORText.setVisibility(View.GONE);
-                    llWaterQuantity.setVisibility(View.GONE);
-                    etDurationPlan.setText("");
-                    etWaterQuant.setText("");
-                    return;
-                }
-
-                llDuration.setVisibility(View.VISIBLE);
                 if (s.toString().equals("0")) {
                     tvORText.setVisibility(View.GONE);
-                    llWaterQuantity.setVisibility(View.GONE);
+                    llQuantOfWater.setVisibility(View.GONE);
                 } else {
                     tvORText.setVisibility(View.VISIBLE);
-                    llWaterQuantity.setVisibility(View.VISIBLE);
+                    llQuantOfWater.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -255,7 +244,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
             }
         });
 
-        etWaterQuant.setOnTouchListener(new View.OnTouchListener() {
+        etQuantityPlan.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 visibleCursorSoftKeyboard();
@@ -396,67 +385,83 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         tvLoadSesnPlan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                etDisPntsInput = etDischargePoints.getText().toString();
-                if (etDisPntsInput.isEmpty()) {
+                etInputDischrgPnts = etDischargePoints.getText().toString();
+                etInputDursnPlan = etDurationPlan.getText().toString();
+
+
+                if (etInputDischrgPnts.isEmpty()) {
                     Toast.makeText(mContext, "Please enter Discharge points", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
-                if (llWaterQuantity.getVisibility() == View.VISIBLE) {
-                    etDurationInput = etDurationPlan.getText().toString();
-                    etWaterQuantInput = etWaterQuant.getText().toString();
-
-                    if (etDurationInput.isEmpty() && etWaterQuantInput.isEmpty()) {
-                        Toast.makeText(mContext, "Please enter Duration OR Quantity", Toast.LENGTH_SHORT).show();
-                        return;
-                    } else if (!etDurationInput.isEmpty() && !etWaterQuantInput.isEmpty()) {
-                        etDurationInt = Integer.parseInt(etDurationInput);
-                        etWaterQuantInt = Integer.parseInt(etWaterQuantInput);
-                    } else {
-                        if (!etWaterQuantInput.isEmpty()) {
-                            etWaterQuantInt = Integer.parseInt(etWaterQuantInput);
-                            etDurationInt = 0;
-                        } else {
-                            etDurationInt = Integer.parseInt(etDurationInput);
-                            etWaterQuantInt = 0;
-                        }
-                    }
-
-                } else {
-                    etDurationInput = etDurationPlan.getText().toString();
-                    if (etDurationInput.isEmpty()) {
-                        Toast.makeText(mContext, "Please enter Duration", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    etDurationInt = Integer.parseInt(etDurationInput);
-                    etWaterQuantInt = 0;
+                if (etInputDursnPlan.isEmpty()) {
+                    Toast.makeText(mContext, "Please enter Duration", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+
+                if (llQuantOfWater.getVisibility() == View.VISIBLE) {
+                    etQuantPlan = etQuantityPlan.getText().toString();
+                    if (etQuantPlan.isEmpty()) {
+                        Toast.makeText(mContext, "Please enter Quantity", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                } else {
+                    etQuantPlan = "0";
+                }
+
+
+               /* if (etQuantPlan.isEmpty() && llQuantOfWater.getVisibility() == View.VISIBLE) {
+                    Toast.makeText(mContext, "Please enter Quantity", Toast.LENGTH_SHORT).show();
+                    return;
+                }*/
                 if (listSingleValveData.size() == 0) {
                     Toast.makeText(mContext, "Please select at least one day in week", Toast.LENGTH_LONG).show();
                     return;
                 }
-                etDisPntsInt = Integer.parseInt(etDisPntsInput);
-                etWaterQuantWithDPInt = etDisPntsInt * etWaterQuantInt;
 
-                bleAppLevel = BLEAppLevel.getInstanceOnly();
-                if (bleAppLevel != null && bleAppLevel.getBLEConnectedOrNot()) {
-                    //This method will automatically followed by loading new time points method
-                    bleAppLevel.eraseOldTimePoints(FragAddEditSesnPlan.this, etDisPntsInt, etDurationInt, etWaterQuantWithDPInt, listSingleValveData);
-                } else {
-                    AppAlertDialog.dialogBLENotConnected(mContext, myRequestedFrag, bleAppLevel);
+                etInputDischrgPntsInt = Integer.parseInt(etInputDischrgPnts);
+                etInputDursnPlanInt = Integer.parseInt(etInputDursnPlan);
+                etQuantPlanInt = Integer.parseInt(etQuantPlan);
+
+              /*  if (listTimePntsSun.size() > 0) {
+                    mapDayTimings.put(1, listTimePntsSun);
                 }
+                if (listTimePntsMon.size() > 0) {
+                    mapDayTimings.put(2, listTimePntsMon);
+                }
+                if (listTimePntsTue.size() > 0) {
+                    mapDayTimings.put(3, listTimePntsTue);
+                }
+                if (listTimePntsWed.size() > 0) {
+                    mapDayTimings.put(4, listTimePntsWed);
+                }
+                if (listTimePntsThu.size() > 0) {
+                    mapDayTimings.put(5, listTimePntsThu);
+                }
+                if (listTimePntsFri.size() > 0) {
+                    mapDayTimings.put(6, listTimePntsFri);
+                }
+                if (listTimePntsSat.size() > 0) {
+                    mapDayTimings.put(7, listTimePntsSat);
+                }*/
+                //Toast.makeText(mContext, "Load check", Toast.LENGTH_SHORT).show();
+
+                //ArrayList list=listSingleValveData;
+
+                eraseOldTimePoints(); //This is automatically followed by loading new time points
+
+
             }
         });
     }
 
     private void setEditableValveDataToUI() {
-        tvClearEditData.setVisibility(View.VISIBLE);
+      /*  tvClearEditData.setVisibility(View.VISIBLE);
         tvClearEditData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialogConfirmAction();
             }
-        });
+        });*/
 
         DataTransferModel dataTransferModel;
         listTimePntsSun = new ArrayList<>();
@@ -474,11 +479,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
 
             dischargePnts = dataTransferModel.getDischarge();
             duration = dataTransferModel.getDuration();
-            if (dischargePnts != 0) {
-                quantity = dataTransferModel.getQty() / dischargePnts;
-            } else {
-                quantity = dataTransferModel.getQty();
-            }
+            quantity = dataTransferModel.getQty();
 
             //For Sunday
             if (dataTransferModel.getDayOfTheWeek() == 1) {
@@ -507,17 +508,13 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
 
         if (dischargePnts == 0) {
             etDischargePoints.setText(dischargePnts + "");
-            llDuration.setVisibility(View.VISIBLE);
             etDurationPlan.setText(duration + "");
             tvORText.setVisibility(View.GONE);
-            llWaterQuantity.setVisibility(View.GONE);
+            llQuantOfWater.setVisibility(View.GONE);
         } else {
             etDischargePoints.setText(dischargePnts + "");
-            llDuration.setVisibility(View.VISIBLE);
-            tvORText.setVisibility(View.VISIBLE);
-            llWaterQuantity.setVisibility(View.VISIBLE);
             etDurationPlan.setText(duration + "");
-            etWaterQuant.setText(quantity + "");
+            etQuantityPlan.setText(quantity + "");
         }
 
         if (listTimePntsSun.size() > 0) {
@@ -867,12 +864,11 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
     }
 
     private void clearWholeDataFromUI() {
-        llWaterQuantity.setVisibility(View.VISIBLE);
+        llQuantOfWater.setVisibility(View.VISIBLE);
         etDischargePoints.setText("");
         etDurationPlan.setText("");
-        etWaterQuant.setText("");
+        etQuantityPlan.setText("");
 //        tvClearEditData.setVisibility(View.GONE);
-        tvClearEditData.setVisibility(View.GONE);
 
         tvSunFirst.setVisibility(View.GONE);
         tvSunSecond.setVisibility(View.GONE);
@@ -1384,11 +1380,11 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
     private void visibleCursorSoftKeyboard() {
         etDischargePoints.setFocusableInTouchMode(true);
         etDurationPlan.setFocusableInTouchMode(true);
-        etWaterQuant.setFocusableInTouchMode(true);
+        etQuantityPlan.setFocusableInTouchMode(true);
 
         etDischargePoints.setCursorVisible(true);
         etDurationPlan.setCursorVisible(true);
-        etWaterQuant.setCursorVisible(true);
+        etQuantityPlan.setCursorVisible(true);
     }
 
     @Override
@@ -1885,19 +1881,13 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
                 .show();
     }
 
-   /* public void eraseOldTimePoints() {
-        byte[] timePoint = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-        bluetooth_le_adapter.writeCharacteristic(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
-                BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint);
-    }
-
     private final ServiceConnection service_connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             bluetooth_le_adapter = ((BleAdapterService.LocalBinder) service).getService();
             bluetooth_le_adapter.setActivityHandler(message_handler);
             if (bluetooth_le_adapter != null) {
-                bluetooth_le_adapter.connect(macAdd);
+                bluetooth_le_adapter.connect(device_address);
             } else {
                 showMsg("onConnect: bluetooth_le_adapter=null");
             }
@@ -1907,9 +1897,9 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         public void onServiceDisconnected(ComponentName componentName) {
             bluetooth_le_adapter = null;
         }
-    };*/
+    };
 
-   /* private Handler message_handler = new Handler() {
+    private Handler message_handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             Bundle bundle;
@@ -1930,9 +1920,9 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
                     //we're connected
                     showMsg("GATT_CONNECTED");
                     // enable the LOW/MID/HIGH alert level selection buttons
-                   *//* ((Button)findViewById(R.id.lowButton)).setEnabled(true);
+                   /* ((Button)findViewById(R.id.lowButton)).setEnabled(true);
                     ((Button) findViewById(R.id.midButton)).setEnabled(true);
-                    ((Button) findViewById(R.id.highButton)).setEnabled(true);*//*
+                    ((Button) findViewById(R.id.highButton)).setEnabled(true);*/
                     bluetooth_le_adapter.discoverServices();
 
                     break;
@@ -1941,14 +1931,14 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
                     //((Button) findViewById(R.id.connectButton)).setEnabled(true);
                     //we're disconnected
                     showMsg("DISCONNECTED");
-                   *//* // hide the rssi distance colored rectangle
+                   /* // hide the rssi distance colored rectangle
                     ((LinearLayout) findViewById(R.id.rectangle)).setVisibility(View.INVISIBLE);
                     // disable the LOW/MID/HIGH alert level selection buttons
                     ((Button) findViewById(R.id.lowButton)).setEnabled(false);
                     ((Button) findViewById(R.id.midButton)).setEnabled(false);
-                    ((Button) findViewById(R.id.highButton)).setEnabled(false);*//*
+                    ((Button) findViewById(R.id.highButton)).setEnabled(false);*/
                     if (back_requested) {
-                        //finish();
+                        finish();
                     }
                     break;
 
@@ -1987,7 +1977,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
                     }
                     if (time_point_service_present && current_time_service_present && pots_service_present && battery_service_present) {
                         showMsg("Device has expected services");
-                        //onSetTime();
+                        onSetTime();
 
                     } else {
                         showMsg("Device does not have expected GATT services");
@@ -2002,7 +1992,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
                             && bundle.get(BleAdapterService.PARCEL_SERVICE_UUID).toString().toUpperCase().equals(BleAdapterService.BATTERY_LEVEL_CHARACTERISTIC_UUID)) {
                         b = bundle.getByteArray(BleAdapterService.PARCEL_VALUE);
                         if (b.length > 0) {
-                            //setAlertLevel((int) b[0]);
+                            setAlertLevel((int) b[0]);
                             showMsg("Received " + b.toString() + "from Pebble.");
                         }
                     }
@@ -2012,7 +2002,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
                     bundle = msg.getData();
 
                     if (bundle.get(BleAdapterService.PARCEL_CHARACTERISTIC_UUID).toString().toUpperCase().equals(BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID)) {
-                        Log.e("@@@ACK RECEIVED FOR ", "" + dataSendingIndex);
+                        Log.e("@@@@@@@@@@@@", "Ack Received For" + dataSendingIndex);
                         if (oldTimePointsErased == FALSE) {
                             oldTimePointsErased = TRUE;
                             if (dataSendingIndex < listSingleValveData.size()) {
@@ -2039,7 +2029,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
                         b = bundle.getByteArray(BleAdapterService.PARCEL_VALUE);
                         if (b.length > 0) {
 
-                            //setAlertLevel((int) b[0]);
+                            setAlertLevel((int) b[0]);
                         }
                     }
                     break;
@@ -2049,14 +2039,38 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
 
     private void showMsg(final String msg) {
         Log.d(Constants.TAG, msg);
-        mContext.runOnUiThread(new Runnable() {
+        runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
                 //((TextView) findViewById(R.id.msgTextView)).setText(msg);
             }
         });
-    }*/
+    }
+
+    private void setAlertLevel(int alert_level) {
+        this.alert_level = alert_level;
+        ((Button) this.findViewById(R.id.lowButton)).setTextColor(Color.parseColor("#000000"));
+        ;
+        ((Button) this.findViewById(R.id.midButton)).setTextColor(Color.parseColor("#000000"));
+        ;
+        ((Button) this.findViewById(R.id.highButton)).setTextColor(Color.parseColor("#000000"));
+        ;
+
+        switch (alert_level) {
+            case 0:
+                ((Button) this.findViewById(R.id.lowButton)).setTextColor(Color.parseColor("#FF0000"));
+                ;
+                break;
+            case 1:
+                ((Button) this.findViewById(R.id.midButton)).setTextColor(Color.parseColor("#FF0000"));
+                break;
+            case 2:
+                ((Button) this.findViewById(R.id.highButton)).setTextColor(Color.parseColor("#FF0000"));
+                break;
+        }
+    }
+
     /*@Override
     public void onBackPressed() {
         back_requested = true;
@@ -2085,35 +2099,26 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
 
     }*/
 
-   /* void eraseOldTimePoints() {
+    void eraseOldTimePoints() {
         byte[] timePoint = {0, 0, 0, 0, 0, 0, 0, 0, 0};
         bluetooth_le_adapter.writeCharacteristic(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
                 BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint);
-    }*/
+    }
 
     void startSendData() {
-        Log.e("@@@ INDEX", "" + dataSendingIndex);
+        Log.e("@@@@@@@@@@@", "" + dataSendingIndex);
         //byte index = (byte) (listSingleValveData.get(dataSendingIndex).getIndex() + 1);
         byte index = (byte) (dataSendingIndex + 1);
         byte hours = (byte) listSingleValveData.get(dataSendingIndex).getHours();
         byte dayOfTheWeek = (byte) listSingleValveData.get(dataSendingIndex).getDayOfTheWeek();
 
-/*<<<<<<< HEAD
-        int iDurationMSB = (etDurationInt / 256);
-        int iDurationLSB = (etDurationInt % 256);
+        int iDurationMSB = (etInputDursnPlanInt / 256);
+        int iDurationLSB = (etInputDursnPlanInt % 256);
         byte bDurationMSB = (byte) iDurationMSB;
         byte bDurationLSB = (byte) iDurationLSB;
 
-        int iVolumeMSB = (etWaterQuantInt / 256);
-        int iVolumeLSB = (etWaterQuantInt % 256);
-=======*/
-        int iDurationMSB = (etDurationInt / 128);
-        int iDurationLSB = (etDurationInt % 128);
-        byte bDurationMSB = (byte) iDurationMSB;
-        byte bDurationLSB = (byte) iDurationLSB;
-
-        int iVolumeMSB = (etWaterQuantInt / 128);
-        int iVolumeLSB = (etWaterQuantInt % 128);
+        int iVolumeMSB = (etQuantPlanInt / 256);
+        int iVolumeLSB = (etQuantPlanInt % 256);
         byte bVolumeMSB = (byte) iVolumeMSB;
         byte bVolumeLSB = (byte) iVolumeLSB;
         listSingleValveData.get(dataSendingIndex).setIndex(index);
@@ -2123,11 +2128,11 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         listSingleValveData.get(dataSendingIndex).setbVolumeMSB(bVolumeMSB);
         listSingleValveData.get(dataSendingIndex).setMinutes(0);
         listSingleValveData.get(dataSendingIndex).setSeconds(0);
-        listSingleValveData.get(dataSendingIndex).setQty(etWaterQuantInt);
-        listSingleValveData.get(dataSendingIndex).setDuration(etDurationInt);
-        listSingleValveData.get(dataSendingIndex).setDischarge(etDisPntsInt);
+        listSingleValveData.get(dataSendingIndex).setQty(etQuantPlanInt);
+        listSingleValveData.get(dataSendingIndex).setDuration(etInputDursnPlanInt);
+        listSingleValveData.get(dataSendingIndex).setDischarge(etInputDischrgPntsInt);
 
-        Log.e("GGG", "INDEX:" + index + "- DOW:" + dayOfTheWeek + "- HRS:" + hours + "- MIN:" + 0 + "- SEC:" + 0 + "- D MSB:" + bDurationMSB + "- D LSB:" + bDurationLSB + "- V MSB:" + bVolumeMSB + "- V LSB:" + bVolumeLSB);
+        Log.e("@@", "" + index + "-" + dayOfTheWeek + "-" + hours + "-" + 0 + "-" + 0 + "-" + bDurationMSB + "-" + bDurationLSB + "-" + bVolumeMSB + "-" + bVolumeLSB);
         byte[] timePoint = {index, dayOfTheWeek, hours, 0, 0, bDurationMSB, bDurationLSB, bVolumeMSB, bVolumeLSB};
         bluetooth_le_adapter.writeCharacteristic(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
                 BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint);
@@ -2140,7 +2145,7 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         return data;
     }
 
-   /* public void onSetTime() {
+    public void onSetTime() {
         String[] ids = TimeZone.getAvailableIDs(+5 * 60 * 60 * 1000);
         SimpleTimeZone pdt = new SimpleTimeZone(+5 * 60 * 60 * 1000, ids[0]);
 
@@ -2157,8 +2162,8 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
         byte seconds = (byte) calendar.get(Calendar.SECOND);
         byte DATE = (byte) calendar.get(Calendar.DAY_OF_MONTH);
         byte MONTH = (byte) (calendar.get(Calendar.MONTH) + 1);
-        int iYEARMSB = (calendar.get(Calendar.YEAR) / 128);
-        int iYEARLSB = (calendar.get(Calendar.YEAR) % 128);
+        int iYEARMSB = (calendar.get(Calendar.YEAR) / 256);
+        int iYEARLSB = (calendar.get(Calendar.YEAR) % 256);
         byte bYEARMSB = (byte) iYEARMSB;
         byte bYEARLSB = (byte) iYEARLSB;
         byte[] currentTime = {hours, minutes, seconds, DATE, MONTH, bYEARMSB, bYEARLSB};
@@ -2166,22 +2171,20 @@ public class FragAddEditSesnPlan extends Fragment implements View.OnClickListene
                 BleAdapterService.CURRENT_TIME_SERVICE_SERVICE_UUID,
                 BleAdapterService.CURRENT_TIME_CHARACTERISTIC_UUID, currentTime
         );
-    }*/
+    }
 
     void saveValveDatatoDB() {
         DatabaseHandler databaseHandler = new DatabaseHandler(mContext);
-        databaseHandler.updateValveDataAndState(macAdd, clkdVlvName, listSingleValveData, "PLAY");
-        //databaseHandler.updateValveStates(macAdd, clkdVlvName, "ACTIVATE");
-        Toast.makeText(mContext, clkdVlvName + " session activated", Toast.LENGTH_SHORT).show();
-        getTargetFragment().onActivityResult(
-                getTargetRequestCode(),
-                Activity.RESULT_OK,
-                new Intent().putExtra("dataKey", "Success")
-        );
-        getActivity().onBackPressed();
+        databaseHandler.updateValveDataWithMAC_ValveName(device_address, clickedValveName, listSingleValveData);
+
+        //listSingleValveData;
+        //listSingleValveData.clear();
+        //Toast.makeText(mContext, "Got All ACK", Toast.LENGTH_SHORT).show();
+        Toast.makeText(mContext, "Session plan Loaded successfully", Toast.LENGTH_SHORT).show();
+       /* Intent intentValveDataSuces=new Intent();
+        intentValveDataSuces.putExtra("Data","Success");*/
+        setResult(DeviceDetails.RESULT_CODE_VALVE_INDB);
+        mContext.finish();
     }
 
-    public void doneWrtingAllTP() {
-        saveValveDatatoDB();
-    }
 }

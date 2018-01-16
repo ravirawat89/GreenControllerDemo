@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.zxing.integration.android.IntentIntegrator;
+//import com.google.zxing.integration.android.IntentIntegrator;
 import com.netcommlabs.greencontroller.activities.MainActivity;
 
 
@@ -21,7 +21,7 @@ public class FragScanQRCode extends Fragment {
     private MainActivity mContext;
     private View view;
     private TextView tvAddNewDvc;
-    private IntentIntegrator integrator;
+    //private IntentIntegrator integrator;
 
     private int REQUEST_CODE = 1001;
 
@@ -66,7 +66,7 @@ public class FragScanQRCode extends Fragment {
 
     private void zxingQRInitiateCamera() {
         //This opens up the Barcode Scanner
-        IntentIntegrator.forSupportFragment(FragScanQRCode.this).initiateScan();
+        //IntentIntegrator.forSupportFragment(FragScanQRCode.this).initiateScan();
        /* integrator = new IntentIntegrator()
         integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
         integrator.setPrompt("Scan QR Code or Barcode");

@@ -283,11 +283,12 @@ public class BLEAppLevel {
     }
 
     public void onSetTime() {
+/*<<<<<<< HEAD
         //Getting +5:30 time zone
         int plusFiveThirtyZone = (5 * 60 * 60 * 1000) + (30 * 60 * 1000);
 
-        /*String[] ids = TimeZone.getAvailableIDs(+5 * 60 * 60 * 1000);
-        SimpleTimeZone pdt = new SimpleTimeZone(+5 * 60 * 60 * 1000, ids[0]);*/
+        *//*String[] ids = TimeZone.getAvailableIDs(+5 * 60 * 60 * 1000);
+        SimpleTimeZone pdt = new SimpleTimeZone(+5 * 60 * 60 * 1000, ids[0]);*//*
 
         String[] ids = TimeZone.getAvailableIDs(+plusFiveThirtyZone);
         SimpleTimeZone pdt = new SimpleTimeZone(+plusFiveThirtyZone, ids[0]);
@@ -295,18 +296,16 @@ public class BLEAppLevel {
         Calendar calendar = new GregorianCalendar(pdt);
         Date trialTime = new Date();
         calendar.setTime(trialTime);
-
+=======*/
+        Calendar calendar = Calendar.getInstance();
         //Set present time as data packet
-        byte hours = (byte) calendar.get(Calendar.HOUR);
-        if (calendar.get(Calendar.AM_PM) == 1) {
-            hours = (byte) (calendar.get(Calendar.HOUR) + 12);
-        }
+        byte hours = (byte) calendar.get(Calendar.HOUR_OF_DAY);
         byte minutes = (byte) calendar.get(Calendar.MINUTE);
         byte seconds = (byte) calendar.get(Calendar.SECOND);
         byte DATE = (byte) calendar.get(Calendar.DAY_OF_MONTH);
         byte MONTH = (byte) (calendar.get(Calendar.MONTH) + 1);
-        int iYEARMSB = (calendar.get(Calendar.YEAR) / 256);
-        int iYEARLSB = (calendar.get(Calendar.YEAR) % 256);
+        int iYEARMSB = (calendar.get(Calendar.YEAR) / 128);
+        int iYEARLSB = (calendar.get(Calendar.YEAR) % 128);
         byte bYEARMSB = (byte) iYEARMSB;
         byte bYEARLSB = (byte) iYEARLSB;
         byte[] currentTime = {hours, minutes, seconds, DATE, MONTH, bYEARMSB, bYEARLSB};
@@ -400,12 +399,20 @@ public class BLEAppLevel {
     }
 
     void startSendData() {
+/*<<<<<<< HEAD
         //Log.e("@@@ INDEX", "" + dataSendingIndex);
+=======*/
+        Calendar calendar = Calendar.getInstance();
+
+        Log.e("@@@@@@@@@@@", "" + dataSendingIndex);
         //byte index = (byte) (listSingleValveData.get(dataSendingIndex).getIndex() + 1);
         byte index = (byte) (dataSendingIndex + 1);
         byte hours = (byte) listSingleValveData.get(dataSendingIndex).getHours();
+        byte minutes = 0;
+        byte seconds = 0;
         byte dayOfTheWeek = (byte) listSingleValveData.get(dataSendingIndex).getDayOfTheWeek();
 
+/*<<<<<<< HEAD
         int iDurationMSB = (etDurationInt / 256);
         int iDurationLSB = (etDurationInt % 256);
         byte bDurationMSB = (byte) iDurationMSB;
@@ -413,6 +420,14 @@ public class BLEAppLevel {
 
         int iVolumeMSB = (etWaterQuantWithDPInt / 256);
         int iVolumeLSB = (etWaterQuantWithDPInt % 256);
+=======*/
+        int iDurationMSB = (etDurationInt / 128);
+        int iDurationLSB = (etDurationInt % 128);
+        byte bDurationMSB = (byte) iDurationMSB;
+        byte bDurationLSB = (byte) iDurationLSB;
+
+        int iVolumeMSB = (etWaterQuantWithDPInt / 128);
+        int iVolumeLSB = (etWaterQuantWithDPInt % 128);
         byte bVolumeMSB = (byte) iVolumeMSB;
         byte bVolumeLSB = (byte) iVolumeLSB;
 
@@ -435,5 +450,6 @@ public class BLEAppLevel {
         byte[] timePoint = {index, dayOfTheWeek, hours, 0, 0, bDurationMSB, bDurationLSB, bVolumeMSB, bVolumeLSB};
         bluetooth_le_adapter.writeCharacteristic(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
                 BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint);
+
     }
 }
