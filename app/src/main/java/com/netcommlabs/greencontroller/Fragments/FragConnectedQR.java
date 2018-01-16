@@ -16,8 +16,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-//import com.google.zxing.integration.android.IntentIntegrator;
-//import com.google.zxing.integration.android.IntentResult;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import com.netcommlabs.greencontroller.R;
 import com.netcommlabs.greencontroller.activities.MainActivity;
 import com.netcommlabs.greencontroller.model.MdlAddressNdLocation;
@@ -160,7 +160,7 @@ public class FragConnectedQR extends Fragment {
         tvScanQREvent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //IntentIntegrator.forSupportFragment(FragConnectedQR.this).initiateScan();
+                IntentIntegrator.forSupportFragment(FragConnectedQR.this).initiateScan();
             }
         });
 
@@ -220,14 +220,14 @@ public class FragConnectedQR extends Fragment {
 
             }
         }
-        //IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        /*if (result != null) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null) {
             if (result.getContents() == null) {
                 Toast.makeText(mContext, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(mContext, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
             }
-        }*/
+        }
     }
 
 }
