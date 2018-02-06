@@ -146,11 +146,12 @@ public class BLEAppLevel {
                     boolean pots_service_present = false;
                     boolean battery_service_present = false;
                     boolean valve_controller_service_present = false;
+                    boolean pebble_service_present = false;
 
                     for (BluetoothGattService svc : slist) {
                         Log.d(Constants.TAG, "UUID=" + svc.getUuid().toString().toUpperCase() + "INSTANCE=" + svc.getInstanceId());
                         String serviceUuid = svc.getUuid().toString().toUpperCase();
-                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID)) {
+                        /*if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID)) {
                             time_point_service_present = true;
                             continue;
                         }
@@ -169,10 +170,15 @@ public class BLEAppLevel {
                         if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID)) {
                             valve_controller_service_present = true;
                             continue;
+                        }*/
+                        if (svc.getUuid().toString().equalsIgnoreCase(BleAdapterService.PEBBLE_SERVICE_UUID)) {
+                            pebble_service_present = true;
+                            continue;
                         }
                     }
-                    if (time_point_service_present && current_time_service_present && pots_service_present && battery_service_present) {
-                        showMsg("Device has expected services");
+                   // if (time_point_service_present && current_time_service_present && pots_service_present && battery_service_present) {
+                        if(pebble_service_present) {
+                            showMsg("Device has expected services");
                         isBLEConnected = true;
                         //Recent connected device MAC save in SP
                         MySharedPreference.getInstance(mContext).setConnectedDvcMacAdd(macAddress);
@@ -304,13 +310,13 @@ public class BLEAppLevel {
         byte seconds = (byte) calendar.get(Calendar.SECOND);
         byte DATE = (byte) calendar.get(Calendar.DAY_OF_MONTH);
         byte MONTH = (byte) (calendar.get(Calendar.MONTH) + 1);
-        int iYEARMSB = (calendar.get(Calendar.YEAR) / 128);
-        int iYEARLSB = (calendar.get(Calendar.YEAR) % 128);
+        int iYEARMSB = (calendar.get(Calendar.YEAR) / 256);
+        int iYEARLSB = (calendar.get(Calendar.YEAR) % 256);
         byte bYEARMSB = (byte) iYEARMSB;
         byte bYEARLSB = (byte) iYEARLSB;
         byte[] currentTime = {hours, minutes, seconds, DATE, MONTH, bYEARMSB, bYEARLSB};
         bluetooth_le_adapter.writeCharacteristic(
-                BleAdapterService.CURRENT_TIME_SERVICE_SERVICE_UUID,
+                BleAdapterService.PEBBLE_SERVICE_UUID,
                 BleAdapterService.CURRENT_TIME_CHARACTERISTIC_UUID, currentTime
         );
     }
@@ -339,7 +345,7 @@ public class BLEAppLevel {
         this.listSingleValveData = listSingleValveData;
 
         byte[] timePoint = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-        bluetooth_le_adapter.writeCharacteristic(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
+        bluetooth_le_adapter.writeCharacteristic(BleAdapterService.PEBBLE_SERVICE_UUID,
                 BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint);
     }
 
@@ -369,8 +375,12 @@ public class BLEAppLevel {
         if (cmdTypeName.equals("PLAY")) {
             byte[] valveCommand = {2};
             if (bluetooth_le_adapter != null) {
-                bluetooth_le_adapter.writeCharacteristic(
+                /*bluetooth_le_adapter.writeCharacteristic(
                         BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                        BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+                );*/
+                bluetooth_le_adapter.writeCharacteristic(
+                        BleAdapterService.PEBBLE_SERVICE_UUID,
                         BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
                 );
             }
@@ -378,21 +388,33 @@ public class BLEAppLevel {
         if (cmdTypeName.equals("STOP")) {
             byte[] valveCommand = {3};
             if (bluetooth_le_adapter != null) {
-                bluetooth_le_adapter.writeCharacteristic(
+                /*bluetooth_le_adapter.writeCharacteristic(
                         BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                        BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+                );*/
+                bluetooth_le_adapter.writeCharacteristic(
+                        BleAdapterService.PEBBLE_SERVICE_UUID,
                         BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
                 );
             }
         } else if (cmdTypeName.equals("PAUSE")) {
             byte[] valveCommand = {4};
-            bluetooth_le_adapter.writeCharacteristic(
+            /*bluetooth_le_adapter.writeCharacteristic(
                     BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                    BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+            );*/
+            bluetooth_le_adapter.writeCharacteristic(
+                    BleAdapterService.PEBBLE_SERVICE_UUID,
                     BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
             );
         } else if (cmdTypeName.equals("FLUSH")) {
             byte[] valveCommand = {1};
-            bluetooth_le_adapter.writeCharacteristic(
+            /*bluetooth_le_adapter.writeCharacteristic(
                     BleAdapterService.VALVE_CONTROLLER_SERVICE_UUID,
+                    BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
+            );*/
+            bluetooth_le_adapter.writeCharacteristic(
+                    BleAdapterService.PEBBLE_SERVICE_UUID,
                     BleAdapterService.COMMAND_CHARACTERISTIC_UUID, valveCommand
             );
         }
@@ -421,13 +443,13 @@ public class BLEAppLevel {
         int iVolumeMSB = (etWaterQuantWithDPInt / 256);
         int iVolumeLSB = (etWaterQuantWithDPInt % 256);
 =======*/
-        int iDurationMSB = (etDurationInt / 128);
-        int iDurationLSB = (etDurationInt % 128);
+        int iDurationMSB = (etDurationInt / 256);
+        int iDurationLSB = (etDurationInt % 256);
         byte bDurationMSB = (byte) iDurationMSB;
         byte bDurationLSB = (byte) iDurationLSB;
 
-        int iVolumeMSB = (etWaterQuantWithDPInt / 128);
-        int iVolumeLSB = (etWaterQuantWithDPInt % 128);
+        int iVolumeMSB = (etWaterQuantWithDPInt / 256);
+        int iVolumeLSB = (etWaterQuantWithDPInt % 256);
         byte bVolumeMSB = (byte) iVolumeMSB;
         byte bVolumeLSB = (byte) iVolumeLSB;
 
@@ -448,7 +470,7 @@ public class BLEAppLevel {
 
         //Log.e("@@", "" + index + "-" + dayOfTheWeek + "-" + hours + "-" + 0 + "-" + 0 + "-" + bDurationMSB + "-" + bDurationLSB + "-" + bVolumeMSB + "-" + bVolumeLSB);
         byte[] timePoint = {index, dayOfTheWeek, hours, 0, 0, bDurationMSB, bDurationLSB, bVolumeMSB, bVolumeLSB};
-        bluetooth_le_adapter.writeCharacteristic(BleAdapterService.TIME_POINT_SERVICE_SERVICE_UUID,
+        bluetooth_le_adapter.writeCharacteristic(BleAdapterService.PEBBLE_SERVICE_UUID,
                 BleAdapterService.NEW_WATERING_TIME_POINT_CHARACTERISTIC_UUID, timePoint);
 
     }
